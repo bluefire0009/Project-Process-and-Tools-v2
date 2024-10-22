@@ -37,3 +37,7 @@ jobs:
           echo "Code coverage is below 70%!"
           exit 1
         fi
+    - name: Clean Old Test Results
+      run: |
+        echo "Cleaning up old test results..."
+        find TestProject1/TestResults -type f -mtime +7 -exec rm {} \;
