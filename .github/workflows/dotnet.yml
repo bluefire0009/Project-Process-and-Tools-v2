@@ -25,4 +25,8 @@ jobs:
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage"
+    - name: Display Coverage Report
+      run: |
+        echo "Displaying Coverage Report:"
+        cat TestProject1/TestResults/*/coverage.cobertura.xml
