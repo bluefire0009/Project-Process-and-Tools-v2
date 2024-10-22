@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace CargoHub
 {
+    [ExcludeFromCodeCoverage]
     class Program
     {
         static void Main(string[] args)
