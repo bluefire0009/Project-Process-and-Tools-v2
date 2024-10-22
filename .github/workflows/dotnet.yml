@@ -46,6 +46,7 @@ jobs:
     - name: Fail if Coverage is Below Threshold (PowerShell)
       shell: pwsh
       run: |
+        $line_rate = [double]$env:line_rate
         if ($line_rate -lt 0.70) {
         Write-Host "Code coverage is below the threshold of 70%."
         Write-Host "Current coverage is $line_rate"
