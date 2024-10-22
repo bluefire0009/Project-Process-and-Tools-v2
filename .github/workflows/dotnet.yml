@@ -47,9 +47,11 @@ jobs:
       shell: pwsh
       run: |
         if ($line_rate -lt 0.70) {
-          Write-Host "Code coverage is below the threshold of 70%."
-          Write-Host "Current coverage is $line_rate"
-          exit 1
+        Write-Host "Code coverage is below the threshold of 70%."
+        Write-Host "Current coverage is $line_rate"
+        exit 1
+        } else {
+        Write-Host "Code coverage is acceptable: $line_rate"
         }
     - name: Clean Old Test Results
       run: |
