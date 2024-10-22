@@ -32,7 +32,7 @@ jobs:
     - name: Check Code Coverage
       run: |
         # Extract coverage percentage
-        coverage=$(grep -oP '(?<=<line-rate>)[0-9.]+(?=</line-rate>)' TestResults/*/coverage.cobertura.xml | awk '{sum+=$1} END {print sum/NR*100}')
+        coverage=$(grep -oP '(?<=<line-rate>)[0-9.]+(?=</line-rate>)' TestProject1/TestResults/*/coverage.cobertura.xml | awk '{sum+=$1} END {print sum/NR*100}')
         echo "Code Coverage: $coverage%"
 
         # Check if coverage is below the threshold (70%)
