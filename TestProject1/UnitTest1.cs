@@ -1,5 +1,8 @@
+using System.Diagnostics.CodeAnalysis;
+
 namespace TestProject1;
 
+[ExcludeFromCodeCoverage]
 [TestClass]
 public class UnitTest1
 {
