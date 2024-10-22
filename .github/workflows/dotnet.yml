@@ -38,3 +38,6 @@ jobs:
       run: |
         line_rate=$(xmllint --xpath 'string(/coverage/@line-rate)' TestProject1/TestResults/*/coverage.cobertura.xml)
         echo "Line Rate: $line_rate"
+        if ($line_rate -lt 0.70) {
+          Write-Host "Code coverage is below the threshold of 70%."
+          exit 1
