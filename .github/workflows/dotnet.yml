@@ -28,7 +28,7 @@ jobs:
       run: dotnet test --no-build --verbosity normal
 
     - name: Run Tests with Coverage
-      run: dotnet test --no-build --collect:"XPlat Code Coverage" --settings coverlet.runsettings
+      run: dotnet test --no-build --collect:"XPlat Code Coverage"
     - name: Check Code Coverage
       run: |
         # Generate the coverage report in Cobertura format
