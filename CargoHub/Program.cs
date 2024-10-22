@@ -1,9 +1,18 @@
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+using System.Diagnostics.CodeAnalysis;
 
-app.MapGet("/", () => "Hello World!");
-Console.WriteLine("Hi");
-Console.WriteLine("Hi2");
-app.Run();
+namespace CargoHub
+{
+    [ExcludeFromCodeCoverage]
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+            var app = builder.Build();
 
+            app.MapGet("/", () => "Hello World!");
 
+            app.Run();
+        }
+    }
+}
