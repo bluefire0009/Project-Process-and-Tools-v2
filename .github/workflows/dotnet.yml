@@ -40,4 +40,4 @@ jobs:
         echo "Line Rate: $line_rate"
         if ($line_rate -lt 0.70) {
           Write-Host "Code coverage is below the threshold of 70%."
-          exit 1
+          exit 1 }
