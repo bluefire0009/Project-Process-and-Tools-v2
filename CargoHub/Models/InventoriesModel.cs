@@ -5,20 +5,6 @@ using System.ComponentModel.DataAnnotations.Schema;
 
 public class Inventory
 {
-    // "id": 1,
-    // "item_id": "P000001",
-    // "description": "Face-to-face clear-thinking complexity",
-    // "item_reference": "sjQ23408K",
-    // "locations": [
-    //     3211,
-    //     24700,
-    //     14123,
-    //     19538,
-    //     31071,
-    //     24701,
-    //     11606,
-    //     11817
-
     [Key]
     public int Id { get; set; }
 
