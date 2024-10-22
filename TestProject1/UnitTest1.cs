@@ -13,6 +13,6 @@ public class UnitTest1
     public void TestMethod2()
     {
         Test calc = new();
-        Assert.IsTrue(calc.add(3, 1) == 4);
+        Assert.IsTrue(calc.add(3, 1) == 1);
     }
 }
