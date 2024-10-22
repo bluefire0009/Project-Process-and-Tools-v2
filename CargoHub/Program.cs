@@ -1,9 +1,15 @@
-var builder = WebApplication.CreateBuilder(args);
-var app = builder.Build();
+namespace CargoHub
+{
+    class Program
+    {
+        static void Main(string[] args)
+        {
+            var builder = WebApplication.CreateBuilder(args);
+            var app = builder.Build();
 
-app.MapGet("/", () => "Hello World!");
-Console.WriteLine("Hi");
-Console.WriteLine("Hi2");
-app.Run();
+            app.MapGet("/", () => "Hello World!");
 
-
+            app.Run();
+        }
+    }
+}
