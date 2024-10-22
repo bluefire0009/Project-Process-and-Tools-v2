@@ -1,0 +1,31 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+# Visual Studio Version 17
+VisualStudioVersion = 17.5.002.0
+MinimumVisualStudioVersion = 10.0.40219.1
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "CargoHub", "CargoHub\CargoHub.csproj", "{B0527968-9E2E-4F33-B21B-2DA45C9FBC9D}"
+EndProject
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "TestProject1", "TestProject1\TestProject1.csproj", "{A5E7FDE6-58AE-424B-8EF8-CC229885C0D5}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{B0527968-9E2E-4F33-B21B-2DA45C9FBC9D}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B0527968-9E2E-4F33-B21B-2DA45C9FBC9D}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B0527968-9E2E-4F33-B21B-2DA45C9FBC9D}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B0527968-9E2E-4F33-B21B-2DA45C9FBC9D}.Release|Any CPU.Build.0 = Release|Any CPU
+		{A5E7FDE6-58AE-424B-8EF8-CC229885C0D5}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{A5E7FDE6-58AE-424B-8EF8-CC229885C0D5}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{A5E7FDE6-58AE-424B-8EF8-CC229885C0D5}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{A5E7FDE6-58AE-424B-8EF8-CC229885C0D5}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {85C81EA2-0DCF-4F2F-A520-D4F7653B41B0}
+	EndGlobalSection
+EndGlobal

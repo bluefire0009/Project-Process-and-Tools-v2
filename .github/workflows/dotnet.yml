@@ -20,9 +20,27 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+    - name: Install xmllint
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxml2-utils
     - name: Restore dependencies
       run: dotnet restore
+    - name: Install dependencies
+      run: dotnet tool install -g dotnet-reportgenerator-globaltool
     - name: Build
       run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal
+      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage"  
+    - name: Display Coverage Report
+      run: |
+        echo "Displaying Coverage Report:"
+        cat TestProject1/TestResults/*/coverage.cobertura.xml
+    - name: Extract Line Rate
+      run: |
+        line_rate=$(xmllint --xpath 'string(/coverage/@line-rate)' TestProject1/TestResults/*/coverage.cobertura.xml)
+        echo "Line Rate: $line_rate"
+        if (( $(echo "$line_rate < 0.70" | bc -l) )); then
+          echo "Code coverage is below the threshold of 70%."
+          exit 1
+        fi
