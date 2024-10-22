@@ -34,18 +34,21 @@ jobs:
           echo "Coverage report is empty or not generated."
           exit 1
         fi
-    - name: Extract Coverage Percentage
+    - name: Extract Coverage Percentage (PowerShell)
       id: coverage
+      shell: pwsh
       run: |
-        line_rate=$(xmllint --xpath 'string(/coverage/@line-rate)' TestProject1/TestResults/*/coverage.cobertura.xml)
-        echo "Line Coverage Rate: $line_rate"
-        echo "line_rate=$line_rate" >> $GITHUB_ENV
+        $xmlPath = Get-ChildItem -Path TestProject1/TestResults/*/coverage.cobertura.xml
+        [xml]$xml = Get-Content $xmlPath.FullName
+        $lineRate = $xml.coverage.'@line-rate'
+        Write-Host "Line Coverage Rate: $lineRate"
+        echo "line_rate=$lineRate" >> $GITHUB_ENV
     - name: Fail if Coverage is Below Threshold
       run: |
-        if (( $(echo "$line_rate < 0.70" | bc -l) )); then
+        if (( [double]$line_rate -lt 0.70 )) {
           echo "Code coverage is below the threshold of 70%."
           exit 1
-        fi
+        }
     - name: Clean Old Test Results
       run: |
         echo "Cleaning up old test results..."
