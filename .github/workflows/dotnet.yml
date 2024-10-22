@@ -26,28 +26,37 @@ jobs:
       run: dotnet tool install -g dotnet-reportgenerator-globaltool
     - name: Build
       run: dotnet build --no-restore
-    - name: Test
-      run: dotnet test --no-build --verbosity normal
-
-    - name: Run Tests with Coverage
-      run: dotnet test --no-build --collect:"XPlat Code Coverage"
-    - name: Check Code Coverage
+    - name: Test with Coverage
+      run: dotnet test --no-build --collect:"XPlat Code Coverage" --verbosity normal
+    - name: Check Coverage Report
       run: |
-        # Generate the coverage report in Cobertura format
-        reportgenerator -reports:TestProject1/TestResults/*/coverage.cobertura.xml -targetdir:coverageReport -reporttypes:Html
-
-        # Check the coverage percentage
-        coverage=$(grep -oP '(?<=<line-rate>)[0-9.]+(?=</line-rate>)' coverageReport/* | awk '{sum+=$1} END {print sum/NR100}')
-        echo "Code Coverage: $coverage%"
-
-        # Check if coverage is below the threshold (70%)
-        if (( $(echo "$coverage < 70" | bc -l) )); then
-          echo "Code coverage is below 70%!"
+        if [ -s TestProject1/TestResults/*/coverage.cobertura.xml ]; then
+          echo "Coverage report generated successfully."
+        else
+          echo "Coverage report is empty or not generated."
           exit 1
         fi
-        
-    - name: Store Coverage Report
-      uses: actions/upload-artifact@v4
-      with:
-        name: coverage-report
-        path: coverageReport/
+    - name: Extract Coverage Percentage (PowerShell)
+      id: coverage
+      shell: pwsh
+      run: |
+        $xmlPath = Get-ChildItem -Path TestProject1/TestResults/*/coverage.cobertura.xml
+        [xml]$xml = Get-Content $xmlPath.FullName
+        $lineRate = [double]$xml.coverage.'@line-rate'
+        Write-Host "Line Coverage Rate: $lineRate"
+        echo "line_rate=$lineRate" >> $GITHUB_ENV
+    - name: Fail if Coverage is Below Threshold (PowerShell)
+      shell: pwsh
+      run: |
+        $line_rate = [double]$env:line_rate
+        if ($line_rate -lt 0.70) {
+        Write-Host "Code coverage is below the threshold of 70%."
+        Write-Host "Current coverage is $line_rate"
+        exit 1
+        } else {
+        Write-Host "Code coverage is acceptable: $line_rate"
+        }
+    - name: Clean Old Test Results
+      run: |
+        echo "Cleaning up old test results..."
+        find TestProject1/TestResults -type f -mtime +7 -exec rm {} \;
