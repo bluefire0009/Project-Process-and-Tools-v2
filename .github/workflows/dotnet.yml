@@ -30,3 +30,7 @@ jobs:
       run: |
         echo "Displaying Coverage Report:"
         cat TestProject1/TestResults/*/coverage.cobertura.xml
+    - name: Extract Line Rate
+      run: |
+        line_rate=$(xmllint --xpath 'string(/coverage/@line-rate)' TestProject1/TestResults/*/coverage.cobertura.xml)
+        echo "Line Rate: $line_rate"
