@@ -3,6 +3,7 @@ var app = builder.Build();
 
 app.MapGet("/", () => "Hello World!");
 Console.WriteLine("Hi");
+Console.WriteLine("Hi2");
 app.Run();
 
 public static class Test
