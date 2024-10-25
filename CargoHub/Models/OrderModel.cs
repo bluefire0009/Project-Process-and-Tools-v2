@@ -7,9 +7,6 @@ public class Order
 {
     [Key]
     public int Id { get; set; }
-
-    [ForeignKey("SourceId")]
-    public Shipment? shipment { get; set; }
     public int SourceId { get; set; }
 
     [DataType(DataType.DateTime)]
@@ -24,7 +21,7 @@ public class Order
     public string? PickingNotes { get; set; }
 
     [ForeignKey("WareHouseId")]
-    public WareHouse? wareHouse { get; set; }
+    public Warehouse? wareHouse { get; set; }
     public int? WareHouseId { get; set; }
 
     [ForeignKey("ShipTo")]
@@ -35,8 +32,7 @@ public class Order
     public Client? client { get; set; }
     public int? BillTo { get; set; }
 
-    [ForeignKey("ShipmentId")]
-    public Shipment? shipment { get; set; }
+    public Shipment? ShipmentById { get; set; }
     public int? ShipmentId { get; set; }
 
     public float TotalAmount { get; set; }
@@ -55,12 +51,16 @@ public class Order
 
 public class OrderItems
 {
+    [Key]
+    public int Id { get; set; }
+
     [ForeignKey("OrderId")]
     public Order? order { get; set; }
     public int OrderId { get; set; }
 
-    [ForeignKey("Itemuid")]
+    [ForeignKey("ItemUid")]
     public Item? item { get; set; }
     public int ItemUid { get; set; }
+
     public int Amount { get; set; }
 }

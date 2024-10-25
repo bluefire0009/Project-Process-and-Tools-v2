@@ -10,21 +10,15 @@ public class DatabaseContext : DbContext
     public DbSet<Item> Items { get; set; }
     public DbSet<ItemType> ItemTypes { get; set; }
     public DbSet<Location> Locations { get; set; }
+    public DbSet<Order> Orders { get; set; }
+    public DbSet<Shipment> Shipments { get; set; }
+    public DbSet<Supplier> Suppliers { get; set; }
+    public DbSet<Transfer> Transfers { get; set; }
+    public DbSet<Warehouse> Warehouses { get; set; }
 
 
-    // protected override void OnModelCreating(ModelBuilder modelBuilder)
-    // {
-    //     modelBuilder.Entity<Item>()
-    //         .HasOne(i => i.SupplierById)
-    //         .WithMany() // Assuming no collection in Supplier
-    //         .HasForeignKey(i => i.SupplierId)
-    //         .HasPrincipalKey(s => s.SupplierPrimaryKey); // Maps SupplierId to SupplierPrimaryKey
+    public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
+    {
 
-    //     modelBuilder.Entity<Item>()
-    //         .HasOne(i => i.SupplierByCode)
-    //         .WithMany() // Assuming no collection in Supplier
-    //         .HasForeignKey(i => i.SupplierCode)
-    //         .HasPrincipalKey(s => s.SupplierUniqueCode); // Maps SupplierCode to SupplierUniqueCode
-    // }
-
+    }
 }

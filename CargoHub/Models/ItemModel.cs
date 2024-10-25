@@ -35,11 +35,7 @@ public class Item
     [ForeignKey("SupplierId")]
     public Supplier? SupplierById { get; set; }
     public int SupplierId { get; set; }
-
-    [ForeignKey("SupplierCode")]
-    public Supplier? SupplierByCode { get; set; }
     public int SupplierCode { get; set; }
-
     public string? SupplierPartNumber { get; set; }
 
     [DataType(DataType.DateTime)]

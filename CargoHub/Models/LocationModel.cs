@@ -10,7 +10,7 @@ public class Location
     public int Id { get; set; }
 
     [ForeignKey("WareHouseId")]
-    public WareHouse? wareHouse { get; set; }
+    public Warehouse? wareHouse { get; set; }
     public int? WareHouseId { get; set; }
 
     public string? Code { get; set; }
