@@ -1,4 +1,5 @@
 using CargoHub.Models;
+using Microsoft.EntityFrameworkCore;
 
 public class WarehouseDBStorage : IWarehouseStorage
 {
@@ -17,9 +18,10 @@ public class WarehouseDBStorage : IWarehouseStorage
         throw new NotImplementedException();
     }
 
-    public Task<Warehouse?> getWarehouse(int id)
+    public async Task<Warehouse?> getWarehouse(int id)
     {
-        throw new NotImplementedException();
+        Warehouse? warehouse = await db.Warehouses.Where(w => w.Id == id).FirstOrDefaultAsync();
+        return warehouse;
     }
 
     public IEnumerable<Warehouse> getWarehouses()

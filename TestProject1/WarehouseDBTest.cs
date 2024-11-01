@@ -34,9 +34,9 @@ public class WarehouseDBTest
             db.Warehouses.Add(warehouse);
             db.SaveChanges();
         }
+        WarehouseDBStorage storage = new(db);
 
         // Act
-        WarehouseDBStorage storage = new(db);
         List<Warehouse> result = storage.getWarehouses().ToList();
 
         // Assert
@@ -57,5 +57,32 @@ public class WarehouseDBTest
             Assert.IsTrue(result[warehouseIterator].CreatedAt == warehouses[warehouseIterator].CreatedAt);
             Assert.IsTrue(result[warehouseIterator].UpdatedAt == warehouses[warehouseIterator].UpdatedAt);
         }
+    }
+
+    public static IEnumerable<object[]> SpecificWarehousesTestData => new List<object[]>
+        {
+            new object[] { new List<Warehouse> {}, 1, false},
+            new object[] { new List<Warehouse> { new Warehouse(){Id = 1}}, 2, false},
+            new object[] { new List<Warehouse> { new Warehouse(){Id = 1}}, 1, true},
+            new object[] { new List<Warehouse> { new Warehouse(){Id = 1}, new Warehouse(){Id = 2}}, 2, true}
+        };
+    [TestMethod]
+    [DynamicData(nameof(SpecificWarehousesTestData), DynamicDataSourceType.Property)]
+    public void TestGetSpecific(List<Warehouse> warehouses, int soughtId, bool expectedResult)
+    {
+        // Arrange
+        foreach(Warehouse warehouse in warehouses)
+        {
+            db.Warehouses.Add(warehouse);
+            db.SaveChanges();
+        }
+        WarehouseDBStorage storage = new(db);
+
+        // Act
+        Warehouse? foundWarehouse = storage.getWarehouse(soughtId).Result;
+
+        // Assert
+        bool actualResult = foundWarehouse != null;
+        Assert.IsTrue(actualResult == expectedResult);
     }
 }

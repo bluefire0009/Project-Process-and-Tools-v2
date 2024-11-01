@@ -15,4 +15,12 @@ public class WarehousesController : Controller
         List<Warehouse> warehouses = warehouseStorage.getWarehouses().ToList();
         return Ok(warehouses);
     }
+    [HttpGet("{id}")]
+    public async Task<IActionResult> GetSpecificWarehouse(int id)
+    {
+        Warehouse? foundWarehouse = await warehouseStorage.getWarehouse(id);
+        
+        if (foundWarehouse == null) return NotFound($"No warehouse with id:{id} found");
+        return Ok(foundWarehouse);
+    }
 }
