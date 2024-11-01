@@ -8,14 +8,31 @@ public class WarehouseDBStorage : IWarehouseStorage
     {
         this.db = db;
     }
-    public Task<bool> addWarehouse(Warehouse warehouse)
+    public async Task<bool> addWarehouse(Warehouse warehouse)
     {
-        throw new NotImplementedException();
+        if (warehouse == null) return false;
+        if (warehouse.Id <= 0) return false;
+
+        Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == warehouse.Id).FirstOrDefaultAsync(); 
+        if (warehouseInDatabase != null) return false;
+
+        await db.Warehouses.AddAsync(warehouse);
+
+        await db.SaveChangesAsync();
+        return true;
     }
 
-    public Task<bool> deleteWarehouse(int id)
+    public async Task<bool> deleteWarehouse(int id)
     {
-        throw new NotImplementedException();
+        if (id <= 0) return false;
+
+        Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == id).FirstOrDefaultAsync();
+        if (warehouseInDatabase == null) return false;
+
+        db.Warehouses.Remove(warehouseInDatabase);
+        
+        await db.SaveChangesAsync();
+        return true;
     }
 
     public async Task<Warehouse?> getWarehouse(int id)
@@ -30,8 +47,28 @@ public class WarehouseDBStorage : IWarehouseStorage
         return warehouses;
     }
 
-    public Task<bool> updateWarehouse(int id, Warehouse warehouse)
+    public IEnumerable<Location>? getWarehouseLocations(int warehouseId)
     {
-        throw new NotImplementedException();
+        if (warehouseId <= 0) return null;
+        
+        IEnumerable<Location> locations = db.Locations.Where(l => l.WareHouseId == warehouseId);
+        return locations;
+    }
+
+    public async Task<bool> updateWarehouse(int idToUpdate, Warehouse? updatedWarehouse)
+    {
+        if (updatedWarehouse == null) return false;
+        if (idToUpdate <= 0 || updatedWarehouse.Id <= 0) return false;
+
+        Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == idToUpdate).FirstOrDefaultAsync();
+        if (warehouseInDatabase == null) return false;
+
+        db.Remove(warehouseInDatabase);
+        await db.SaveChangesAsync();
+
+        db.Add(updatedWarehouse);
+        await db.SaveChangesAsync();
+
+        return true;
     }
 }

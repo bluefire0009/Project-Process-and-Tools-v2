@@ -7,5 +7,6 @@ public interface IWarehouseStorage
     Task<Warehouse?> getWarehouse(int id);
     Task<bool> addWarehouse(Warehouse warehouse);
     Task<bool> deleteWarehouse(int id);
-    Task<bool> updateWarehouse(int id, Warehouse warehouse);
+    Task<bool> updateWarehouse(int id, Warehouse? warehouse);
+    IEnumerable<Location>? getWarehouseLocations(int id);
 }
