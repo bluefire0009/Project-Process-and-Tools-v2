@@ -72,6 +72,6 @@ public class SuppliersController : Controller
         bool updated = await supplierStorage.updateSupplier(idToUpdate, updatedSupplier);
         
         if (!updated) return NotFound($"No supplier with id:{idToUpdate} in the database");
-        return Ok($"Updated warhouse id:{idToUpdate} to:{updatedSupplier}");
+        return Ok($"Updated supplier id:{idToUpdate} to:{updatedSupplier}");
     }
 }
