@@ -6,4 +6,5 @@ public interface ISupplierStorage
     Task<bool> addSupplier(Supplier supplier);
     Task<bool> deleteSupplier(int id);
     Task<bool> updateSupplier(int id, Supplier? supplier);
+    IEnumerable<Item>? getSupplierItems(int id);
 }
