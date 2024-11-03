@@ -19,9 +19,6 @@ public class Inventory
 
 public class InventoryLocation
 {
-    [Key]
-    public int Id { get; set; }
-
     [ForeignKey("InventoryId")]
     public Inventory? inventory { get; set; }
     public int InventoryId { get; set; }

@@ -95,19 +95,13 @@ namespace CargoHub.Migrations
 
             modelBuilder.Entity("CargoHub.Models.InventoryLocation", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
                     b.Property<int>("InventoryId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("LocationId")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
-
-                    b.HasIndex("InventoryId");
+                    b.HasKey("InventoryId", "LocationId");
 
                     b.HasIndex("LocationId");
 
@@ -541,31 +535,29 @@ namespace CargoHub.Migrations
 
                     b.HasKey("Id");
 
+                    b.HasIndex("TransferFrom");
+
+                    b.HasIndex("TransferTo");
+
                     b.ToTable("Transfers");
                 });
 
             modelBuilder.Entity("CargoHub.Models.TransferItem", b =>
                 {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Amount")
+                    b.Property<int>("TransferId")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("ItemUid")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("TransferId")
+                    b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
-                    b.HasKey("Id");
+                    b.HasKey("TransferId", "ItemUid");
 
                     b.HasIndex("ItemUid");
 
-                    b.HasIndex("TransferId");
-
-                    b.ToTable("TransferItem");
+                    b.ToTable("TransferItems");
                 });
 
             modelBuilder.Entity("CargoHub.Models.Warehouse", b =>
@@ -757,6 +749,25 @@ namespace CargoHub.Migrations
                     b.Navigation("item");
 
                     b.Navigation("shipment");
+                });
+
+            modelBuilder.Entity("CargoHub.Models.Transfer", b =>
+                {
+                    b.HasOne("CargoHub.Models.Location", "LocationFrom")
+                        .WithMany()
+                        .HasForeignKey("TransferFrom")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("CargoHub.Models.Location", "LocationTo")
+                        .WithMany()
+                        .HasForeignKey("TransferTo")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LocationFrom");
+
+                    b.Navigation("LocationTo");
                 });
 
             modelBuilder.Entity("CargoHub.Models.TransferItem", b =>
