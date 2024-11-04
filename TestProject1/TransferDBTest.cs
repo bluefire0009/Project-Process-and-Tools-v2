@@ -95,7 +95,6 @@ public class TransferDBTest
             new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = 0}}}, false},
             new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = -1}}}, false},
             new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = -1}}}, false},
-            new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = -1}}}, false},
             new object[] { null, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, Items = {new() {TransferId = 1, ItemUid = 1}, new(){TransferId = 1, ItemUid = 1}}}, false},
             new object[] { null, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, Items = {new(){TransferId = 2, ItemUid = 1}}}, false},
             new object[] { new List<Warehouse>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, TransferFrom = 3, TransferTo = 4, Items = {new(){TransferId = 2, ItemUid = 1}}}, false},
