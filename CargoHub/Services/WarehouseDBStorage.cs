@@ -58,6 +58,7 @@ public class WarehouseDBStorage : IWarehouseStorage
     public async Task<bool> updateWarehouse(int idToUpdate, Warehouse? updatedWarehouse)
     {
         if (updatedWarehouse == null) return false;
+        if (updatedWarehouse.Id != idToUpdate) return false;
         if (idToUpdate <= 0 || updatedWarehouse.Id <= 0) return false;
 
         Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == idToUpdate).FirstOrDefaultAsync();
