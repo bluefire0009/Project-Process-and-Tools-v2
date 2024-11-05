@@ -289,4 +289,43 @@ public class TransferDBTest
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
     }
+
+    public static IEnumerable<object[]> CommitTransferTestData => new List<object[]>
+    {
+        new object[] { new List<Location> {new(){Id = 1}, new(){Id = 2}}, new List<Item> {new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> {new(){Id = 1, TransferFrom = 1, TransferTo = 2, Items = {new(){ItemUid = 1, TransferId = 1}, new(){ItemUid = 2, TransferId = 1} }}}, 1,true}
+    };
+    [TestMethod]
+    [DynamicData(nameof(CommitTransferTestData), DynamicDataSourceType.Property)]
+    public void TestCommit(List<Location> locations, List<Item> items, List<Transfer> transfers, int idToCommit, bool expectedResult)
+    {
+        // Arrange
+        if (locations != null)
+        {
+            foreach (Location location in locations)
+            {
+                db.Locations.Add(location);
+                db.SaveChanges();
+            }
+        }
+        if (items != null)
+        {
+            foreach (Item item in items)
+            {
+                db.Items.Add(item);
+                db.SaveChanges();
+            }
+        }
+        foreach (Transfer transfer in transfers)
+        {
+            db.Transfers.Add(transfer);
+            db.SaveChanges();
+        }
+        TransferDBStorage storage = new(db);
+
+        // Act
+        (bool succeded, TransferDBStorage.TransferResult message) actualResult = storage.commitTransfer(idToCommit).Result;
+
+        // Assert
+        Assert.IsTrue(actualResult.succeded == expectedResult);
+    }
 }
