@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CargoHub.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20241103203809_compositeKeysToInventoryLocation")]
-    partial class compositeKeysToInventoryLocation
+    [Migration("20241105124237_addAmountsToInventory")]
+    partial class addAmountsToInventory
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -86,6 +86,21 @@ namespace CargoHub.Migrations
 
                     b.Property<string>("ItemReference")
                         .HasColumnType("TEXT");
+
+                    b.Property<int>("total_allocated")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_available")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_expected")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_on_hand")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_ordered")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
