@@ -26,7 +26,7 @@ public class TransferDBTest
         };
     [TestMethod]
     [DynamicData(nameof(TransfersTestData), DynamicDataSourceType.Property)]
-    public void TestGetAll(List<Transfer> transfers)
+    public async void TestGetAll(List<Transfer> transfers)
     {
         // Arrange
         foreach (Transfer transfer in transfers)
@@ -37,7 +37,7 @@ public class TransferDBTest
         TransferDBStorage storage = new(db);
 
         // Act
-        List<Transfer> result = storage.getTransfers().ToList();
+        List<Transfer> result = storage.getTransfers().Result.ToList();
 
         // Assert
         Assert.IsTrue(result.Count == transfers.Count);
