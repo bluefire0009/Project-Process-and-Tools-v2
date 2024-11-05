@@ -18,4 +18,24 @@ public class ClientDBStorage : IClientStorage
         Client? client = await db.Clients.Where(s => s.Id == id).FirstOrDefaultAsync();
         return client;
     }
+
+    public Task<bool> addClient(Client client)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> deleteClient(int id)
+    {
+        throw new NotImplementedException();
+    }
+
+    public Task<bool> updateClient(int id, Client? client)
+    {
+        throw new NotImplementedException();
+    }
+
+    public IEnumerable<Order>? getClientOrders(int id)
+    {
+        throw new NotImplementedException();
+    }
 }
