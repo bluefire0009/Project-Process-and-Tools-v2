@@ -33,18 +33,18 @@ public class ClientsController : Controller
         return Ok(foundClient);
     }
 
-    [HttpGet("{id}/orders")]
-    public async Task<IActionResult> GetOrdersSpecificClient(int id)
-    {
-        if (id <= 0) return BadRequest("Invalid id in the url");
+[HttpGet("{id}/orders")]
+public async Task<IActionResult> GetOrdersSpecificClient(int id)
+{
+    if (id <= 0) return BadRequest("Invalid id in the URL");
 
-        Client? foundClient = await clientStorage.getClient(id);
-        if (foundClient == null) return NotFound($"No client with id:{id} found");
+    Client? foundClient = await clientStorage.getClient(id);
+    if (foundClient == null) return NotFound($"No client with id:{id} found");
 
-        List<Order> clientOrders = clientStorage.getClientOrders(id).ToList();
+    List<Order> clientOrders = clientStorage.getClientOrders(id)?.ToList() ?? new List<Order>();
 
-        return Ok(clientOrders);
-    }
+    return Ok(clientOrders);
+}
 
     [HttpPost("")]
     public async Task<IActionResult> PostClient([FromBody] Client client)
