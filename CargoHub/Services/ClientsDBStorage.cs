@@ -18,24 +18,53 @@ public class ClientDBStorage : IClientStorage
         Client? client = await db.Clients.Where(s => s.Id == id).FirstOrDefaultAsync();
         return client;
     }
-
-    public Task<bool> addClient(Client client)
+    public async Task<bool> addClient(Client client)
     {
-        throw new NotImplementedException();
+        if (client == null) return false;
+        if (client.Id <= 0) return false;
+
+        Client? clientInDatabase = await db.Clients.Where(c => c.Id == client.Id).FirstOrDefaultAsync(); 
+        if (clientInDatabase != null) return false;
+
+        await db.Clients.AddAsync(client);
+
+        await db.SaveChangesAsync();
+        return true;
+    }
+    public async Task<bool> deleteClient(int id)
+    {
+        if (id <= 0) return false;
+
+        Client? clientInDatabase = await db.Clients.Where(c => c.Id == id).FirstOrDefaultAsync();
+        if (clientInDatabase == null) return false;
+
+        db.Clients.Remove(clientInDatabase);
+        
+        await db.SaveChangesAsync();
+        return true;
+    }
+    public async Task<bool> updateClient(int idToUpdate, Client? updatedClient)
+    {
+        if (updatedClient == null) return false;
+        if (idToUpdate <= 0 || updatedClient.Id <= 0) return false;
+
+        Client? clientInDatabase = await db.Clients.Where(c => c.Id == idToUpdate).FirstOrDefaultAsync();
+        if (clientInDatabase == null) return false;
+
+        db.Clients.Remove(clientInDatabase);
+        await db.SaveChangesAsync();
+
+        db.Add(updatedClient);
+        await db.SaveChangesAsync();
+
+        return true;
     }
 
-    public Task<bool> deleteClient(int id)
+    public IEnumerable<Order>? getClientOrders(int clientId)
     {
-        throw new NotImplementedException();
-    }
-
-    public Task<bool> updateClient(int id, Client? client)
-    {
-        throw new NotImplementedException();
-    }
-
-    public IEnumerable<Order>? getClientOrders(int id)
-    {
-        throw new NotImplementedException();
+        if (clientId <= 0) return null;
+        
+        IEnumerable<Order> orders = db.Orders.Where(o => o.BillTo == clientId || o.ShipTo == clientId);
+        return orders;
     }
 }
