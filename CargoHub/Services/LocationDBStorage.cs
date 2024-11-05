@@ -1,6 +1,7 @@
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
+
 public class LocationStroage : ILocationStorage
 {
     DatabaseContext DB;
@@ -24,12 +25,15 @@ public class LocationStroage : ILocationStorage
     public async Task<IEnumerable<Location>> GetLocationsInWarehouses(int GivenWarehouseId)
     {
         // find all location with the given WarehouseId
+        // currently not used by location controller
         return await DB.Locations.Where(x => x.WareHouseId == GivenWarehouseId).ToListAsync();
     }
 
     public async Task<bool> AddLocation(Location location)
     {
         // add location to Locations
+        if (location == null) return false;
+
         await DB.Locations.AddAsync(location);
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;
