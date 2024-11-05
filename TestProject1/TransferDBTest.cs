@@ -138,14 +138,6 @@ public class TransferDBTest
                 db.SaveChanges();
             }
         }
-        // if (warehouses != null)
-        // {
-        //     foreach (Warehouse warehouse in warehouses)
-        //     {
-        //         db.Warehouses.Add(warehouse);
-        //         db.SaveChanges();
-        //     }
-        // }
         TransferDBStorage storage = new(db);
 
         // Act
