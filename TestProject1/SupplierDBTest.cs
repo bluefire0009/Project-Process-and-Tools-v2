@@ -178,9 +178,8 @@ public class SupplierDBTest
             new object[] { new List<Supplier> {}, 1, null,false},
             new object[] { new List<Supplier> {}, 0, new Supplier(){Id = 1},false},
             new object[] { new List<Supplier> {}, -1, new Supplier(){Id = 1},false},
+            new object[] { new List<Supplier> {new Supplier(){Id = 1}}, 1, new Supplier(){Id = 2}, false},
             new object[] { new List<Supplier> {new Supplier(){Id = 1}}, 1, new Supplier(){Id = 1, Code = "ABC"}, true},
-            new object[] { new List<Supplier> {new Supplier(){Id = 1}}, 1, new Supplier(){Id = 2}, true},
-
         };
     [TestMethod]
     [DynamicData(nameof(UpdateSupplierTestData), DynamicDataSourceType.Property)]
