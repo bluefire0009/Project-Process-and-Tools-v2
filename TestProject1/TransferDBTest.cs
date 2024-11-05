@@ -26,7 +26,7 @@ public class TransferDBTest
         };
     [TestMethod]
     [DynamicData(nameof(TransfersTestData), DynamicDataSourceType.Property)]
-    public async void TestGetAll(List<Transfer> transfers)
+    public void TestGetAll(List<Transfer> transfers)
     {
         // Arrange
         foreach (Transfer transfer in transfers)
