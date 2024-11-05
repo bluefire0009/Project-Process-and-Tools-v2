@@ -242,11 +242,10 @@ public class TransferDBTest
             new object[] { null, new List<Transfer> {}, -1, new Transfer(){Id = 1},false},
             new object[] { new List<Item>{new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = 1}}}}, 1, new Transfer(){Id = 2, Items = { new(){TransferId = 2, ItemUid = 3}, new(){TransferId = 2, ItemUid = 4}}}, false},
             new object[] { new List<Item>{new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = 1}}}}, 1, new Transfer(){Id = 2, Items = { new(){TransferId = 3, ItemUid = 1}, new(){TransferId = 3, ItemUid = 2}}}, false},
+            new object[] { null, new List<Transfer> {new Transfer(){Id = 1}}, 1, new Transfer(){Id = 2}, false},
 
-            new object[] { new List<Item>{new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = 1}}}}, 1, new Transfer(){Id = 2, Items = { new(){TransferId = 2, ItemUid = 1}, new(){TransferId = 2, ItemUid = 2}}}, true},
+            new object[] { new List<Item>{new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = 1}}}}, 1, new Transfer(){Id = 1, Items = { new(){TransferId = 2, ItemUid = 1}, new(){TransferId = 2, ItemUid = 2}}}, false},
             new object[] { null, new List<Transfer> {new Transfer(){Id = 1}}, 1, new Transfer(){Id = 1}, true},
-            new object[] { null, new List<Transfer> {new Transfer(){Id = 1}}, 1, new Transfer(){Id = 2}, true},
-
         };
     [TestMethod]
     [DynamicData(nameof(UpdateTransferTestData), DynamicDataSourceType.Property)]

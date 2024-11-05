@@ -80,6 +80,7 @@ public class TransferDBStorage : ITransferStorage
     public async Task<bool> updateTransfer(int idToUpdate, Transfer? updatedTransfer)
     {
         if (updatedTransfer == null) return false;
+        if (updatedTransfer.Id != idToUpdate) return false;
         if (idToUpdate <= 0 || updatedTransfer.Id <= 0) return false;
 
         // Check if  the composite keys already exsist or if the item is null
