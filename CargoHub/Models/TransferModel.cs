@@ -9,8 +9,12 @@ public class Transfer
     public int Id { get; set; }
 
     public string? Reference { get; set; }
+    
     public int TransferFrom { get; set; }
+    public Location? LocationFrom;
     public int TransferTo { get; set; }
+    
+    public Location? LocationTo;
     public string? TransferStatus { get; set; }
 
     [DataType(DataType.DateTime)]
@@ -24,9 +28,6 @@ public class Transfer
 
 public class TransferItem
 {
-    [Key]
-    public int Id { get; set; }
-
     [ForeignKey("TransferId")]
     public Transfer? transfer { get; set; }
     public int TransferId { get; set; }
