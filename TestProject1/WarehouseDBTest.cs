@@ -17,7 +17,7 @@ public class WarehouseDBTest
         .Options;
         db = new DatabaseContext(options);
     }
-    
+
     public static IEnumerable<object[]> WarehousesTestData => new List<object[]>
         {
             new object[] { new List<Warehouse> {}},
@@ -29,7 +29,7 @@ public class WarehouseDBTest
     public void TestGetAll(List<Warehouse> warehouses)
     {
         // Arrange
-        foreach(Warehouse warehouse in warehouses)
+        foreach (Warehouse warehouse in warehouses)
         {
             db.Warehouses.Add(warehouse);
             db.SaveChanges();
@@ -37,11 +37,11 @@ public class WarehouseDBTest
         WarehouseDBStorage storage = new(db);
 
         // Act
-        List<Warehouse> result = storage.getWarehouses().ToList();
+        List<Warehouse> result = storage.getWarehouses().Result.ToList();
 
         // Assert
         Assert.IsTrue(result.Count == warehouses.Count);
-        for(int warehouseIterator = 0; warehouseIterator < result.Count; warehouseIterator++)
+        for (int warehouseIterator = 0; warehouseIterator < result.Count; warehouseIterator++)
         {
             Assert.IsTrue(result[warehouseIterator].Id == warehouses[warehouseIterator].Id);
             Assert.IsTrue(result[warehouseIterator].Code == warehouses[warehouseIterator].Code);
@@ -71,7 +71,7 @@ public class WarehouseDBTest
     public void TestGetSpecific(List<Warehouse> warehouses, int soughtId, bool expectedResult)
     {
         // Arrange
-        foreach(Warehouse warehouse in warehouses)
+        foreach (Warehouse warehouse in warehouses)
         {
             db.Warehouses.Add(warehouse);
             db.SaveChanges();
@@ -110,8 +110,8 @@ public class WarehouseDBTest
     public void TestAddSameIdTwice()
     {
         // Arrange
-        Warehouse w1 = new(){Id = 1};
-        Warehouse w2 = new(){Id = 1};
+        Warehouse w1 = new() { Id = 1 };
+        Warehouse w2 = new() { Id = 1 };
         WarehouseDBStorage storage = new(db);
 
         // Act
@@ -137,7 +137,7 @@ public class WarehouseDBTest
     public void TestRemove(List<Warehouse> warehouses, int idToRemove, bool expectedResult)
     {
         // Arrange
-        foreach(Warehouse warehouse in warehouses)
+        foreach (Warehouse warehouse in warehouses)
         {
             db.Warehouses.Add(warehouse);
             db.SaveChanges();
@@ -155,11 +155,11 @@ public class WarehouseDBTest
     public void TestRemoveSameTwice()
     {
         // Arrange
-        Warehouse w1 = new(){Id = 1};
+        Warehouse w1 = new() { Id = 1 };
         db.Warehouses.Add(w1);
         db.SaveChanges();
         WarehouseDBStorage storage = new(db);
-        
+
 
         // Act
         bool firstRemove = storage.deleteWarehouse(w1.Id).Result;
@@ -178,14 +178,14 @@ public class WarehouseDBTest
             new object[] { new List<Warehouse> {}, -1, new Warehouse(){Id = 1},false},
             new object[] { new List<Warehouse> {new Warehouse(){Id = 1}}, 1, new Warehouse(){Id = 1, Code = "ABC"}, true},
             new object[] { new List<Warehouse> {new Warehouse(){Id = 1}}, 1, new Warehouse(){Id = 2}, true},
-        
+
         };
     [TestMethod]
     [DynamicData(nameof(UpdateWarehouseTestData), DynamicDataSourceType.Property)]
     public void TestUpdate(List<Warehouse> warehouses, int idToUpdate, Warehouse updatedWarehouse, bool expectedResult)
     {
         // Arrange
-        foreach(Warehouse warehouse in warehouses)
+        foreach (Warehouse warehouse in warehouses)
         {
             db.Warehouses.Add(warehouse);
             db.SaveChanges();
@@ -201,23 +201,24 @@ public class WarehouseDBTest
 
     public static IEnumerable<object[]> GetWarehouseLocationsTestData => new List<object[]>
         {
-            new object[] { new List<Warehouse> {new(){Id = 1}}, new List<Location> {new(){Id = 1, WareHouseId = 1}, new(){Id = 2, WareHouseId = 1}, new(){Id = 3, WareHouseId = 1}}, 1},        
-            new object[] { new List<Warehouse> {new(){Id = 1}}, null, 0},        
-            new object[] { new List<Warehouse> {new(){Id = 1}}, null, -1},        
-            new object[] { new List<Warehouse> {new(){Id = 2}}, new List<Location> {new(){Id = 1, WareHouseId = 1}, new(){Id = 2, WareHouseId = 1}, new(){Id = 3, WareHouseId = 1}}, 2},        
+            new object[] { new List<Warehouse> {new(){Id = 1}}, new List<Location> {new(){Id = 1, WareHouseId = 1}, new(){Id = 2, WareHouseId = 1}, new(){Id = 3, WareHouseId = 1}}, 1},
+            new object[] { new List<Warehouse> {new(){Id = 1}}, null, 0},
+            new object[] { new List<Warehouse> {new(){Id = 1}}, null, -1},
+            new object[] { new List<Warehouse> {new(){Id = 2}}, new List<Location> {new(){Id = 1, WareHouseId = 1}, new(){Id = 2, WareHouseId = 1}, new(){Id = 3, WareHouseId = 1}}, 2},
         };
     [TestMethod]
     [DynamicData(nameof(GetWarehouseLocationsTestData), DynamicDataSourceType.Property)]
     public void TestGetLocations(List<Warehouse> warehouses, List<Location> locations, int soughtId)
     {
         // Arrange
-        foreach(Warehouse warehouse in warehouses)
+        foreach (Warehouse warehouse in warehouses)
         {
             db.Warehouses.Add(warehouse);
             db.SaveChanges();
         }
-        if (locations != null){
-            foreach(Location location in locations)
+        if (locations != null)
+        {
+            foreach (Location location in locations)
             {
                 db.Locations.Add(location);
                 db.SaveChanges();
@@ -231,10 +232,10 @@ public class WarehouseDBTest
         // these two statements are here because getWarehouseLocations COULD TECHNICALLY return a null, not very likely but still
         if (result == null) resultList = new();
         else resultList = result.ToList();
-        
+
 
         // Assert
-        for(int locationIterator = 0; locationIterator < resultList.Count; locationIterator++)
+        for (int locationIterator = 0; locationIterator < resultList.Count; locationIterator++)
         {
             Assert.IsTrue(resultList[locationIterator].WareHouseId == locations[locationIterator].WareHouseId);
             Assert.IsTrue(resultList[locationIterator].Id == locations[locationIterator].Id);
@@ -245,7 +246,7 @@ public class WarehouseDBTest
         }
         if (resultList.Count == 0 && result != null)
             Assert.IsTrue(locations != null);
-        if (result == null) 
+        if (result == null)
             Assert.IsTrue(locations == null);
     }
 }
