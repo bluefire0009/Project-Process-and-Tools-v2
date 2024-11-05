@@ -26,6 +26,10 @@ public class TransferDBStorage : ITransferStorage
         if (transfer == null) return false;
         if (transfer.Id <= 0) return false;
 
+        // Check that transferLocations are valid
+        if ((await db.Locations.FirstOrDefaultAsync(l => l.Id == transfer.TransferFrom)) == null) return false;
+        if ((await db.Locations.FirstOrDefaultAsync(l => l.Id == transfer.TransferTo)) == null) return false;
+
         // Check if  the composite keys already exsist or if the item is null
         foreach (TransferItem item in transfer.Items)
         {
@@ -124,24 +128,61 @@ public class TransferDBStorage : ITransferStorage
         return true;
     }
 
-    public async Task<(bool succeded, string message)> commitTransfer(int id)
+    public async Task<(bool succeded, TransferResult message)> commitTransfer(int id)
     {
-        if (id <= 0) return (false, "wrongId");
+        if (id <= 0) return (false, TransferResult.wrongId);
 
+        // check if the transfer is in the database
         Transfer? transferInDatabase = await db.Transfers.Where(t => t.Id == id).FirstOrDefaultAsync();
-        if (transferInDatabase == null) return (false, "notFound");
+        if (transferInDatabase == null) return (false, TransferResult.transferNotFound);
+
+        // check if there are enough items for the transfer
+        foreach (TransferItem item in transferInDatabase.Items)
+            if (await checkIfItemTransferPossible(item.ItemUid, transferInDatabase.TransferFrom, transferInDatabase.TransferTo, item.Amount))
+                return (false, TransferResult.notEnoughItems);
+
+        // carry out the transfer
+        foreach (TransferItem item in transferInDatabase.Items)
+        {
+            Inventory? inventoryWithAskedItem = await db.Inventories.FirstOrDefaultAsync(i => i.ItemId == item.ItemUid);
+            Inventory? inventoryToTransferTo = await db.Inventories.Where(i => i.InventoryLocations.Select(l => l.InventoryId).Contains(transferInDatabase.LocationTo.Id)).FirstOrDefaultAsync();
+
+            // from calculations
+            inventoryWithAskedItem.total_on_hand -= item.Amount;
+            inventoryWithAskedItem.total_expected = inventoryWithAskedItem.total_on_hand + inventoryWithAskedItem.total_ordered;
+            inventoryWithAskedItem.total_available = inventoryWithAskedItem.total_on_hand - inventoryWithAskedItem.total_allocated;
 
 
+            // to calculations
+            inventoryToTransferTo.total_on_hand += item.Amount;
+            inventoryToTransferTo.total_expected = inventoryToTransferTo.total_on_hand + inventoryToTransferTo.total_ordered;
+            inventoryToTransferTo.total_available = inventoryToTransferTo.total_on_hand - inventoryToTransferTo.total_allocated;
+        }
+        db.SaveChanges();
 
-        return (true, "");
+        return (true, TransferResult.possible);
     }
 
-    private bool checkIfItemTransferPossible(int itemId, int locationFrom, int locationTo)
+    private async Task<bool> checkIfItemTransferPossible(int itemId, int locationFrom, int locationTo, int amountToTransfer)
     {
-        Inventory? inventoryWithAskedItem = db.Inventories.Where(i => i.ItemId == itemId).FirstOrDefault();
+        Inventory? inventoryWithAskedItem = await db.Inventories.FirstOrDefaultAsync(i => i.ItemId == itemId);
+        Inventory? inventoryToTransferTo = await db.Inventories.Where(i => i.InventoryLocations.Select(l => l.InventoryId).Contains(locationTo)).FirstOrDefaultAsync();
         if (inventoryWithAskedItem == null) return false;
+        if (inventoryToTransferTo == null) return false;
 
+        bool noLocationInInventory = !inventoryWithAskedItem.InventoryLocations.Select(i => i.InventoryId).Contains(locationFrom);
+        if (noLocationInInventory) return false;
+
+        if (inventoryWithAskedItem.total_available - amountToTransfer < 0) return false;
 
         return true;
+    }
+
+    public enum TransferResult
+    {
+        notEnoughItems,
+        wrongId,
+        transferNotFound,
+        possible
     }
 }
