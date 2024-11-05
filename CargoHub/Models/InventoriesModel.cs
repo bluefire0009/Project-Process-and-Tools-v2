@@ -10,7 +10,7 @@ public class Inventory
 
     [ForeignKey("ItemId")]
     public Item item { get; set; } = null!;
-    public int ItemId { get; set; }
+    public string ItemId { get; set; }
     public string? Description { get; set; }
     public string? ItemReference { get; set; }
 
