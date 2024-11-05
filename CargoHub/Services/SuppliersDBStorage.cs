@@ -9,9 +9,9 @@ public class SupplierDBStorage : ISupplierStorage
         this.db = db;
     }
 
-    public IEnumerable<Supplier> getSuppliers()
+    public async Task<IEnumerable<Supplier>> getSuppliers()
     {
-        IEnumerable<Supplier> supplier = db.Suppliers.AsEnumerable();
+        List<Supplier> supplier = await db.Suppliers.ToListAsync();
         return supplier;
     }
 
@@ -24,17 +24,17 @@ public class SupplierDBStorage : ISupplierStorage
     public IEnumerable<Item>? getSupplierItems(int supplierId)
     {
         if (supplierId <= 0) return null;
-        
+
         IEnumerable<Item> items = db.Items.Where(l => l.SupplierId == supplierId);
         return items;
     }
-    
+
     public async Task<bool> addSupplier(Supplier supplier)
     {
         if (supplier == null) return false;
         if (supplier.Id <= 0) return false;
 
-        Supplier? supplierInDatabase = await db.Suppliers.Where(s => s.Id == supplier.Id).FirstOrDefaultAsync(); 
+        Supplier? supplierInDatabase = await db.Suppliers.Where(s => s.Id == supplier.Id).FirstOrDefaultAsync();
         if (supplierInDatabase != null) return false;
 
         await db.Suppliers.AddAsync(supplier);
@@ -51,7 +51,7 @@ public class SupplierDBStorage : ISupplierStorage
         if (supplierInDatabase == null) return false;
 
         db.Suppliers.Remove(supplierInDatabase);
-        
+
         await db.SaveChangesAsync();
         return true;
     }
