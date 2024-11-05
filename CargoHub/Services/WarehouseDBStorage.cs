@@ -13,7 +13,7 @@ public class WarehouseDBStorage : IWarehouseStorage
         if (warehouse == null) return false;
         if (warehouse.Id <= 0) return false;
 
-        Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == warehouse.Id).FirstOrDefaultAsync(); 
+        Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == warehouse.Id).FirstOrDefaultAsync();
         if (warehouseInDatabase != null) return false;
 
         await db.Warehouses.AddAsync(warehouse);
@@ -30,7 +30,7 @@ public class WarehouseDBStorage : IWarehouseStorage
         if (warehouseInDatabase == null) return false;
 
         db.Warehouses.Remove(warehouseInDatabase);
-        
+
         await db.SaveChangesAsync();
         return true;
     }
@@ -41,16 +41,16 @@ public class WarehouseDBStorage : IWarehouseStorage
         return warehouse;
     }
 
-    public IEnumerable<Warehouse> getWarehouses()
+    public async Task<IEnumerable<Warehouse>> getWarehouses()
     {
-        IEnumerable<Warehouse> warehouses = db.Warehouses.AsEnumerable();
+        IEnumerable<Warehouse> warehouses = await db.Warehouses.ToListAsync();
         return warehouses;
     }
 
     public IEnumerable<Location>? getWarehouseLocations(int warehouseId)
     {
         if (warehouseId <= 0) return null;
-        
+
         IEnumerable<Location> locations = db.Locations.Where(l => l.WareHouseId == warehouseId);
         return locations;
     }
@@ -58,6 +58,7 @@ public class WarehouseDBStorage : IWarehouseStorage
     public async Task<bool> updateWarehouse(int idToUpdate, Warehouse? updatedWarehouse)
     {
         if (updatedWarehouse == null) return false;
+        if (updatedWarehouse.Id != idToUpdate) return false;
         if (idToUpdate <= 0 || updatedWarehouse.Id <= 0) return false;
 
         Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == idToUpdate).FirstOrDefaultAsync();

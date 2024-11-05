@@ -9,10 +9,10 @@ public class TransferDBStorage : ITransferStorage
         this.db = db;
     }
 
-    public IEnumerable<Transfer> getTransfers()
+    public async Task<IEnumerable<Transfer>> getTransfers()
     {
-        IEnumerable<Transfer> transfer = db.Transfers.AsEnumerable();
-        return transfer;
+        List<Transfer> transfers = await db.Transfers.ToListAsync();
+        return transfers;
     }
 
     public async Task<Transfer?> getTransfer(int id)
@@ -137,7 +137,10 @@ public class TransferDBStorage : ITransferStorage
 
     private bool checkIfItemTransferPossible(int itemId, int locationFrom, int locationTo)
     {
-        //int inventoryIdWithAskedItem = db.Inventories.Where(i => i.ItemId == itemId).FirstOrDefault().;
+        Inventory? inventoryWithAskedItem = db.Inventories.Where(i => i.ItemId == itemId).FirstOrDefault();
+        if (inventoryWithAskedItem == null) return false;
+
+
         return true;
     }
 }

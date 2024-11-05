@@ -1,7 +1,7 @@
 using CargoHub.Models;
 public interface ITransferStorage
 {
-    IEnumerable<Transfer> getTransfers();
+    Task<IEnumerable<Transfer>> getTransfers();
     Task<Transfer?> getTransfer(int id);
     Task<bool> addTransfer(Transfer supplier);
     Task<bool> deleteTransfer(int id);
