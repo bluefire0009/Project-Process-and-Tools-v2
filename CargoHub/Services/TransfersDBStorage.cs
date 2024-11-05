@@ -135,7 +135,7 @@ public class TransferDBStorage : ITransferStorage
         return (true, "");
     }
 
-    private bool checkIfItemTransferPossible(int itemId, int locationFrom, int locationTo)
+    private bool checkIfItemTransferPossible(string itemId, int locationFrom, int locationTo)
     {
         Inventory? inventoryWithAskedItem = db.Inventories.Where(i => i.ItemId == itemId).FirstOrDefault();
         if (inventoryWithAskedItem == null) return false;
