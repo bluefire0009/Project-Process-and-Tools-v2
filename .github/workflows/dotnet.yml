@@ -40,10 +40,8 @@ jobs:
       run: |
         sudo apt-get update
         sudo apt-get install -y libxml2-utils
-    - name: Build
-      run: dotnet build --no-restore
     - name: Test
-      run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage"  
+      run: dotnet test Project-Process-and-Tools-v2.sln --no-build --verbosity normal --collect:"XPlat Code Coverage"
     - name: Display Coverage Report
       run: |
         echo "Displaying Coverage Report:"
