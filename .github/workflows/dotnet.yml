@@ -20,10 +20,6 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
-    - name: Install xmllint
-      run: |
-        sudo apt-get update
-        sudo apt-get install -y libxml2-utils
     - name: Restore dependencies
       run: dotnet restore
     - name: Install dependencies
@@ -39,6 +35,10 @@ jobs:
       uses: actions/setup-dotnet@v4
       with:
         dotnet-version: 8.0.x
+    - name: Install xmllint
+      run: |
+        sudo apt-get update
+        sudo apt-get install -y libxml2-utils
     - name: Test
       run: dotnet test --no-build --verbosity normal --collect:"XPlat Code Coverage"  
     - name: Display Coverage Report
