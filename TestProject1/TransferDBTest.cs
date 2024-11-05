@@ -29,7 +29,7 @@ public class TransferDBTest
     public void TestGetAll(List<Transfer> transfers)
     {
         // Arrange
-        foreach(Transfer transfer in transfers)
+        foreach (Transfer transfer in transfers)
         {
             db.Transfers.Add(transfer);
             db.SaveChanges();
@@ -41,14 +41,14 @@ public class TransferDBTest
 
         // Assert
         Assert.IsTrue(result.Count == transfers.Count);
-        for(int transferIterator = 0; transferIterator < result.Count; transferIterator++)
+        for (int transferIterator = 0; transferIterator < result.Count; transferIterator++)
         {
             Assert.IsTrue(result[transferIterator].Id == transfers[transferIterator].Id);
             Assert.IsTrue(result[transferIterator].Reference == transfers[transferIterator].Reference);
             Assert.IsTrue(result[transferIterator].TransferFrom == transfers[transferIterator].TransferFrom);
             Assert.IsTrue(result[transferIterator].TransferTo == transfers[transferIterator].TransferTo);
             Assert.IsTrue(result[transferIterator].TransferStatus == transfers[transferIterator].TransferStatus);
-            for(int itemIterator = 0; itemIterator < result[transferIterator].Items.Count; itemIterator++)
+            for (int itemIterator = 0; itemIterator < result[transferIterator].Items.Count; itemIterator++)
             {
                 Assert.IsTrue(result[transferIterator].Items[itemIterator].ItemUid == transfers[transferIterator].Items[itemIterator].ItemUid);
                 Assert.IsTrue(result[transferIterator].Items[itemIterator].TransferId == transfers[transferIterator].Items[itemIterator].TransferId);
@@ -71,7 +71,7 @@ public class TransferDBTest
     public void TestGetSpecific(List<Transfer> transfers, int soughtId, bool expectedResult)
     {
         // Arrange
-        foreach(Transfer transfer in transfers)
+        foreach (Transfer transfer in transfers)
         {
             db.Transfers.Add(transfer);
             db.SaveChanges();
@@ -113,7 +113,7 @@ public class TransferDBTest
         // Arrange
         if (items != null)
         {
-            foreach(Item item in items)
+            foreach (Item item in items)
             {
                 db.Items.Add(item);
                 db.SaveChanges();
@@ -121,7 +121,7 @@ public class TransferDBTest
         }
         if (warehouses != null)
         {
-            foreach(Warehouse warehouse in warehouses)
+            foreach (Warehouse warehouse in warehouses)
             {
                 db.Warehouses.Add(warehouse);
                 db.SaveChanges();
@@ -142,7 +142,7 @@ public class TransferDBTest
             }
             if (expectedResult == true)
             {
-                foreach(TransferItem item in transfer.Items)
+                foreach (TransferItem item in transfer.Items)
                 {
                     Assert.IsTrue(db.TransferItems.Contains(item));
                 }
@@ -156,8 +156,8 @@ public class TransferDBTest
     public void TestAddSameIdTwice()
     {
         // Arrange
-        Transfer t1 = new(){Id = 1};
-        Transfer t2 = new(){Id = 1};
+        Transfer t1 = new() { Id = 1 };
+        Transfer t2 = new() { Id = 1 };
         TransferDBStorage storage = new(db);
 
         // Act
@@ -185,15 +185,15 @@ public class TransferDBTest
         // Arrange
         if (items != null)
         {
-            foreach(Item item in items)
+            foreach (Item item in items)
             {
                 db.Items.Add(item);
                 db.SaveChanges();
             }
         }
-        foreach(Transfer transfer in transfers)
+        foreach (Transfer transfer in transfers)
         {
-            foreach(TransferItem item in transfer.Items)
+            foreach (TransferItem item in transfer.Items)
             {
                 db.TransferItems.Add(item);
                 db.SaveChanges();
@@ -215,6 +215,25 @@ public class TransferDBTest
         }
     }
 
+    [TestMethod]
+    public void TestRemoveSameTwice()
+    {
+        // Arrange
+        Warehouse t1 = new() { Id = 1 };
+        db.Warehouses.Add(t1);
+        db.SaveChanges();
+        WarehouseDBStorage storage = new(db);
+
+
+        // Act
+        bool firstRemove = storage.deleteWarehouse(t1.Id).Result;
+        bool secondRemove = storage.deleteWarehouse(t1.Id).Result;
+
+        // Assert
+        Assert.IsTrue(firstRemove == true);
+        Assert.IsTrue(secondRemove == false);
+    }
+
     public static IEnumerable<object[]> UpdateTransferTestData => new List<object[]>
         {
             new object[] { null, new List<Transfer> {}, 2, new Transfer(){Id = 1},false},
@@ -227,7 +246,7 @@ public class TransferDBTest
             new object[] { new List<Item>{new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = 1}}}}, 1, new Transfer(){Id = 2, Items = { new(){TransferId = 2, ItemUid = 1}, new(){TransferId = 2, ItemUid = 2}}}, true},
             new object[] { null, new List<Transfer> {new Transfer(){Id = 1}}, 1, new Transfer(){Id = 1}, true},
             new object[] { null, new List<Transfer> {new Transfer(){Id = 1}}, 1, new Transfer(){Id = 2}, true},
-        
+
         };
     [TestMethod]
     [DynamicData(nameof(UpdateTransferTestData), DynamicDataSourceType.Property)]
@@ -236,13 +255,13 @@ public class TransferDBTest
         // Arrange
         if (items != null)
         {
-            foreach(Item item in items)
+            foreach (Item item in items)
             {
                 db.Items.Add(item);
                 db.SaveChanges();
             }
         }
-        foreach(Transfer transfer in transfers)
+        foreach (Transfer transfer in transfers)
         {
             db.Transfers.Add(transfer);
             db.SaveChanges();

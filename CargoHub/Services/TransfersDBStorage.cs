@@ -27,7 +27,7 @@ public class TransferDBStorage : ITransferStorage
         if (transfer.Id <= 0) return false;
 
         // Check if  the composite keys already exsist or if the item is null
-        foreach(TransferItem item in transfer.Items)
+        foreach (TransferItem item in transfer.Items)
         {
             if (item == null) return false;
             bool containsItemUid = await db.TransferItems.Where(i => i.ItemUid == item.ItemUid).FirstOrDefaultAsync() != null;
@@ -39,15 +39,15 @@ public class TransferDBStorage : ITransferStorage
             if (containsDuplicatesKeys) return false;
             // Check if updated item actually exsists in the Items table
             bool itemExsists = db.Items.Select(i => i.Uid).Contains(item.ItemUid);
-            if (!itemExsists) return false; 
+            if (!itemExsists) return false;
             // Check if the TransferId of the item is the same as the transfer it's in
             if (item.TransferId != transfer.Id) return false;
         }
 
-        Transfer? transferInDatabase = await db.Transfers.Where(s => s.Id == transfer.Id).FirstOrDefaultAsync(); 
+        Transfer? transferInDatabase = await db.Transfers.Where(s => s.Id == transfer.Id).FirstOrDefaultAsync();
         if (transferInDatabase != null) return false;
 
-        foreach(TransferItem item in transfer.Items)
+        foreach (TransferItem item in transfer.Items)
         {
             await db.TransferItems.AddAsync(item);
         }
@@ -72,7 +72,7 @@ public class TransferDBStorage : ITransferStorage
             db.TransferItems.Remove(item);
         }
         db.Transfers.Remove(transferInDatabase);
-        
+
         await db.SaveChangesAsync();
         return true;
     }
@@ -83,7 +83,7 @@ public class TransferDBStorage : ITransferStorage
         if (idToUpdate <= 0 || updatedTransfer.Id <= 0) return false;
 
         // Check if  the composite keys already exsist or if the item is null
-        foreach(TransferItem item in updatedTransfer.Items)
+        foreach (TransferItem item in updatedTransfer.Items)
         {
             if (item == null) return false;
             bool containsItemUid = await db.TransferItems.Where(i => i.ItemUid == item.ItemUid).FirstOrDefaultAsync() != null;
@@ -95,7 +95,7 @@ public class TransferDBStorage : ITransferStorage
             if (containsDuplicatesKeys) return false;
             // Check if updated item actually exsists in the Items table
             bool itemExsists = db.Items.Select(i => i.Uid).Contains(item.ItemUid);
-            if (!itemExsists) return false; 
+            if (!itemExsists) return false;
             // Check if the TransferId of the item is the same as the transfer it's in
             if (item.TransferId != updatedTransfer.Id) return false;
         }
@@ -103,12 +103,12 @@ public class TransferDBStorage : ITransferStorage
         Transfer? transferInDatabase = await db.Transfers.Where(t => t.Id == idToUpdate).FirstOrDefaultAsync();
         if (transferInDatabase == null) return false;
 
-        foreach(TransferItem item in transferInDatabase.Items.ToList())
+        foreach (TransferItem item in transferInDatabase.Items.ToList())
         {
             db.TransferItems.Remove(item);
             await db.SaveChangesAsync();
         }
-        foreach(TransferItem item in updatedTransfer.Items)
+        foreach (TransferItem item in updatedTransfer.Items)
         {
             await db.TransferItems.AddAsync(item);
             await db.SaveChangesAsync();
@@ -130,14 +130,14 @@ public class TransferDBStorage : ITransferStorage
         Transfer? transferInDatabase = await db.Transfers.Where(t => t.Id == id).FirstOrDefaultAsync();
         if (transferInDatabase == null) return (false, "notFound");
 
-        
-        
-        return (true,"");
+
+
+        return (true, "");
     }
 
     private bool checkIfItemTransferPossible(int itemId, int locationFrom, int locationTo)
     {
-        int inventoryIdWithAskedItem = 
+        //int inventoryIdWithAskedItem = db.Inventories.Where(i => i.ItemId == itemId).FirstOrDefault().;
         return true;
     }
 }
