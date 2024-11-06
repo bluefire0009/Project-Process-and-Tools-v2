@@ -42,9 +42,9 @@ public class ItemDBTest
 
         // Assert
         Assert.IsTrue(result.Count == items.Count);
-        for (int supplierIterator = 0; supplierIterator < result.Count; supplierIterator++)
+        for (int itemIterator = 0; itemIterator < result.Count; itemIterator++)
         {
-            Assert.IsTrue(result[supplierIterator].Equals(items[supplierIterator]));
+            Assert.IsTrue(result[itemIterator].Equals(items[itemIterator]));
         }
     }
 
@@ -68,10 +68,10 @@ public class ItemDBTest
         ItemsDBStorage storage = new(db);
 
         // Act
-        Item? foundSupplier = storage.GetItem(soughtId).Result;
+        Item? foundItem = storage.GetItem(soughtId).Result;
 
         // Assert
-        bool actualResult = foundSupplier != null;
+        bool actualResult = foundItem != null;
         Assert.IsTrue(actualResult == expectedResult);
     }
 
@@ -140,4 +140,50 @@ public class ItemDBTest
         Assert.IsTrue(actualResult == expectedResult);
     }
 
+    [TestMethod]
+    public void TestRemoveSameTwice()
+    {
+        // Arrange
+        Item i1 = new() { Uid = "P00001" };
+        db.Items.Add(i1);
+        db.SaveChanges();
+        ItemsDBStorage storage = new(db);
+
+
+        // Act
+        bool firstRemove = storage.DeleteItem(i1.Uid).Result;
+        bool secondRemove = storage.DeleteItem(i1.Uid).Result;
+
+        // Assert
+        Assert.IsTrue(firstRemove == true);
+        Assert.IsTrue(secondRemove == false);
+    }
+
+    public static IEnumerable<object[]> UpdateItemTestData => new List<object[]>
+        {
+            new object[] { new List<Item> {}, "P00002", new Item(){Uid = "P00001"},false},
+            new object[] { new List<Item> {}, "P00001", null,false},
+            new object[] { new List<Item> {}, "", new Item(){Uid = "P00001"},false},
+            new object[] { new List<Item> {}, "", new Item(){Uid = "P00001"},false},
+            new object[] { new List<Item> {new Item(){Uid = "P00001"}}, "P00001", new Item(){Uid = "P00002"}, false},
+            new object[] { new List<Item> {new Item(){Uid = "P00001"}}, "P00001", new Item(){Uid = "P00001", Code = "ABC"}, true},
+        };
+    [TestMethod]
+    [DynamicData(nameof(UpdateItemTestData), DynamicDataSourceType.Property)]
+    public void TestUpdate(List<Item> items, string idToUpdate, Item updatedItem, bool expectedResult)
+    {
+        // Arrange
+        foreach (Item item in items)
+        {
+            db.Items.Add(item);
+            db.SaveChanges();
+        }
+        ItemsDBStorage storage = new(db);
+
+        // Act
+        bool actualResult = storage.UpdateItem(idToUpdate, updatedItem).Result;
+
+        // Assert
+        Assert.IsTrue(actualResult == expectedResult);
+    }
 }
