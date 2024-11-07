@@ -46,7 +46,7 @@ jobs:
     - name: Build Solution
       run: dotnet build Project-Process-and-Tools-v2.sln --no-restore --configuration Debug
     - name: Test
-      run: dotnet test Project-Process-and-Tools-v2.sln --no-build --verbosity normal --collect:"XPlat Code Coverage"
+      run: dotnet test TestProject1/UnitTests --no-build --verbosity normal --collect:"XPlat Code Coverage"
     - name: Display Coverage Report
       run: |
         echo "Displaying Coverage Report:"
@@ -59,3 +59,20 @@ jobs:
           echo "Code coverage is below the threshold of 70%."
           exit 1
         fi
+  
+  Integration_test_in_C_sharp:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out code
+        uses: actions/checkout@v3
+
+      - name: Set up .NET Core
+        uses: actions/setup-dotnet@v3
+        with:
+          dotnet-version: '8.0.x'  # Adjust to your .NET version
+      - name: Restore dependencies
+        run: dotnet restore
+      - name: Build API project
+        run: dotnet build Project-Process-and-Tools-v2.sln --no-restore --configuration Debug
+      - name: Run integration tests
+        run: dotnet test TestProject1\IntegrationTests --no-build --verbosity normal
