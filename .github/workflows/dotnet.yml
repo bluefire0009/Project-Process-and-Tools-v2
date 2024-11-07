@@ -110,9 +110,9 @@ jobs:
 
       - name: Start API server in background
         run: |
-          dotnet run --urls http://localhost:3000
+          dotnet run CargoHub/CargoHub.csproj --urls http://localhost:3000
           sleep 5  # Wait for the server to start
 
       - name: Run Python tests
         run: |
-          pytest PthonIntegrationTests
+          pytest PythonIntegrationTests

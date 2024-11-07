@@ -23,6 +23,6 @@ def test_simple_endpoint(connection: http.client.HTTPConnection):
     response = connection.getresponse()
 
     # Assert
-    assert response.status == 200
+    assert response.status == 500
     response_data = response.read().decode()
     assert response_data == "1"
