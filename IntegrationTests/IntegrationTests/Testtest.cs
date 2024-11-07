@@ -11,7 +11,7 @@ namespace IntegrationTests
     {
 
         [TestMethod]
-        public async Task TestEndpoint_ReturnsOkWithExpectedContent()
+        public async Task SimpleTest()
         {
             // Arrange
             var application = new CargoHUbWebApplicationFactory();
