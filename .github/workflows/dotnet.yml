@@ -82,7 +82,7 @@ jobs:
   Integration_test_in_python:
     runs-on: ubuntu-latest  # You can change this to a different OS if needed (e.g., windows-latest or macos-latest)
     needs: build
-    
+
     steps:
       - name: Check out repository
         uses: actions/checkout@v2
@@ -110,9 +110,9 @@ jobs:
 
       - name: Start API server in background
         run: |
-          dotnet run --urls http://localhost:5000 &  # Adjust the port to match your API's port
+          dotnet run --urls http://localhost:3000
           sleep 5  # Wait for the server to start
 
       - name: Run Python tests
         run: |
-          pytest PthonIntegrationTests  # Replace with the actual path to your test file
+          pytest PthonIntegrationTests
