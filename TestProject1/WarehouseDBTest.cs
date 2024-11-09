@@ -176,9 +176,8 @@ public class WarehouseDBTest
             new object[] { new List<Warehouse> {}, 1, null,false},
             new object[] { new List<Warehouse> {}, 0, new Warehouse(){Id = 1},false},
             new object[] { new List<Warehouse> {}, -1, new Warehouse(){Id = 1},false},
+            new object[] { new List<Warehouse> {new Warehouse(){Id = 1}}, 1, new Warehouse(){Id = 2}, false},
             new object[] { new List<Warehouse> {new Warehouse(){Id = 1}}, 1, new Warehouse(){Id = 1, Code = "ABC"}, true},
-            new object[] { new List<Warehouse> {new Warehouse(){Id = 1}}, 1, new Warehouse(){Id = 2}, true},
-
         };
     [TestMethod]
     [DynamicData(nameof(UpdateWarehouseTestData), DynamicDataSourceType.Property)]

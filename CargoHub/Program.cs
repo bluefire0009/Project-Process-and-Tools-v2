@@ -26,3 +26,7 @@ namespace CargoHub
         }
     }
 }
+
+
+// this is needed to make c# integration tests work
+public partial class Program { }

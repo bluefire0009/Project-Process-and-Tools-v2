@@ -4,7 +4,7 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-public class Location
+public class Location : IEquatable<Location>
 {
     [Key]
     public int Id { get; set; }
@@ -21,4 +21,18 @@ public class Location
 
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
+
+    public bool Equals(Location? other)
+    {
+        // If the other object is null, return false
+        if (other is null) return false;
+
+        // Compare properties
+        return Id == other.Id &&
+               WareHouseId == other.WareHouseId &&
+               Code == other.Code &&
+               Name == other.Name &&
+               CreatedAt == other.CreatedAt &&
+               UpdatedAt == other.UpdatedAt;
+    }
 }

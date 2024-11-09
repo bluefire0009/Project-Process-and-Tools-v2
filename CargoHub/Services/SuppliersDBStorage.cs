@@ -59,6 +59,7 @@ public class SupplierDBStorage : ISupplierStorage
     public async Task<bool> updateSupplier(int idToUpdate, Supplier? updatedSupplier)
     {
         if (updatedSupplier == null) return false;
+        if (idToUpdate != updatedSupplier.Id) return false;
         if (idToUpdate <= 0 || updatedSupplier.Id <= 0) return false;
 
         Supplier? supplierInDatabase = await db.Suppliers.Where(w => w.Id == idToUpdate).FirstOrDefaultAsync();
