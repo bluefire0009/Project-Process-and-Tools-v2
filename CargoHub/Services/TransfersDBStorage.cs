@@ -175,7 +175,8 @@ public class TransferDBStorage : ITransferStorage
             db.InventoryLocations.ToList().Add(ilToAdd);
             await db.SaveChangesAsync();
         }
-
+        transferInDatabase.TransferStatus = "Processed";
+        await db.SaveChangesAsync();
         return (true, TransferResult.possible);
     }
 
