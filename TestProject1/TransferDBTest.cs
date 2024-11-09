@@ -342,6 +342,8 @@ public class TransferDBTest
         // check amount and location of each transferItem
         foreach(Transfer transfer in db.Transfers)
         {
+            if (expectedResult == true)
+                Assert.IsTrue(transfer.TransferStatus == "Processed");
             foreach(TransferItem transferItem in transfer.Items)
             {
                 // false uses the actually original inventories because the original won't be changed if commit fails
