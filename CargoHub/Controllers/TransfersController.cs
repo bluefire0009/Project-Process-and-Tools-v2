@@ -72,6 +72,8 @@ public class TransferController : Controller
 
         if (!updated.succeded && updated.message == TransferDBStorage.TransferResult.notEnoughItems) return BadRequest($"There are not enough items in the location to carry out the transfer");
         if (!updated.succeded && updated.message == TransferDBStorage.TransferResult.transferNotFound) return NotFound($"No transfer with id:{idToUpdate} in the database");
+        if (!updated.succeded && updated.message == TransferDBStorage.TransferResult.FromInventoryNotExsists) return BadRequest($"Inventory to transfer from is not in the database");
+        if (!updated.succeded && updated.message == TransferDBStorage.TransferResult.ToInventoryNotExsists) return BadRequest($"Inventory to transfer to is not in the database");
 
         return Ok($"Committed transfer id:{idToUpdate}");
     }
