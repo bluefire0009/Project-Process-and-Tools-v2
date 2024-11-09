@@ -29,11 +29,7 @@ public class TransferDBTest
     public void TestGetAll(List<Transfer> transfers)
     {
         // Arrange
-        foreach (Transfer transfer in transfers)
-        {
-            db.Transfers.Add(transfer);
-            db.SaveChanges();
-        }
+        addTestResourceToDB(transfers);
         TransferDBStorage storage = new(db);
 
         // Act
@@ -71,11 +67,7 @@ public class TransferDBTest
     public void TestGetSpecific(List<Transfer> transfers, int soughtId, bool expectedResult)
     {
         // Arrange
-        foreach (Transfer transfer in transfers)
-        {
-            db.Transfers.Add(transfer);
-            db.SaveChanges();
-        }
+        addTestResourceToDB(transfers);
         TransferDBStorage storage = new(db);
 
         // Act
@@ -122,22 +114,8 @@ public class TransferDBTest
     public void TestAdd(List<Location> locations, List<Item> items, Transfer transfer, bool expectedResult)
     {
         // Arrange
-        if (locations != null)
-        {
-            foreach (Location location in locations)
-            {
-                db.Locations.Add(location);
-                db.SaveChanges();
-            }
-        }
-        if (items != null)
-        {
-            foreach (Item item in items)
-            {
-                db.Items.Add(item);
-                db.SaveChanges();
-            }
-        }
+        addTestResourceToDB(locations);
+        addTestResourceToDB(locations);
         TransferDBStorage storage = new(db);
 
         // Act
@@ -199,21 +177,12 @@ public class TransferDBTest
     public void TestRemove(List<Item> items, List<Transfer> transfers, int idToRemove, bool expectedResult)
     {
         // Arrange
-        if (items != null)
-        {
-            foreach (Item item in items)
-            {
-                db.Items.Add(item);
-                db.SaveChanges();
-            }
-        }
+        addTestResourceToDB(items);
+
         foreach (Transfer transfer in transfers)
         {
-            foreach (TransferItem item in transfer.Items)
-            {
-                db.TransferItems.Add(item);
-                db.SaveChanges();
-            }
+            addTestResourceToDB(transfer.Items);
+
             db.Transfers.Add(transfer);
             db.SaveChanges();
         }
@@ -268,19 +237,9 @@ public class TransferDBTest
     public void TestUpdate(List<Item> items, List<Transfer> transfers, int idToUpdate, Transfer updatedTransfer, bool expectedResult)
     {
         // Arrange
-        if (items != null)
-        {
-            foreach (Item item in items)
-            {
-                db.Items.Add(item);
-                db.SaveChanges();
-            }
-        }
-        foreach (Transfer transfer in transfers)
-        {
-            db.Transfers.Add(transfer);
-            db.SaveChanges();
-        }
+        addTestResourceToDB(items);
+        addTestResourceToDB(transfers);
+        
         TransferDBStorage storage = new(db);
 
         // Act
@@ -292,34 +251,27 @@ public class TransferDBTest
 
     public static IEnumerable<object[]> CommitTransferTestData => new List<object[]>
     {
-        new object[] { new List<Location> {new(){Id = 1}, new(){Id = 2}}, new List<Item> {new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> {new(){Id = 1, TransferFrom = 1, TransferTo = 2, Items = {new(){ItemUid = 1, TransferId = 1}, new(){ItemUid = 2, TransferId = 1} }}}, 1,true}
+        new object[] { 
+            new List<Inventory> {
+                new(){Id = 1, ItemId = 1, InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_available = 100},
+                new(){Id = 2, ItemId = 2, InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_available = 100}},
+            new List<Location> {new(){Id = 1}, new(){Id = 2}}, 
+            new List<Item> {new(){Uid = 1}, new(){Uid = 2}}, 
+            new List<Transfer> {new(){Id = 1, TransferFrom = 1, TransferTo = 2, Items = {new(){ItemUid = 1, TransferId = 1}, new(){ItemUid = 2, TransferId = 1} }}}, 
+            1,
+            true},
     };
     [TestMethod]
     [DynamicData(nameof(CommitTransferTestData), DynamicDataSourceType.Property)]
-    public void TestCommit(List<Location> locations, List<Item> items, List<Transfer> transfers, int idToCommit, bool expectedResult)
+    public void TestCommit(List<Inventory> inventories, List<Location> locations, List<Item> items, List<Transfer> transfers, int idToCommit, bool expectedResult)
     {
         // Arrange
-        if (locations != null)
-        {
-            foreach (Location location in locations)
-            {
-                db.Locations.Add(location);
-                db.SaveChanges();
-            }
-        }
-        if (items != null)
-        {
-            foreach (Item item in items)
-            {
-                db.Items.Add(item);
-                db.SaveChanges();
-            }
-        }
-        foreach (Transfer transfer in transfers)
-        {
-            db.Transfers.Add(transfer);
-            db.SaveChanges();
-        }
+        addTestResourceToDB(inventories);
+        addTestResourceToDB(items);
+        addTestResourceToDB(locations);
+        addTestResourceToDB(items);
+        addTestResourceToDB(transfers);
+
         TransferDBStorage storage = new(db);
 
         // Act
@@ -327,5 +279,18 @@ public class TransferDBTest
 
         // Assert
         Assert.IsTrue(actualResult.succeded == expectedResult);
+    }
+
+    private void addTestResourceToDB<T>(List<T> resources) where T : class
+    {
+        if (resources != null)
+        {
+            var testTable = db.Set<T>();
+            foreach(T resource in resources)
+            {
+                testTable.Add(resource);
+                db.SaveChanges();
+            }
+        }
     }
 }
