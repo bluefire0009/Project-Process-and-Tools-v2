@@ -138,7 +138,7 @@ public class TransferDBStorage : ITransferStorage
 
         // check if there are enough items for the transfer
         foreach (TransferItem item in transferInDatabase.Items)
-            if (await checkIfItemTransferPossible(item.ItemUid, transferInDatabase.TransferFrom, transferInDatabase.TransferTo, item.Amount))
+            if ((await checkIfItemTransferPossible(item.ItemUid, transferInDatabase.TransferTo, item.Amount)) == false)
                 return (false, TransferResult.notEnoughItems);
 
         // carry out the transfer
@@ -146,32 +146,45 @@ public class TransferDBStorage : ITransferStorage
         {
             Inventory? inventoryWithAskedItem = await db.Inventories.FirstOrDefaultAsync(i => i.ItemId == item.ItemUid);
             Inventory? inventoryToTransferTo = await db.Inventories.Where(i => i.InventoryLocations.Select(l => l.InventoryId).Contains(transferInDatabase.LocationTo.Id)).FirstOrDefaultAsync();
+            if (inventoryWithAskedItem == null) return (false, TransferResult.FromInventoryNotExsists);
+            if (inventoryToTransferTo == null) return (false, TransferResult.ToInventoryNotExsists);
 
             // from calculations
             inventoryWithAskedItem.total_on_hand -= item.Amount;
             inventoryWithAskedItem.total_expected = inventoryWithAskedItem.total_on_hand + inventoryWithAskedItem.total_ordered;
             inventoryWithAskedItem.total_available = inventoryWithAskedItem.total_on_hand - inventoryWithAskedItem.total_allocated;
-
+            // remove the item if the transfer results in total_available lower than 0
+            if(inventoryWithAskedItem.total_available <= 0)
+            {
+                db.InventoryLocations.RemoveRange(inventoryWithAskedItem.InventoryLocations);
+                db.Inventories.Remove(inventoryWithAskedItem);
+                db.SaveChanges();
+            }
 
             // to calculations
             inventoryToTransferTo.total_on_hand += item.Amount;
             inventoryToTransferTo.total_expected = inventoryToTransferTo.total_on_hand + inventoryToTransferTo.total_ordered;
             inventoryToTransferTo.total_available = inventoryToTransferTo.total_on_hand - inventoryToTransferTo.total_allocated;
+            // add the inventoryLocation if it's the first
+            InventoryLocation ilToAdd = new(){InventoryId=inventoryToTransferTo.Id, LocationId = transferInDatabase.TransferTo};
+            if (!inventoryToTransferTo.InventoryLocations.Any(l => l.LocationId == ilToAdd.LocationId && l.InventoryId == ilToAdd.InventoryId))
+            {
+                inventoryToTransferTo.InventoryLocations.ToList().Add(ilToAdd);
+                inventoryToTransferTo.InventoryLocations.ToArray();
+            }
+            db.InventoryLocations.ToList().Add(ilToAdd);
+            await db.SaveChangesAsync();
         }
-        db.SaveChanges();
 
         return (true, TransferResult.possible);
     }
 
-    private async Task<bool> checkIfItemTransferPossible(int itemId, int locationFrom, int locationTo, int amountToTransfer)
+    private async Task<bool> checkIfItemTransferPossible(int itemId, int locationTo, int amountToTransfer)
     {
         Inventory? inventoryWithAskedItem = await db.Inventories.FirstOrDefaultAsync(i => i.ItemId == itemId);
         Inventory? inventoryToTransferTo = await db.Inventories.Where(i => i.InventoryLocations.Select(l => l.InventoryId).Contains(locationTo)).FirstOrDefaultAsync();
         if (inventoryWithAskedItem == null) return false;
         if (inventoryToTransferTo == null) return false;
-
-        bool noLocationInInventory = !inventoryWithAskedItem.InventoryLocations.Select(i => i.InventoryId).Contains(locationFrom);
-        if (noLocationInInventory) return false;
 
         if (inventoryWithAskedItem.total_available - amountToTransfer < 0) return false;
 
@@ -183,6 +196,8 @@ public class TransferDBStorage : ITransferStorage
         notEnoughItems,
         wrongId,
         transferNotFound,
-        possible
+        possible,
+        ToInventoryNotExsists,
+        FromInventoryNotExsists
     }
 }
