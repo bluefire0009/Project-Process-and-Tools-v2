@@ -27,9 +27,11 @@ public class ItemsDBStorage : IItemStorage
         if (uid == "") return false;
 
         Item? itemInDb = await db.Items.FirstOrDefaultAsync(_ => _.Uid == uid);
-        if (itemInDb != null) return false;
+        if (itemInDb == null) return false;
 
-        return false;
+        db.Items.Remove(itemInDb);
+        await db.SaveChangesAsync();
+        return true;
     }
 
     public async Task<Item?> GetItem(string uid)
@@ -55,7 +57,13 @@ public class ItemsDBStorage : IItemStorage
         if (item == null) return false;
         if (uid == "" || item.Uid == "" || uid != item.Uid) return false;
 
-        db.Items.Update(item);
+        Item? itemInDatabase = await db.Items.Where(i => i.Uid == uid).FirstOrDefaultAsync();
+        if (itemInDatabase == null) return false;
+
+        db.Items.Remove(itemInDatabase);
+        await db.SaveChangesAsync();
+
+        db.Items.Add(item);
         await db.SaveChangesAsync();
         return true;
     }

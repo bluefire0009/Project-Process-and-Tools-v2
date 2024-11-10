@@ -114,8 +114,8 @@ public class ItemDBTest
 
     public static IEnumerable<object[]> RemoveItemTestData => new List<object[]>
         {
-            new object[] { new List<Item> {}, 1, false},
-            new object[] { new List<Item> { new Item(){Uid = "P00001"}}, "P00001", false},
+            new object[] { new List<Item> {}, "P00001", false},
+            new object[] { new List<Item> { new Item(){Uid = "P00001"}}, "", false},
             new object[] { new List<Item> { new Item(){Uid = "P00001"}}, "P00000", false},
             new object[] { new List<Item> { new Item(){Uid = "P00001"}}, "P00003", false},
             new object[] { new List<Item> { new Item(){Uid = "P00001"}}, "P00001", true},
@@ -164,9 +164,9 @@ public class ItemDBTest
             new object[] { new List<Item> {}, "P00002", new Item(){Uid = "P00001"},false},
             new object[] { new List<Item> {}, "P00001", null,false},
             new object[] { new List<Item> {}, "", new Item(){Uid = "P00001"},false},
-            new object[] { new List<Item> {}, "", new Item(){Uid = "P00001"},false},
+            new object[] { new List<Item> {}, "P00001", new Item(){Uid = "P00001"},false},
             new object[] { new List<Item> {new Item(){Uid = "P00001"}}, "P00001", new Item(){Uid = "P00002"}, false},
-            new object[] { new List<Item> {new Item(){Uid = "P00001"}}, "P00001", new Item(){Uid = "P00001", Code = "ABC"}, true},
+            new object[] { new List<Item> {new Item(){Uid = "P00001", Code="123"}}, "P00001", new Item(){Uid = "P00001", Code = "ABC"}, true},
         };
     [TestMethod]
     [DynamicData(nameof(UpdateItemTestData), DynamicDataSourceType.Property)]
@@ -185,5 +185,50 @@ public class ItemDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+    }
+
+    public static IEnumerable<object[]> GetItemInventoriesTestData => new List<object[]>
+        {
+            new object[] { new List<Item> {new(){Uid = "P00001"}}, new List<Item> {new(){Uid = "P000001", SupplierId = 1}, new(){Uid = "P000002", SupplierId = 1}, new(){Uid = "P000003", SupplierId = 1}}, "P00001"},
+            new object[] { new List<Item> {new(){Uid = "P00001"}}, null, "P00000"},
+            new object[] { new List<Item> {new(){Uid = "P00001"}}, null, ""},
+            new object[] { new List<Item> {new(){Uid = "P00002"}}, new List<Item> {new(){Uid = "P000001", SupplierId = 1}, new(){Uid = "P000002", SupplierId = 1}, new(){Uid = "P000003", SupplierId = 1}}, "P00002"},
+        };
+    [TestMethod]
+    [DynamicData(nameof(GetItemInventoriesTestData), DynamicDataSourceType.Property)]
+    public void TestGetItemInventories(List<Item> items, List<Inventory> inventories, string soughtId)
+    {
+        // Arrange
+        foreach (Item item in items)
+        {
+            db.Items.Add(item);
+            db.SaveChanges();
+        }
+        if (inventories != null)
+        {
+            foreach (Inventory inventory in inventories)
+            {
+                db.Inventories.Add(inventory);
+                db.SaveChanges();
+            }
+        }
+        ItemsDBStorage storage = new(db);
+
+        // Act
+        List<Inventory> result = storage.GetItemInventory(soughtId).Result.ToList();
+
+
+        // Assert
+        for (int inventoriesIterator = 0; inventoriesIterator < result.Count; inventoriesIterator++)
+        {
+            Assert.IsTrue(result[inventoriesIterator].Id == inventories[inventoriesIterator].Id);
+            Assert.IsTrue(result[inventoriesIterator].ItemId == inventories[inventoriesIterator].ItemId);
+            Assert.IsTrue(result[inventoriesIterator].Description == inventories[inventoriesIterator].Description);
+            Assert.IsTrue(result[inventoriesIterator].ItemReference == inventories[inventoriesIterator].ItemReference);
+        }
+        if (result.Count == 0 && result != null)
+            Assert.IsTrue(inventories != null);
+        if (result == null)
+            Assert.IsTrue(inventories == null);
     }
 }
