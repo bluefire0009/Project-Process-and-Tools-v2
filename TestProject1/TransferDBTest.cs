@@ -26,7 +26,7 @@ public class TransferDBTest
         };
     [TestMethod]
     [DynamicData(nameof(TransfersTestData), DynamicDataSourceType.Property)]
-    public async void TestGetAll(List<Transfer> transfers)
+    public void TestGetAll(List<Transfer> transfers)
     {
         // Arrange
         foreach (Transfer transfer in transfers)
@@ -43,19 +43,7 @@ public class TransferDBTest
         Assert.IsTrue(result.Count == transfers.Count);
         for (int transferIterator = 0; transferIterator < result.Count; transferIterator++)
         {
-            Assert.IsTrue(result[transferIterator].Id == transfers[transferIterator].Id);
-            Assert.IsTrue(result[transferIterator].Reference == transfers[transferIterator].Reference);
-            Assert.IsTrue(result[transferIterator].TransferFrom == transfers[transferIterator].TransferFrom);
-            Assert.IsTrue(result[transferIterator].TransferTo == transfers[transferIterator].TransferTo);
-            Assert.IsTrue(result[transferIterator].TransferStatus == transfers[transferIterator].TransferStatus);
-            for (int itemIterator = 0; itemIterator < result[transferIterator].Items.Count; itemIterator++)
-            {
-                Assert.IsTrue(result[transferIterator].Items[itemIterator].ItemUid == transfers[transferIterator].Items[itemIterator].ItemUid);
-                Assert.IsTrue(result[transferIterator].Items[itemIterator].TransferId == transfers[transferIterator].Items[itemIterator].TransferId);
-                Assert.IsTrue(result[transferIterator].Items[itemIterator].Amount == transfers[transferIterator].Items[itemIterator].Amount);
-            }
-            Assert.IsTrue(result[transferIterator].CreatedAt == transfers[transferIterator].CreatedAt);
-            Assert.IsTrue(result[transferIterator].UpdatedAt == transfers[transferIterator].UpdatedAt);
+            Assert.IsTrue(result[transferIterator].Equals(transfers[transferIterator]));
         }
     }
 
