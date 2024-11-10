@@ -93,6 +93,10 @@ public class ItemLineDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.ItemLines.Contains(itemline));
+        if (expectedResult == false)
+            Assert.IsTrue(!db.ItemLines.Contains(itemline));
     }
 
     [TestMethod]
@@ -138,6 +142,10 @@ public class ItemLineDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.ItemLines.Count() == itemlines.Count -1);
+        if (expectedResult == false)
+            Assert.IsTrue(db.ItemLines.Count() == itemlines.Count);
     }
 
     [TestMethod]
@@ -185,6 +193,10 @@ public class ItemLineDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.ItemLines.Contains(updatedItemLine));
+        if (expectedResult == false)
+            Assert.IsTrue(!db.ItemLines.Contains(updatedItemLine));
     }
 
     public static IEnumerable<object[]> GetItemLineInventoriesTestData => new List<object[]>
