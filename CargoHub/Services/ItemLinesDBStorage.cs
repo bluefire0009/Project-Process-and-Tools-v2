@@ -60,11 +60,9 @@ public class ItemLinesDBStorage : IItemLineStorage
         ItemLine? itemLineInDatabase = await db.ItemLines.Where(i => i.Id == id).FirstOrDefaultAsync();
         if (itemLineInDatabase == null) return false;
 
-        db.ItemLines.Remove(itemLineInDatabase);
+        db.ItemLines.Update(itemLineInDatabase);
         await db.SaveChangesAsync();
 
-        db.ItemLines.Add(itemLine);
-        await db.SaveChangesAsync();
         return true;
     }
 }
