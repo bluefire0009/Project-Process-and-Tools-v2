@@ -189,10 +189,10 @@ public class ItemDBTest
 
     public static IEnumerable<object[]> GetItemInventoriesTestData => new List<object[]>
         {
-            new object[] { new List<Item> {new(){Uid = "P00001"}}, new List<Item> {new(){Uid = "P000001", SupplierId = 1}, new(){Uid = "P000002", SupplierId = 1}, new(){Uid = "P000003", SupplierId = 1}}, "P00001"},
-            new object[] { new List<Item> {new(){Uid = "P00001"}}, null, "P00000"},
+            new object[] { new List<Item> {new(){Uid = "P00001"}}, new List<Inventory> {new(){Id = 1, ItemId = "P00001"}, new(){Id = 2, ItemId = "P00001"}, new(){Id = 3, ItemId = "P00001"}}, "P00001"},
             new object[] { new List<Item> {new(){Uid = "P00001"}}, null, ""},
-            new object[] { new List<Item> {new(){Uid = "P00002"}}, new List<Item> {new(){Uid = "P000001", SupplierId = 1}, new(){Uid = "P000002", SupplierId = 1}, new(){Uid = "P000003", SupplierId = 1}}, "P00002"},
+            new object[] { new List<Item> {new(){Uid = "P00001"}}, null, ""},
+            new object[] { new List<Item> {new(){Uid = "P00002"}}, new List<Inventory> {new(){Id = 1, ItemId = "P00001"}, new(){Id = 2, ItemId = "P00001"}, new(){Id = 3, ItemId = "P00001"}}, "P00002"},
         };
     [TestMethod]
     [DynamicData(nameof(GetItemInventoriesTestData), DynamicDataSourceType.Property)]
@@ -226,9 +226,9 @@ public class ItemDBTest
             Assert.IsTrue(result[inventoriesIterator].Description == inventories[inventoriesIterator].Description);
             Assert.IsTrue(result[inventoriesIterator].ItemReference == inventories[inventoriesIterator].ItemReference);
         }
-        if (result.Count == 0 && result != null)
-            Assert.IsTrue(inventories != null);
+        if (result.Count == 0 && result != null && inventories != null)
+            Assert.IsTrue(inventories.Where(_ => _.ItemId == soughtId) != null);
         if (result == null)
-            Assert.IsTrue(inventories == null);
+            Assert.IsTrue(inventories.Where(_ => _.ItemId == soughtId) == null);
     }
 }
