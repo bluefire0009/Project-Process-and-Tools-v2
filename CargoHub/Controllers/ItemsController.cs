@@ -3,7 +3,7 @@ using CargoHub.Models;
 using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
 
-[Route("/api/v2/suppliers")]
+[Route("/api/v2/items")]
 // Doesn't have to be covered because we have integration tests for that
 [ExcludeFromCodeCoverage]
 public class ItemsController : Controller {
