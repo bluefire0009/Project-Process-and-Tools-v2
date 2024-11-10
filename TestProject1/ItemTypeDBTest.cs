@@ -93,6 +93,10 @@ public class ItemTypeDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if(expectedResult == true)
+            Assert.IsTrue(db.ItemTypes.Contains(itemtype));
+        if(expectedResult == false)
+            Assert.IsTrue(!db.ItemTypes.Contains(itemtype));
     }
 
     [TestMethod]
@@ -110,6 +114,7 @@ public class ItemTypeDBTest
         // Assert
         Assert.IsTrue(firstAdd == true);
         Assert.IsTrue(secondAdd == false);
+        Assert.IsTrue(db.ItemTypes.Count() == 1);
     }
 
     public static IEnumerable<object[]> RemoveItemTypeTestData => new List<object[]>
@@ -138,6 +143,10 @@ public class ItemTypeDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if(expectedResult == true)
+            Assert.IsTrue(db.ItemTypes.Count() == itemtypes.Count -1);
+        if(expectedResult == false)
+            Assert.IsTrue(db.ItemTypes.Count() == itemtypes.Count);
     }
 
     [TestMethod]
@@ -185,6 +194,10 @@ public class ItemTypeDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if(expectedResult == true)
+            Assert.IsTrue(db.ItemTypes.Contains(updatedItemType));
+        if(expectedResult == false)
+            Assert.IsTrue(!db.ItemTypes.Contains(updatedItemType));
     }
 
     public static IEnumerable<object[]> GetItemTypeInventoriesTestData => new List<object[]>
