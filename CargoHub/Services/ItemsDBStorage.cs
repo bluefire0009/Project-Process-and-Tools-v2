@@ -60,11 +60,9 @@ public class ItemsDBStorage : IItemStorage
         Item? itemInDatabase = await db.Items.Where(i => i.Uid == uid).FirstOrDefaultAsync();
         if (itemInDatabase == null) return false;
 
-        db.Items.Remove(itemInDatabase);
+        db.Items.Update(itemInDatabase);
         await db.SaveChangesAsync();
 
-        db.Items.Add(item);
-        await db.SaveChangesAsync();
         return true;
     }
 }
