@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CargoHub.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20241111115455_updateCaseSensitiveName2")]
-    partial class updateCaseSensitiveName2
+    [Migration("20241111152347_fixMergeConflict")]
+    partial class fixMergeConflict
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -88,6 +88,21 @@ namespace CargoHub.Migrations
                     b.Property<string>("ItemReference")
                         .HasColumnType("TEXT");
 
+                    b.Property<int>("total_allocated")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_available")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_expected")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_on_hand")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_ordered")
+                        .HasColumnType("INTEGER");
+
                     b.HasKey("Id");
 
                     b.HasIndex("ItemId");
@@ -107,7 +122,7 @@ namespace CargoHub.Migrations
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("InventoryLocation");
+                    b.ToTable("InventoryLocations");
                 });
 
             modelBuilder.Entity("CargoHub.Models.Item", b =>

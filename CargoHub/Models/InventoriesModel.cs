@@ -13,6 +13,11 @@ public class Inventory
     public string ItemId { get; set; }
     public string? Description { get; set; }
     public string? ItemReference { get; set; }
+    public int total_on_hand { get; set; } = 0;
+    public int total_expected { get; set; } = 0;
+    public int total_ordered { get; set; } = 0;
+    public int total_allocated { get; set; } = 0;
+    public int total_available { get; set; } = 0;
 
     public ICollection<InventoryLocation> InventoryLocations { get; set; } = new List<InventoryLocation>();
 }
