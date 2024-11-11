@@ -14,6 +14,7 @@ namespace CargoHub
             builder.Services.AddScoped<IWarehouseStorage, WarehouseDBStorage>();
             builder.Services.AddScoped<ITransferStorage, TransferDBStorage>();
             builder.Services.AddScoped<ISupplierStorage, SupplierDBStorage>();
+            builder.Services.AddScoped<ILocationStorage, LocationStroage>();
             builder.Services.AddScoped<IItemStorage, ItemsDBStorage>();
 
             builder.Services.AddDbContext<DatabaseContext>(x => x.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));

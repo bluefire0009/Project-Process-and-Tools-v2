@@ -34,6 +34,9 @@ public class LocationStroage : ILocationStorage
         // add location to Locations
         if (location == null) return false;
 
+        Location? locationInDatabase = await DB.Locations.Where(l => l.Id == location.Id).FirstOrDefaultAsync();
+        if (locationInDatabase != null) return false;
+
         await DB.Locations.AddAsync(location);
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;

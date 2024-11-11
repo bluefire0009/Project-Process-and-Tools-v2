@@ -1,0 +1,92 @@
+// Get all warehouses endpoint
+// Expected: Empty list
+Get http://localhost:3000/api/v2/warehouses
+###
+
+
+// Get specific transfer endpoint
+// Expected: 404 response with text "No transfer with id:9999 found"
+Get http://localhost:3000/api/v2/warehouses/9999
+###
+
+
+// Get items in a specific transfer endpoint
+// Expected: 404 response with text "No transfer with id:9999 found"
+Get http://localhost:3000/api/v2/warehouses/9999/locations
+###
+
+
+// Adding a warehouse
+// Expected: 201 response with text $"Added warehouse:{body}"
+Post http://localhost:3000/api/v2/warehouses
+Content-Type: application/json
+
+{"id": 1000000, "code": "GIOMNL90", "name": "Petten longterm hub", "address": "Owenweg 731", "zip": "4615 RB", "city": "Petten", "province": "Noord-Holland", "country": "NL", "ContactName": "Maud Adryaens", "ContactPhone": "+31836 752702", "ContactEmail": "nickteunissen@example.com", "created_at": "2008-02-22 19:55:39", "updated_at": "2009-08-28 23:15:50"}
+###
+
+
+// Adding the same warehouse again
+// Expected: 400 response with text $"Couldn't add warehouse:{body}"
+Post http://localhost:3000/api/v2/warehouses
+Content-Type: application/json
+
+{"id": 1000000, "code": "GIOMNL90", "name": "Petten longterm hub", "address": "Owenweg 731", "zip": "4615 RB", "city": "Petten", "province": "Noord-Holland", "country": "NL", "ContactName": "Maud Adryaens", "ContactPhone": "+31836 752702", "ContactEmail": "nickteunissen@example.com", "created_at": "2008-02-22 19:55:39", "updated_at": "2009-08-28 23:15:50"}
+###
+
+
+// Get all warehouses endpoint
+// Expected: 200 response with the list containing the first added warehouse
+Get http://localhost:3000/api/v2/warehouses
+###
+
+
+// Get specific warehouse endpoint
+// Expected: 200 response with the body of the first added warehouse
+Get http://localhost:3000/api/v2/warehouses/1000000
+###
+
+
+Post http://localhost:3000/api/v2/locations
+Content-Type: application/json
+
+{"Id": 1,"WareHouseId": 1000000,"Code": "A.1.1","Name": "Row: A, Rack: 1, Shelf: 1"}
+###
+Post http://localhost:3000/api/v2/locations
+Content-Type: application/json
+
+{"Id": 2,"WareHouseId": 1000000,"Code": "A.1.2","Name": "Row: A, Rack: 1, Shelf: 2"}
+###
+// Get locations in a specific warehouse endpoint
+// Expected: 200 response with 2 added locations beforehand
+Get http://localhost:3000/api/v2/warehouses/1000000/locations
+###
+
+
+// Updating an unexsisting warehouse
+// Expected: 404 response with text $"No warehouse with id:1000001 in the database"
+Put http://localhost:3000/api/v2/warehouses/1000001
+Content-Type: application/json
+
+{"id": 1000001, "code": "ABCDEF12", "name": "Patten shortterm hub", "address": "Downweg 731", "zip": "1234 AB", "city": "Patten", "province": "Zuid-Holland", "country": "NL", "ContactName": "Maud Adryaens", "ContactPhone": "+31836 752702", "ContactEmail": "nickteunissen@example.com", "created_at": "2008-02-22 19:55:39", "updated_at": "2009-08-28 23:15:50"}
+###
+
+
+// Updating the first warehouse
+// Expected: 200 response with text $"Updated warhouse id:1000000 to:{body}"
+Put http://localhost:3000/api/v2/warehouses/1000000
+Content-Type: application/json
+
+{"id": 1000000, "code": "ABCDEF12", "name": "Patten shortterm hub", "address": "Downweg 731", "zip": "1234 AB", "city": "Patten", "province": "Zuid-Holland", "country": "NL", "ContactName": "Maud Adryaens", "ContactPhone": "+31836 752702", "ContactEmail": "nickteunissen@example.com", "created_at": "2008-02-22 19:55:39", "updated_at": "2009-08-28 23:15:50"}
+###
+
+
+// Trying to delete an unexsisting warehouse
+// Expected: 404 response with text $"No warehouse with id:1000001 in the database"
+Delete http://localhost:3000/api/v2/warehouses/1000001
+###
+
+
+// Deleting the first warehouse
+// Expected: 200 response with text $"Deleted warehouse with id: 1000000"
+Delete http://localhost:3000/api/v2/warehouses/1000000
+###

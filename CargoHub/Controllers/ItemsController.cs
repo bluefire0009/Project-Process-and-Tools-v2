@@ -59,7 +59,7 @@ public class ItemsController : Controller {
         return Ok(totals);
     }
 
-    [HttpPost()]
+    [HttpPost("")]
     public async Task<IActionResult> AddItem([FromBody] Item item) {
         if (item == null) return BadRequest("given Item was null");
 

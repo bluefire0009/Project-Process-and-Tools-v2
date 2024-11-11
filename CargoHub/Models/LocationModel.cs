@@ -10,7 +10,7 @@ public class Location : IEquatable<Location>
     public int Id { get; set; }
 
     [ForeignKey("WareHouseId")]
-    public Warehouse? wareHouse { get; set; }
+    private Warehouse? wareHouse { get; set; } = null;
     public int? WareHouseId { get; set; }
 
     public string? Code { get; set; }

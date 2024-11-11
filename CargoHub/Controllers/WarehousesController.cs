@@ -73,6 +73,6 @@ public class WarehousesController : Controller
         bool updated = await warehouseStorage.updateWarehouse(idToUpdate, updatedWarehouse);
 
         if (!updated) return NotFound($"No warehouse with id:{idToUpdate} in the database");
-        return Ok($"Updated warhouse id:{idToUpdate} to:{updatedWarehouse}");
+        return Ok($"Updated warhouse id:{idToUpdate} to:{JsonConvert.SerializeObject(updatedWarehouse)}");
     }
 }

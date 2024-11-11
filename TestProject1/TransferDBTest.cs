@@ -365,6 +365,10 @@ public class TransferDBTest
         if (visitedObjects.ContainsKey(obj))
             return (T)visitedObjects[obj];
 
+        // Handle strings and primitive types directly, as they don't need deep copying
+        if (obj is string || obj.GetType().IsPrimitive)
+            return obj;
+
         // Create a new instance of the object type
         T copy = (T)Activator.CreateInstance(obj.GetType());
 
