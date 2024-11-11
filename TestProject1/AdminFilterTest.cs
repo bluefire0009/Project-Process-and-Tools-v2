@@ -2,11 +2,13 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Text;
+using System.Diagnostics.CodeAnalysis;
 
 
 
 namespace TestProject1
 {
+    [ExcludeFromCodeCoverage]
     [TestClass]
 
 
