@@ -16,17 +16,17 @@ public class Item : IEquatable<Item>
     public string? ModelNumber { get; set; }
     public string? CommodityCode { get; set; }
 
-    [ForeignKey("ItemLine")]
+    [ForeignKey("Item_Line")]
     public ItemLine? itemLine { get; set; }
-    public int ItemLine { get; set; }
+    public int Item_Line { get; set; }
 
-    [ForeignKey("ItemGroup")]
+    [ForeignKey("Item_Group")]
     public ItemGroup? itemGroup { get; set; }
-    public int ItemGroup { get; set; }
+    public int Item_Group { get; set; }
 
-    [ForeignKey("ItemType")]
+    [ForeignKey("Item_Type")]
     public ItemType? itemType { get; set; }
-    public int ItemType { get; set; }
+    public int Item_Type { get; set; }
 
     public int UnitPurchaseQuantity { get; set; }
     public int UnitOrderQuantity { get; set; }

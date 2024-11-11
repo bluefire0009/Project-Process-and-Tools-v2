@@ -126,13 +126,13 @@ namespace CargoHub.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ItemGroup")
+                    b.Property<int>("Item_Group")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ItemLine")
+                    b.Property<int>("Item_Line")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ItemType")
+                    b.Property<int>("Item_Type")
                         .HasColumnType("INTEGER");
 
                     b.Property<string>("ModelNumber")
@@ -167,11 +167,11 @@ namespace CargoHub.Migrations
 
                     b.HasKey("Uid");
 
-                    b.HasIndex("ItemGroup");
+                    b.HasIndex("Item_Group");
 
-                    b.HasIndex("ItemLine");
+                    b.HasIndex("Item_Line");
 
-                    b.HasIndex("ItemType");
+                    b.HasIndex("Item_Type");
 
                     b.HasIndex("SupplierId");
 
@@ -643,19 +643,19 @@ namespace CargoHub.Migrations
                 {
                     b.HasOne("CargoHub.Models.ItemGroup", "itemGroup")
                         .WithMany()
-                        .HasForeignKey("ItemGroup")
+                        .HasForeignKey("Item_Group")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("CargoHub.Models.ItemLine", "itemLine")
                         .WithMany()
-                        .HasForeignKey("ItemLine")
+                        .HasForeignKey("Item_Line")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
                     b.HasOne("CargoHub.Models.ItemType", "itemType")
                         .WithMany()
-                        .HasForeignKey("ItemType")
+                        .HasForeignKey("Item_Type")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
