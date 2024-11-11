@@ -60,7 +60,13 @@ public class OrderItems
 
     [ForeignKey("ItemUid")]
     public Item? item { get; set; }
-    public int ItemUid { get; set; }
+    public string ItemUid { get; set; }
 
     public int Amount { get; set; }
+
+    public OrderItems(string ItemUid, int amount)
+    {
+        this.ItemUid = ItemUid;
+        this.Amount = amount;
+    }
 }

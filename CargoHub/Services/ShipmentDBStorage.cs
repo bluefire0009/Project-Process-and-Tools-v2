@@ -72,7 +72,7 @@ public class ShipmnetStorage : IShipmentStorage
 
         // Get items with the difference in Amount between list1 and list2, including new items
         // this gives a list of items where the amount is how to amount increased / decreased compared
-        // to the corrent list of items ex: Item1 = (Id:1, Amount:-10) means that item with id 1 decreasd abount by 10
+        // to the corrent list of items ex: Item1 = (Id:1, Amount:-10) means that item with id 1 decreasd amount by 10
         // for example old item1 = (Id:1, Amount:20) new item1 = (Id:1, Amount: 10)
         var itemsToUpdate = list2
             .GroupJoin(
@@ -103,10 +103,63 @@ public class ShipmnetStorage : IShipmentStorage
         if (ShipmentStatus == null || ShipmentType == null) return false;
 
 
-        foreach (var item in itemsToUpdate)
+        foreach (ShipmentItems item in itemsToUpdate)
         {
-            
+            // get inventory for the current item
+            Inventory? inventory = await DB.Inventories.FirstOrDefaultAsync(x => x.ItemId == item.ItemUid);
+            if (inventory == null) return false;
+
+
+            if (ShipmentStatus == "Transit")
+            {
+                // if shipment is in transit during change and its Incomming then change total expected
+                if (ShipmentType == "I")
+                {
+                    inventory.total_expected += item.Amount;
+                }
+                // if its Outgoing then change total available and total on hand
+                else if (ShipmentType == "O")
+                {
+                    inventory.total_available += item.Amount;
+                    inventory.total_on_hand += item.Amount;
+                }
+            }
+            else if (ShipmentStatus == "Delivered")
+            {
+                // if the shipment is already delivered then change the total_on_hand and total_available
+                // invert the amount if the shipment was Outgoing
+                if (ShipmentType == "O")
+                {
+                    item.Amount *= -1;
+                }
+                // example item1 = (Id:1, amount:10) and Incomming means we have 10 more items than before
+                // otherwise if it is Outgoing it means we have 10 less items than before
+                inventory.total_available += item.Amount;
+                inventory.total_on_hand += item.Amount;
+            }
+            else if (ShipmentStatus == "Pending")
+            {
+                // if the shipment is still pending and Incomming then total_expected changes
+                if (ShipmentType == "I")
+                {
+                    inventory.total_expected += item.Amount;
+                }
+                // if the shipment is still pending and Outgoing then change the total_allocated and total_available
+                else if (ShipmentType == "O")
+                {
+                    inventory.total_allocated += item.Amount;
+                    inventory.total_available += item.Amount;
+                }
+            }
+            else
+            {
+                // if ShipmentStatus is anything else return false
+                return false;
+            }
+
         }
+        if (await DB.SaveChangesAsync() < 1) return false;
+        return true;
     }
 
     public async Task<bool> DelteShipment(int shipmentId)
@@ -118,10 +171,5 @@ public class ShipmnetStorage : IShipmentStorage
         DB.Shipments.Remove(FoundShipment);
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;
-    }
-
-    private async Task<Inventory> GetInventoryForItem(Item item)
-    {
-        return await DB.Inventory.FirstOrDefaultAsync(x => x)
     }
 }
