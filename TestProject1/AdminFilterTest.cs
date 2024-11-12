@@ -27,7 +27,7 @@ namespace TestProject1
         public void TestAdminFilter_Allowed()
         {
             // Arrange
-            var filterContext = CreateContextWithSession("Admin");
+            var filterContext = CreateContextWithSession("Admin", "a1b2c3d4e5");
 
             var filter = new AdminOnly();
 
@@ -43,7 +43,35 @@ namespace TestProject1
         public void TestAdminFilter_Unauthorized()
         {
             // Arrange
-            var filterContext = CreateContextWithSession("User"); 
+            var filterContext = CreateContextWithSession("User", "WrongKey"); 
+            var filter = new AdminOnly();
+
+            // Act
+            filter.OnAuthorization(filterContext);
+
+            // Assert
+            Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
+        }
+         // Test Method for Unauthorized access non admin user with admin key
+        [TestMethod]
+        public void TestAdminFilter_WrongUser_AdminKey()
+        {
+            // Arrange
+            var filterContext = CreateContextWithSession("User", "a1b2c3d4e5"); 
+            var filter = new AdminOnly();
+
+            // Act
+            filter.OnAuthorization(filterContext);
+
+            // Assert
+            Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
+        }
+        // Test Method for Unauthorized access
+        [TestMethod]
+        public void TestAdminFilter_AdminWrongKey_UserKey()
+        {
+            // Arrange
+            var filterContext = CreateContextWithSession("Admin", "wrongkey"); 
             var filter = new AdminOnly();
 
             // Act
@@ -53,8 +81,9 @@ namespace TestProject1
             Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
         }
 
+
         // Method to Create FilterContext with a Session
-        private AuthorizationFilterContext CreateContextWithSession(string adminStatus)
+        private AuthorizationFilterContext CreateContextWithSession(string adminStatus, string ApiKey)
         {
             // Create a new HttpContext
             var httpContext = new DefaultHttpContext();
@@ -62,6 +91,8 @@ namespace TestProject1
 
             // setting "AdminStatus" in the session
             httpContext.Session.SetString("AdminStatus", adminStatus);
+            //Setting "ApiKey" in the session
+            httpContext.Session.SetString("ApiKey",ApiKey);
 
             // Create ActionContext with HttpContext
             var actionContext = new ActionContext(httpContext, new Microsoft.AspNetCore.Routing.RouteData(), new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());

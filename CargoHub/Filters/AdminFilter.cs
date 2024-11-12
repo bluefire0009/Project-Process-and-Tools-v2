@@ -8,10 +8,15 @@ public class AdminOnly : Attribute, IAuthorizationFilter
     public void OnAuthorization(AuthorizationFilterContext actionContext)
     {
          var admin = actionContext.HttpContext.Session.GetString("AdminStatus");
+         //Full authorization
+         var AdminKey = "a1b2c3d4e5";
+         
+         var ApiKey = actionContext.HttpContext.Session.GetString("ApiKey");
 
-         if(admin!= "Admin")
+
+         if(admin!= "Admin" || ApiKey!= AdminKey)
          {
-          Console.WriteLine(admin);
+          Console.WriteLine(admin, ApiKey);
           actionContext.Result = new UnauthorizedResult();
          }
 
