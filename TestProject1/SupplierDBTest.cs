@@ -29,7 +29,7 @@ public class SupplierDBTest
     public void TestGetAll(List<Supplier> suppliers)
     {
         // Arrange
-        foreach(Supplier supplier in suppliers)
+        foreach (Supplier supplier in suppliers)
         {
             db.Suppliers.Add(supplier);
             db.SaveChanges();
@@ -37,11 +37,11 @@ public class SupplierDBTest
         SupplierDBStorage storage = new(db);
 
         // Act
-        List<Supplier> result = storage.getSuppliers().ToList();
+        List<Supplier> result = storage.getSuppliers().Result.ToList();
 
         // Assert
         Assert.IsTrue(result.Count == suppliers.Count);
-        for(int supplierIterator = 0; supplierIterator < result.Count; supplierIterator++)
+        for (int supplierIterator = 0; supplierIterator < result.Count; supplierIterator++)
         {
             Assert.IsTrue(result[supplierIterator].Id == suppliers[supplierIterator].Id);
             Assert.IsTrue(result[supplierIterator].Code == suppliers[supplierIterator].Code);
@@ -72,7 +72,7 @@ public class SupplierDBTest
     public void TestGetSpecific(List<Supplier> suppliers, int soughtId, bool expectedResult)
     {
         // Arrange
-        foreach(Supplier supplier in suppliers)
+        foreach (Supplier supplier in suppliers)
         {
             db.Suppliers.Add(supplier);
             db.SaveChanges();
@@ -112,8 +112,8 @@ public class SupplierDBTest
     public void TestAddSameIdTwice()
     {
         // Arrange
-        Supplier s1 = new(){Id = 1};
-        Supplier s2 = new(){Id = 1};
+        Supplier s1 = new() { Id = 1 };
+        Supplier s2 = new() { Id = 1 };
         SupplierDBStorage storage = new(db);
 
         // Act
@@ -139,7 +139,7 @@ public class SupplierDBTest
     public void TestRemove(List<Supplier> suppliers, int idToRemove, bool expectedResult)
     {
         // Arrange
-        foreach(Supplier supplier in suppliers)
+        foreach (Supplier supplier in suppliers)
         {
             db.Suppliers.Add(supplier);
             db.SaveChanges();
@@ -157,11 +157,11 @@ public class SupplierDBTest
     public void TestRemoveSameTwice()
     {
         // Arrange
-        Supplier s1 = new(){Id = 1};
+        Supplier s1 = new() { Id = 1 };
         db.Suppliers.Add(s1);
         db.SaveChanges();
         SupplierDBStorage storage = new(db);
-        
+
 
         // Act
         bool firstRemove = storage.deleteSupplier(s1.Id).Result;
@@ -178,16 +178,15 @@ public class SupplierDBTest
             new object[] { new List<Supplier> {}, 1, null,false},
             new object[] { new List<Supplier> {}, 0, new Supplier(){Id = 1},false},
             new object[] { new List<Supplier> {}, -1, new Supplier(){Id = 1},false},
+            new object[] { new List<Supplier> {new Supplier(){Id = 1}}, 1, new Supplier(){Id = 2}, false},
             new object[] { new List<Supplier> {new Supplier(){Id = 1}}, 1, new Supplier(){Id = 1, Code = "ABC"}, true},
-            new object[] { new List<Supplier> {new Supplier(){Id = 1}}, 1, new Supplier(){Id = 2}, true},
-        
         };
     [TestMethod]
     [DynamicData(nameof(UpdateSupplierTestData), DynamicDataSourceType.Property)]
     public void TestUpdate(List<Supplier> suppliers, int idToUpdate, Supplier updatedSupplier, bool expectedResult)
     {
         // Arrange
-        foreach(Supplier supplier in suppliers)
+        foreach (Supplier supplier in suppliers)
         {
             db.Suppliers.Add(supplier);
             db.SaveChanges();
@@ -203,23 +202,24 @@ public class SupplierDBTest
 
     public static IEnumerable<object[]> GetSupplierItemsTestData => new List<object[]>
         {
-            new object[] { new List<Supplier> {new(){Id = 1}}, new List<Item> {new(){Uid = 1, SupplierId = 1}, new(){Uid = 2, SupplierId = 1}, new(){Uid = 3, SupplierId = 1}}, 1},        
-            new object[] { new List<Supplier> {new(){Id = 1}}, null, 0},        
-            new object[] { new List<Supplier> {new(){Id = 1}}, null, -1},              
-            new object[] { new List<Supplier> {new(){Id = 2}}, new List<Item> {new(){Uid = 1, SupplierId = 1}, new(){Uid = 2, SupplierId = 1}, new(){Uid = 3, SupplierId = 1}}, 2},        
+            new object[] { new List<Supplier> {new(){Id = 1}}, new List<Item> {new(){Uid = 1, SupplierId = 1}, new(){Uid = 2, SupplierId = 1}, new(){Uid = 3, SupplierId = 1}}, 1},
+            new object[] { new List<Supplier> {new(){Id = 1}}, null, 0},
+            new object[] { new List<Supplier> {new(){Id = 1}}, null, -1},
+            new object[] { new List<Supplier> {new(){Id = 2}}, new List<Item> {new(){Uid = 1, SupplierId = 1}, new(){Uid = 2, SupplierId = 1}, new(){Uid = 3, SupplierId = 1}}, 2},
         };
     [TestMethod]
     [DynamicData(nameof(GetSupplierItemsTestData), DynamicDataSourceType.Property)]
     public void TestGetItems(List<Supplier> suppliers, List<Item> items, int soughtId)
     {
         // Arrange
-        foreach(Supplier supplier in suppliers)
+        foreach (Supplier supplier in suppliers)
         {
             db.Suppliers.Add(supplier);
             db.SaveChanges();
         }
-        if (items != null){
-            foreach(Item item in items)
+        if (items != null)
+        {
+            foreach (Item item in items)
             {
                 db.Items.Add(item);
                 db.SaveChanges();
@@ -233,10 +233,10 @@ public class SupplierDBTest
         // these two statements are here because getSupplierItems COULD TECHNICALLY return a null, not very likely but still
         if (result == null) resultList = new();
         else resultList = result.ToList();
-        
+
 
         // Assert
-        for(int itemsIterator = 0; itemsIterator < resultList.Count; itemsIterator++)
+        for (int itemsIterator = 0; itemsIterator < resultList.Count; itemsIterator++)
         {
             Assert.IsTrue(resultList[itemsIterator].Uid == items[itemsIterator].Uid);
             Assert.IsTrue(resultList[itemsIterator].Code == items[itemsIterator].Code);
@@ -258,7 +258,7 @@ public class SupplierDBTest
         }
         if (resultList.Count == 0 && result != null)
             Assert.IsTrue(items != null);
-        if (result == null) 
+        if (result == null)
             Assert.IsTrue(items == null);
     }
 }

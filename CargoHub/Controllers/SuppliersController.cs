@@ -17,7 +17,7 @@ public class SuppliersController : Controller
     [HttpGet("")]
     public async Task<IActionResult> GetAllSuppliers()
     {
-        List<Supplier> suppliers = supplierStorage.getSuppliers().ToList();
+        List<Supplier> suppliers = (await supplierStorage.getSuppliers()).ToList();
         return Ok(suppliers);
     }
 
@@ -58,7 +58,7 @@ public class SuppliersController : Controller
     {
         if (id <= 0) return BadRequest("Invalid id in the url");
         bool deleted = await supplierStorage.deleteSupplier(id);
-        
+
         if (!deleted) return NotFound($"No supplier with id:{id} in the database");
         return Ok($"Deleted supplier with id: {id}");
     }
@@ -70,7 +70,7 @@ public class SuppliersController : Controller
         if (updatedSupplier == null) BadRequest("updatedSupplier cannot be null");
 
         bool updated = await supplierStorage.updateSupplier(idToUpdate, updatedSupplier);
-        
+
         if (!updated) return NotFound($"No supplier with id:{idToUpdate} in the database");
         return Ok($"Updated supplier id:{idToUpdate} to:{updatedSupplier}");
     }

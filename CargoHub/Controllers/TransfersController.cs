@@ -17,7 +17,7 @@ public class TransferController : Controller
     [HttpGet("")]
     public async Task<IActionResult> GetAllTransfers()
     {
-        List<Transfer> transfers = transferStorage.getTransfers().ToList();
+        List<Transfer> transfers = (await transferStorage.getTransfers()).ToList();
         return Ok(transfers);
     }
 
@@ -46,7 +46,7 @@ public class TransferController : Controller
     {
         if (id <= 0) return BadRequest("Invalid id in the url");
         bool deleted = await transferStorage.deleteTransfer(id);
-        
+
         if (!deleted) return NotFound($"No transfer with id:{id} in the database");
         return Ok($"Deleted transfer with id: {id}");
     }
@@ -58,7 +58,7 @@ public class TransferController : Controller
         if (updatedTransfer == null) BadRequest("updatedTransfer cannot be null");
 
         bool updated = await transferStorage.updateTransfer(idToUpdate, updatedTransfer);
-        
+
         if (!updated) return NotFound($"No transfer with id:{idToUpdate} in the database");
         return Ok($"Updated transfer id:{idToUpdate} to:{updatedTransfer}");
     }
@@ -68,10 +68,13 @@ public class TransferController : Controller
     {
         if (idToUpdate <= 0) return BadRequest("Invalid id in the url");
 
-        (bool succeded, string message) updated = await transferStorage.commitTransfer(idToUpdate);
-        
-        if (!updated.succeded && updated.message == "notEnoughItems") return BadRequest($"There are not enough items in the location to carry out the transfer");
-        if (!updated.succeded && updated.message == "notFound") return NotFound($"No transfer with id:{idToUpdate} in the database");
+        var updated = await transferStorage.commitTransfer(idToUpdate);
+
+        if (!updated.succeded && updated.message == TransferDBStorage.TransferResult.notEnoughItems) return BadRequest($"There are not enough items in the location to carry out the transfer");
+        if (!updated.succeded && updated.message == TransferDBStorage.TransferResult.transferNotFound) return NotFound($"No transfer with id:{idToUpdate} in the database");
+        if (!updated.succeded && updated.message == TransferDBStorage.TransferResult.FromInventoryNotExsists) return BadRequest($"Inventory to transfer from is not in the database");
+        if (!updated.succeded && updated.message == TransferDBStorage.TransferResult.ToInventoryNotExsists) return BadRequest($"Inventory to transfer to is not in the database");
+
         return Ok($"Committed transfer id:{idToUpdate}");
     }
 }

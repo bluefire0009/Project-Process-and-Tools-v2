@@ -9,10 +9,10 @@ public class TransferDBStorage : ITransferStorage
         this.db = db;
     }
 
-    public IEnumerable<Transfer> getTransfers()
+    public async Task<IEnumerable<Transfer>> getTransfers()
     {
-        IEnumerable<Transfer> transfer = db.Transfers.AsEnumerable();
-        return transfer;
+        List<Transfer> transfers = await db.Transfers.ToListAsync();
+        return transfers;
     }
 
     public async Task<Transfer?> getTransfer(int id)
@@ -26,8 +26,12 @@ public class TransferDBStorage : ITransferStorage
         if (transfer == null) return false;
         if (transfer.Id <= 0) return false;
 
+        // Check that transferLocations are valid
+        if ((await db.Locations.FirstOrDefaultAsync(l => l.Id == transfer.TransferFrom)) == null) return false;
+        if ((await db.Locations.FirstOrDefaultAsync(l => l.Id == transfer.TransferTo)) == null) return false;
+
         // Check if  the composite keys already exsist or if the item is null
-        foreach(TransferItem item in transfer.Items)
+        foreach (TransferItem item in transfer.Items)
         {
             if (item == null) return false;
             bool containsItemUid = await db.TransferItems.Where(i => i.ItemUid == item.ItemUid).FirstOrDefaultAsync() != null;
@@ -39,15 +43,15 @@ public class TransferDBStorage : ITransferStorage
             if (containsDuplicatesKeys) return false;
             // Check if updated item actually exsists in the Items table
             bool itemExsists = db.Items.Select(i => i.Uid).Contains(item.ItemUid);
-            if (!itemExsists) return false; 
+            if (!itemExsists) return false;
             // Check if the TransferId of the item is the same as the transfer it's in
             if (item.TransferId != transfer.Id) return false;
         }
 
-        Transfer? transferInDatabase = await db.Transfers.Where(s => s.Id == transfer.Id).FirstOrDefaultAsync(); 
+        Transfer? transferInDatabase = await db.Transfers.Where(s => s.Id == transfer.Id).FirstOrDefaultAsync();
         if (transferInDatabase != null) return false;
 
-        foreach(TransferItem item in transfer.Items)
+        foreach (TransferItem item in transfer.Items)
         {
             await db.TransferItems.AddAsync(item);
         }
@@ -72,7 +76,7 @@ public class TransferDBStorage : ITransferStorage
             db.TransferItems.Remove(item);
         }
         db.Transfers.Remove(transferInDatabase);
-        
+
         await db.SaveChangesAsync();
         return true;
     }
@@ -80,10 +84,11 @@ public class TransferDBStorage : ITransferStorage
     public async Task<bool> updateTransfer(int idToUpdate, Transfer? updatedTransfer)
     {
         if (updatedTransfer == null) return false;
+        if (updatedTransfer.Id != idToUpdate) return false;
         if (idToUpdate <= 0 || updatedTransfer.Id <= 0) return false;
 
         // Check if  the composite keys already exsist or if the item is null
-        foreach(TransferItem item in updatedTransfer.Items)
+        foreach (TransferItem item in updatedTransfer.Items)
         {
             if (item == null) return false;
             bool containsItemUid = await db.TransferItems.Where(i => i.ItemUid == item.ItemUid).FirstOrDefaultAsync() != null;
@@ -95,7 +100,7 @@ public class TransferDBStorage : ITransferStorage
             if (containsDuplicatesKeys) return false;
             // Check if updated item actually exsists in the Items table
             bool itemExsists = db.Items.Select(i => i.Uid).Contains(item.ItemUid);
-            if (!itemExsists) return false; 
+            if (!itemExsists) return false;
             // Check if the TransferId of the item is the same as the transfer it's in
             if (item.TransferId != updatedTransfer.Id) return false;
         }
@@ -103,12 +108,12 @@ public class TransferDBStorage : ITransferStorage
         Transfer? transferInDatabase = await db.Transfers.Where(t => t.Id == idToUpdate).FirstOrDefaultAsync();
         if (transferInDatabase == null) return false;
 
-        foreach(TransferItem item in transferInDatabase.Items.ToList())
+        foreach (TransferItem item in transferInDatabase.Items.ToList())
         {
             db.TransferItems.Remove(item);
             await db.SaveChangesAsync();
         }
-        foreach(TransferItem item in updatedTransfer.Items)
+        foreach (TransferItem item in updatedTransfer.Items)
         {
             await db.TransferItems.AddAsync(item);
             await db.SaveChangesAsync();
@@ -123,21 +128,77 @@ public class TransferDBStorage : ITransferStorage
         return true;
     }
 
-    public async Task<(bool succeded, string message)> commitTransfer(int id)
+    public async Task<(bool succeded, TransferResult message)> commitTransfer(int id)
     {
-        if (id <= 0) return (false, "wrongId");
+        if (id <= 0) return (false, TransferResult.wrongId);
 
+        // check if the transfer is in the database
         Transfer? transferInDatabase = await db.Transfers.Where(t => t.Id == id).FirstOrDefaultAsync();
-        if (transferInDatabase == null) return (false, "notFound");
+        if (transferInDatabase == null) return (false, TransferResult.transferNotFound);
 
-        
-        
-        return (true,"");
+        // check if there are enough items for the transfer
+        foreach (TransferItem item in transferInDatabase.Items)
+            if ((await checkIfItemTransferPossible(item.ItemUid, transferInDatabase.TransferTo, item.Amount)) == false)
+                return (false, TransferResult.notEnoughItems);
+
+        // carry out the transfer
+        foreach (TransferItem item in transferInDatabase.Items)
+        {
+            Inventory? inventoryWithAskedItem = await db.Inventories.FirstOrDefaultAsync(i => i.ItemId == item.ItemUid);
+            Inventory? inventoryToTransferTo = await db.Inventories.Where(i => i.InventoryLocations.Select(l => l.InventoryId).Contains(transferInDatabase.LocationTo.Id)).FirstOrDefaultAsync();
+            if (inventoryWithAskedItem == null) return (false, TransferResult.FromInventoryNotExsists);
+            if (inventoryToTransferTo == null) return (false, TransferResult.ToInventoryNotExsists);
+
+            // from calculations
+            inventoryWithAskedItem.total_on_hand -= item.Amount;
+            inventoryWithAskedItem.total_expected = inventoryWithAskedItem.total_on_hand + inventoryWithAskedItem.total_ordered;
+            inventoryWithAskedItem.total_available = inventoryWithAskedItem.total_on_hand - inventoryWithAskedItem.total_allocated;
+            // remove the item if the transfer results in total_available lower than 0
+            if(inventoryWithAskedItem.total_available <= 0)
+            {
+                db.InventoryLocations.RemoveRange(inventoryWithAskedItem.InventoryLocations);
+                db.Inventories.Remove(inventoryWithAskedItem);
+                db.SaveChanges();
+            }
+
+            // to calculations
+            inventoryToTransferTo.total_on_hand += item.Amount;
+            inventoryToTransferTo.total_expected = inventoryToTransferTo.total_on_hand + inventoryToTransferTo.total_ordered;
+            inventoryToTransferTo.total_available = inventoryToTransferTo.total_on_hand - inventoryToTransferTo.total_allocated;
+            // add the inventoryLocation if it's the first
+            InventoryLocation ilToAdd = new(){InventoryId=inventoryToTransferTo.Id, LocationId = transferInDatabase.TransferTo};
+            if (!inventoryToTransferTo.InventoryLocations.Any(l => l.LocationId == ilToAdd.LocationId && l.InventoryId == ilToAdd.InventoryId))
+            {
+                inventoryToTransferTo.InventoryLocations.ToList().Add(ilToAdd);
+                inventoryToTransferTo.InventoryLocations.ToArray();
+            }
+            db.InventoryLocations.ToList().Add(ilToAdd);
+            await db.SaveChangesAsync();
+        }
+        transferInDatabase.TransferStatus = "Processed";
+        await db.SaveChangesAsync();
+        return (true, TransferResult.possible);
     }
 
-    private bool checkIfItemTransferPossible(int itemId, int locationFrom, int locationTo)
+    private async Task<bool> checkIfItemTransferPossible(int itemId, int locationTo, int amountToTransfer)
     {
-        int inventoryIdWithAskedItem = 
+        Inventory? inventoryWithAskedItem = await db.Inventories.FirstOrDefaultAsync(i => i.ItemId == itemId);
+        Inventory? inventoryToTransferTo = await db.Inventories.Where(i => i.InventoryLocations.Select(l => l.InventoryId).Contains(locationTo)).FirstOrDefaultAsync();
+        if (inventoryWithAskedItem == null) return false;
+        if (inventoryToTransferTo == null) return false;
+
+        if (inventoryWithAskedItem.total_available - amountToTransfer < 0) return false;
+
         return true;
+    }
+
+    public enum TransferResult
+    {
+        notEnoughItems,
+        wrongId,
+        transferNotFound,
+        possible,
+        ToInventoryNotExsists,
+        FromInventoryNotExsists
     }
 }

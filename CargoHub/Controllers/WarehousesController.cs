@@ -13,11 +13,11 @@ public class WarehousesController : Controller
     {
         this.warehouseStorage = warehouseStorage;
     }
-    
+
     [HttpGet("")]
     public async Task<IActionResult> GetAllWarehouses()
     {
-        List<Warehouse> warehouses = warehouseStorage.getWarehouses().ToList();
+        List<Warehouse> warehouses = (await warehouseStorage.getWarehouses()).ToList();
         return Ok(warehouses);
     }
 
@@ -59,7 +59,7 @@ public class WarehousesController : Controller
     {
         if (id <= 0) return BadRequest("Invalid id in the url");
         bool deleted = await warehouseStorage.deleteWarehouse(id);
-        
+
         if (!deleted) return NotFound($"No warehouse with id:{id} in the database");
         return Ok($"Deleted warehouse with id: {id}");
     }
@@ -71,7 +71,7 @@ public class WarehousesController : Controller
         if (updatedWarehouse == null) BadRequest("updatedWarehouse cannot be null");
 
         bool updated = await warehouseStorage.updateWarehouse(idToUpdate, updatedWarehouse);
-        
+
         if (!updated) return NotFound($"No warehouse with id:{idToUpdate} in the database");
         return Ok($"Updated warhouse id:{idToUpdate} to:{updatedWarehouse}");
     }
