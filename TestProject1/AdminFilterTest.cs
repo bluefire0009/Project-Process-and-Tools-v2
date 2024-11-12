@@ -43,7 +43,7 @@ namespace TestProject1
         public void TestAdminFilter_Unauthorized()
         {
             // Arrange
-            var filterContext = CreateContextWithSession("User", "WrongKey"); 
+            var filterContext = CreateContextWithSession("User", "f6g7h8i9j0"); 
             var filter = new AdminOnly();
 
             // Act
@@ -71,7 +71,7 @@ namespace TestProject1
         public void TestAdminFilter_AdminWrongKey_UserKey()
         {
             // Arrange
-            var filterContext = CreateContextWithSession("Admin", "wrongkey"); 
+            var filterContext = CreateContextWithSession("Admin", "f6g7h8i9j0"); 
             var filter = new AdminOnly();
 
             // Act
