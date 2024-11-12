@@ -6,9 +6,17 @@ public class LocationStroage : ILocationStorage
 {
     DatabaseContext DB;
 
-    public LocationStroage(DatabaseContext db)
+    private readonly int _maxItemsLimit;
+
+    public LocationStroage(DatabaseContext db, IConfiguration configuration)
     {
         DB = db;
+        _maxItemsLimit = configuration.GetValue<int>("MaxResultsLimit");
+    }
+
+    public int MaxItemsLimit()
+    {
+        return _maxItemsLimit;
     }
 
     public async Task<IEnumerable<Location>> GetLocations()

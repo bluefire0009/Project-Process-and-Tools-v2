@@ -14,6 +14,13 @@ public class LocationController : Controller
         Storage = storage;
     }
 
+    [HttpGet("maxRate")]
+    public IActionResult Maxrate()
+    {
+        return Ok(Storage.MaxItemsLimit());
+    }
+
+
     [HttpGet("")]
     public async Task<IActionResult> GetLocations()
     {
