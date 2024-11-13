@@ -18,7 +18,7 @@ public class ItemsDBStorage : IItemStorage
         if (itemInDb != null) return false;
         
         item.CreatedAt = DateTime.Now;
-        item.updatedAt = DateTime.Now;
+        item.UpdatedAt = DateTime.Now;
         await db.Items.AddAsync(item);
         await db.SaveChangesAsync();
         return true;
@@ -62,7 +62,7 @@ public class ItemsDBStorage : IItemStorage
         Item? itemInDatabase = await db.Items.Where(i => i.Uid == uid).FirstOrDefaultAsync();
         if (itemInDatabase == null) return false;
 
-        item.updatedAt = DateTime.Now;
+        item.UpdatedAt = DateTime.Now;
 
         db.Items.Update(itemInDatabase);
         await db.SaveChangesAsync();
