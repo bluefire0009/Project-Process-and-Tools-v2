@@ -11,12 +11,14 @@ public class ItemsDBStorage : IItemStorage
 
     public async Task<bool> AddItem(Item item)
     {
-        if (item == null) return false;
+        if (item != null) return false;
         if (item.Uid == "") return false;
 
         Item? itemInDb = await db.Items.FirstOrDefaultAsync(_ => _.Uid == item.Uid);
         if (itemInDb != null) return false;
-
+        
+        item.CreatedAt = DateTime.Now;
+        item.updatedAt = DateTime.Now;
         await db.Items.AddAsync(item);
         await db.SaveChangesAsync();
         return true;
@@ -59,6 +61,8 @@ public class ItemsDBStorage : IItemStorage
 
         Item? itemInDatabase = await db.Items.Where(i => i.Uid == uid).FirstOrDefaultAsync();
         if (itemInDatabase == null) return false;
+
+        item.updatedAt = DateTime.Now;
 
         db.Items.Update(itemInDatabase);
         await db.SaveChangesAsync();
