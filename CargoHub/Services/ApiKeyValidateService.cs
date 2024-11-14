@@ -1,10 +1,13 @@
-using CargoHub.Models;
+
 using Microsoft.EntityFrameworkCore;
-using System.Linq;
-using System.Threading.Tasks;
+
 using CargoHub.Interface;
+
+using System.Diagnostics.CodeAnalysis;
+
 namespace CargoHub.Services
 {
+    [ExcludeFromCodeCoverage] //Method gets called in the filter. Filter gets tested.
     public class ApiKeyValidationService : IApiKeyValidationInterface
     {
         private readonly DatabaseContext _context;
