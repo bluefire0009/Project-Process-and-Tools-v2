@@ -6,8 +6,7 @@ using CargoHub.Interface;
 using System.Diagnostics.CodeAnalysis;
 namespace CargoHub.Filters
 {
-    //Integration test for admin filter already exsists.
-    [ExcludeFromCodeCoverage]
+    
     public class AdminOnlyFilter : IAsyncActionFilter
     {
         private const string ApiKeyHeader = "Api-Key"; // Header
