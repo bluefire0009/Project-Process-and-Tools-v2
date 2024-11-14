@@ -66,6 +66,34 @@ namespace TestProject1
             // Assert
             Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
         }
+        [TestMethod]
+        //wrong user with Manager key
+        public async Task TestAdminFilter_Admin_ManagerKey()
+        {
+            // Arrange
+            var filterContext = CreateContextWithApiKey("floor_manager_key");
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
+
+            // Act
+            await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
+
+            // Assert
+            Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
+        }
+        [TestMethod]
+        //wrong user with WAREHOUSE key
+        public async Task TestAdminFilter_Admin_WarehouseKey()
+        {
+            // Arrange
+            var filterContext = CreateContextWithApiKey("warehouse_manager_key");
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
+
+            // Act
+            await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
+
+            // Assert
+            Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
+        }
 
        //Create context
         private ActionExecutingContext CreateContextWithApiKey(string apiKey)
@@ -93,7 +121,9 @@ namespace TestProject1
             _apiKeys = new Dictionary<string, string>
             {
                 { "admin_key", "admin" },
-                { "user_key", "user" }
+                { "user_key", "user" },
+                { "floor_manager", "floor_manager_key" },
+                {"warehouse_manager_key", "warehouse_manager"}
             };
         }
 
