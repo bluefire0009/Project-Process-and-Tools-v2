@@ -1,140 +1,109 @@
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using System.Text;
+using CargoHub.Filters;
+using Microsoft.AspNetCore.Mvc.Abstractions;
+using Microsoft.AspNetCore.Routing;
+using CargoHub.Interface;
 using System.Diagnostics.CodeAnalysis;
-
-
 
 namespace TestProject1
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
-
-
-     // Test Method for Admin-Only filter
     public class AdminFilterTest
     {
-       
+        private IApiKeyValidationInterface _apiKeyValidationService;
+
         [TestInitialize]
-        public void setUp()
+        public void SetUp()
         {
-            
+            // Initialize 
+            _apiKeyValidationService = new InMemoryApiKeyValidationService();
         }
 
-        
         [TestMethod]
-        public void TestAdminFilter_Allowed()
+        // valid Api
+        public async Task TestAdminFilter_Allowed()
         {
             // Arrange
-            var filterContext = CreateContextWithSession("Admin", "a1b2c3d4e5");
-
-            var filter = new AdminOnly();
+            var filterContext = CreateContextWithApiKey("admin_key");
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
-            filter.OnAuthorization(filterContext);
+            await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
 
             // Assert
             Assert.IsNull(filterContext.Result);
         }
 
-        // Test Method for Unauthorized access
         [TestMethod]
-        public void TestAdminFilter_Unauthorized()
+        //Invalid api
+        public async Task TestAdminFilter_Unauthorized()
         {
             // Arrange
-            var filterContext = CreateContextWithSession("User", "f6g7h8i9j0"); 
-            var filter = new AdminOnly();
+            var filterContext = CreateContextWithApiKey("invalid_key");
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
-            filter.OnAuthorization(filterContext);
-
-            // Assert
-            Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
-        }
-         // Test Method for Unauthorized access non admin user with admin key
-        [TestMethod]
-        public void TestAdminFilter_WrongUser_AdminKey()
-        {
-            // Arrange
-            var filterContext = CreateContextWithSession("User", "a1b2c3d4e5"); 
-            var filter = new AdminOnly();
-
-            // Act
-            filter.OnAuthorization(filterContext);
-
-            // Assert
-            Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
-        }
-        // Test Method for Unauthorized access
-        [TestMethod]
-        public void TestAdminFilter_AdminWrongKey_UserKey()
-        {
-            // Arrange
-            var filterContext = CreateContextWithSession("Admin", "f6g7h8i9j0"); 
-            var filter = new AdminOnly();
-
-            // Act
-            filter.OnAuthorization(filterContext);
+            await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
 
             // Assert
             Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
         }
 
-
-        // Method to Create FilterContext with a Session
-        private AuthorizationFilterContext CreateContextWithSession(string adminStatus, string ApiKey)
+        [TestMethod]
+        //wrong user with user api
+        public async Task TestAdminFilter_WrongKey()
         {
-            // Create a new HttpContext
+            // Arrange
+            var filterContext = CreateContextWithApiKey("user_key");
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
+
+            // Act
+            await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
+
+            // Assert
+            Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
+        }
+
+       //Create context
+        private ActionExecutingContext CreateContextWithApiKey(string apiKey)
+        {
+          
             var httpContext = new DefaultHttpContext();
-            httpContext.Session = new InMemorySession();
 
-            // setting "AdminStatus" in the session
-            httpContext.Session.SetString("AdminStatus", adminStatus);
-            //Setting "ApiKey" in the session
-            httpContext.Session.SetString("ApiKey",ApiKey);
+            // Add the API key to the request headers
+            httpContext.Request.Headers["Api-Key"] = apiKey;
 
-            // Create ActionContext with HttpContext
-            var actionContext = new ActionContext(httpContext, new Microsoft.AspNetCore.Routing.RouteData(), new Microsoft.AspNetCore.Mvc.Abstractions.ActionDescriptor());
-
-            // Return AuthorizationFilterContext
-            return new AuthorizationFilterContext(actionContext, new IFilterMetadata[] { });
+           
+            var actionContext = new ActionContext(httpContext, new RouteData(), new ActionDescriptor());
+            return new ActionExecutingContext(actionContext, new IFilterMetadata[] { }, new Dictionary<string, object>(), new object());
         }
     }
 
     
-    public class InMemorySession : ISession
-{
-    private readonly Dictionary<string, byte[]> _storage = new Dictionary<string, byte[]>();
-
-    public string Id => Guid.NewGuid().ToString();
-
-    public bool IsAvailable => true;
-
-    // Property for keys in the session
-    public IEnumerable<string> Keys => _storage.Keys;
-
-    public void Clear() => _storage.Clear();
-
-    public Task CommitAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
-
-    public Task LoadAsync(CancellationToken cancellationToken = default) => Task.CompletedTask;
-
-    public void Remove(string key) => _storage.Remove(key);
-
-    public void Set(string key, byte[] value) => _storage[key] = value;
-
-    public bool TryGetValue(string key, out byte[] value) => _storage.TryGetValue(key, out value);
-
-    public string GetString(string key)
+    public class InMemoryApiKeyValidationService : IApiKeyValidationInterface
     {
-        if (_storage.TryGetValue(key, out byte[] value))
-        {
-            return Encoding.UTF8.GetString(value);
-        }
-        return null;
-    }
+        private readonly Dictionary<string, string> _apiKeys;
 
-    public void SetString(string key, string value) => Set(key, Encoding.UTF8.GetBytes(value));
-}
+        public InMemoryApiKeyValidationService()
+        {
+            // Api keys
+            _apiKeys = new Dictionary<string, string>
+            {
+                { "admin_key", "admin" },
+                { "user_key", "user" }
+            };
+        }
+
+        // Check if the API key is valid and has the admin type
+        public async Task<bool> IsValidAdminApiKeyAsync(string apiKey)
+        {
+          
+            await Task.CompletedTask;
+
+            return _apiKeys.ContainsKey(apiKey) && _apiKeys[apiKey] == "admin";
+        }
+    }
 }

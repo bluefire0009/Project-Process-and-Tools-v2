@@ -1,27 +1,48 @@
-using System.Linq.Expressions;
+using CargoHub.Services;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
-using Microsoft.EntityFrameworkCore.Metadata.Internal;
-
-public class AdminOnly : Attribute, IAuthorizationFilter
+using System.Threading.Tasks;
+using CargoHub.Interface;
+namespace CargoHub.Filters
 {
-    public void OnAuthorization(AuthorizationFilterContext actionContext)
+    
+    public class AdminOnlyFilter : IAsyncActionFilter
     {
-         var admin = actionContext.HttpContext.Session.GetString("AdminStatus");
-         //Full authorization
-         var AdminKey = "a1b2c3d4e5";
-         
-         var ApiKey = actionContext.HttpContext.Session.GetString("ApiKey");
+        private const string ApiKeyHeader = "Api-Key"; // Header
+        private readonly IApiKeyValidationInterface _apiKeyValidationService;
 
-
-         if(admin!= "Admin" || ApiKey!= AdminKey)
-         {
-          Console.WriteLine(admin, ApiKey);
-          actionContext.Result = new UnauthorizedResult();
-         }
+        
+        public AdminOnlyFilter(IApiKeyValidationInterface apiKeyValidationService)
+        {
+            _apiKeyValidationService = apiKeyValidationService;
+        }
 
        
-        
+        public async Task OnActionExecutionAsync(ActionExecutingContext context, ActionExecutionDelegate next)
+        {
+            // Retrieve the API key from the request header
+            if (!context.HttpContext.Request.Headers.TryGetValue(ApiKeyHeader, out var apiKey))
+            {
+                context.Result = new UnauthorizedResult(); // Missing API key, return 401 Unauthorized
+                return;
+            }
+
+            // Using ApiKeyValidate Service
+            if (!await _apiKeyValidationService.IsValidAdminApiKeyAsync(apiKey))
+            {
+                context.Result = new UnauthorizedResult(); // Invalid API key, return 401 Unauthorized
+                return;
+            }
+
+            // Proceed with program if the key is valid
+            await next();
+        }
     }
 
+    // Define the AdminOnly attribute as a TypeFilter that uses the AdminOnlyFilter
+    public class AdminOnlyAttribute : TypeFilterAttribute
+    {
+       
+        public AdminOnlyAttribute() : base(typeof(AdminOnlyFilter)) { }
+    }
 }
