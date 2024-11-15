@@ -13,14 +13,17 @@ public class OrderStroage : IOrderStorage
 
     public async Task<IEnumerable<Order>> GetOrders()
     {
-        // return all orders
-        return await DB.Orders.ToListAsync();
+        // Return the first 100 orders, including their items
+        return await DB.Orders
+            .Include(s => s.Items)
+            .Take(100)
+            .ToListAsync();
     }
 
     public async Task<Order?> GetOrder(int orderId)
     {
         // return order by id
-        return await DB.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
+        return await DB.Orders.Include(s => s.Items).FirstOrDefaultAsync(x => x.Id == orderId);
     }
 
     public async Task<IEnumerable<OrderItems>> GetItemsInOrder(int oderId)
@@ -38,24 +41,37 @@ public class OrderStroage : IOrderStorage
 
     // This already exists in the clients controller
     // public Task<IEnumerable<Order>> GetOrdersForClient(int clientId)
-    // {
-    //     throw new NotImplementedException();
-    // }
 
     public async Task<bool> AddOrder(Order order)
     {
         // add order to orders
         if (order == null) return false;
 
-        order.CreatedAt = DateTime.Now;
+        // extract items from order
+        List<OrderItems> orderItems = order.Items.ToList();
 
-        await DB.Orders.AddAsync(order);
+        // make a shipment without items
+        Order OrderWithoutItems = order;
+        OrderWithoutItems.Items = [];
+
+        // give it the correct CreatedAt field
+        OrderWithoutItems.CreatedAt = DateTime.Now;
+        // add the order without items so they can be added by the UpdateItemsInOrder
+        await DB.Orders.AddAsync(OrderWithoutItems);
+
+        // Save to make it available in the DB for the UpdateItemsInShipment
         if (await DB.SaveChangesAsync() < 1) return false;
+
+        if (!await UpdateItemsInOrder(order.Id, orderItems)) return false;
+
         return true;
     }
 
     public async Task<bool> UpdateOrder(int orderId, Order order)
     {
+        // only works if order status doesnt change [FIX THIS LATER]
+
+        // an order can be: {'Pending', 'Packed', 'Shipped', 'Delivered'}
         // update order by id
         if (order == null) return false;
 
@@ -67,6 +83,9 @@ public class OrderStroage : IOrderStorage
         order.Id = orderId;
         // update updated at
         order.UpdatedAt = DateTime.Now;
+
+        // Update the items first
+        await UpdateItemsInOrder(order.Id, order.Items.ToList());
 
         // update exsting order
         DB.Orders.Update(order);
@@ -81,6 +100,10 @@ public class OrderStroage : IOrderStorage
         Order? FoundOrder = await DB.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
         if (FoundOrder == null) return false;
 
+        // first remove the items from the order
+        await UpdateItemsInOrder(FoundOrder.Id, []);
+
+        // then remove the order
         DB.Orders.Remove(FoundOrder);
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;
@@ -100,26 +123,36 @@ public class OrderStroage : IOrderStorage
         // to the corrent list of items ex: Item1 = (Id:1, Amount:-10) means that item with id 1 decreasd amount by 10
         // for example old [item1 = (Id:1, Amount:20)] [new item1 = (Id:1, Amount: 10)]
         var itemsToUpdate = list2
-            .GroupJoin(
-                list1,
-                item2 => item2.ItemUid,
-                item1 => item1.ItemUid,
-                (item2, item1Group) => new { item2, item1Group = item1Group.FirstOrDefault() })
-            .Select(x =>
-            {
-                if (x.item1Group != null)
-                {
-                    // If item exists in list1, calculate the difference in Amount
-                    return new OrderItems(x.item2.ItemUid, x.item2.Amount - x.item1Group.Amount);
-                }
-                else
-                {
-                    // If item is new (not found in list1), add the entire Amount
-                    return new OrderItems(x.item2.ItemUid, x.item2.Amount);
-                }
-            })
+    .GroupJoin(
+        list1,
+        item2 => item2.ItemUid,
+        item1 => item1.ItemUid,
+        (item2, item1Group) => new { item2, item1Group = item1Group.FirstOrDefault() })
+    .Select(x =>
+    {
+        if (x.item1Group != null)
+        {
+            // If item exists in list1, calculate the difference in Amount
+            return new OrderItems(x.item2.ItemUid, x.item2.Amount - x.item1Group.Amount);
+        }
+        else
+        {
+            // If item is new (not found in list1), add the entire Amount
+            return new OrderItems(x.item2.ItemUid, x.item2.Amount);
+        }
+    })
+    .ToList();
+
+        // Now add items from list1 that are missing in list2 (those will have negative Amount)
+        var itemsFromList1 = list1
+            .Where(item1 => !list2.Any(item2 => item2.ItemUid == item1.ItemUid))
+            .Select(item1 => new OrderItems(item1.ItemUid, -item1.Amount))
             .ToList();
-        // remove all items form list where amount didnt change
+
+        // Add those missing items from list1 to the update list
+        itemsToUpdate.AddRange(itemsFromList1);
+
+        // Remove items where Amount is 0
         itemsToUpdate.RemoveAll(item => item.Amount == 0);
 
         // get type of order and check if null
@@ -138,8 +171,8 @@ public class OrderStroage : IOrderStorage
             if (OrderStatus == "Delivered" || OrderStatus == "Shipped")
             {
                 // if order is already delivered or shipped the total_available and total_on_hand changes
-                inventory.total_available += item.Amount;
-                inventory.total_on_hand += item.Amount;
+                inventory.total_available -= item.Amount;
+                inventory.total_on_hand -= item.Amount;
             }
             else if (OrderStatus == "Pending")
             {
