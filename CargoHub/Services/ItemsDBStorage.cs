@@ -11,7 +11,7 @@ public class ItemsDBStorage : IItemStorage
 
     public async Task<bool> AddItem(Item item)
     {
-        if (item != null) return false;
+        if (item == null) return false;
         if (item.Uid == "") return false;
 
         Item? itemInDb = await db.Items.FirstOrDefaultAsync(_ => _.Uid == item.Uid);
