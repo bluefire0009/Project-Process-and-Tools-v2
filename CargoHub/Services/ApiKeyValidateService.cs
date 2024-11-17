@@ -18,13 +18,17 @@ using System.Diagnostics.CodeAnalysis;
         }
 
         // Method to validate 
-        public async Task<bool> IsValidAdminApiKeyAsync(string apiKey)
+       
+        public async Task<bool> IsValidApiKeyAsync(string apiKey)
         {
-            // Check value and if is admin
+            // List of valid API key types
+            List<string> validKeyTypes = new List<string> { "floor_manager", "warehouse_manager", "admin" };
+
+            // Check if the key exists in the database with a valid key type
             var exists = await _context.ApiKeys
-                                       .Where(k => k.Key_value == apiKey && k.Key_type == "admin")
+                                       .Where(k => k.Key_value == apiKey && validKeyTypes.Contains(k.Key_type))
                                        .AnyAsync();
 
-            return exists;  // True exist and == admin
+            return exists; // True if it exists with a valid type
         }
     }
