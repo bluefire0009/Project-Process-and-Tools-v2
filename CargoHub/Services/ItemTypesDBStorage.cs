@@ -17,6 +17,8 @@ public class ItemTypesDBStorage : IItemTypeStorage
         ItemType? itemTypeInDb = await db.ItemTypes.FirstOrDefaultAsync(_ => _.Id == itemType.Id);
         if (itemTypeInDb != null) return false;
 
+        itemType.CreatedAt = DateTime.Now;
+        itemType.UpdatedAt = DateTime.Now;
         await db.ItemTypes.AddAsync(itemType);
         await db.SaveChangesAsync();
         return true;
@@ -63,6 +65,7 @@ public class ItemTypesDBStorage : IItemTypeStorage
         db.ItemTypes.Remove(itemTypeInDatabase);
         await db.SaveChangesAsync();
 
+        itemType.UpdatedAt = DateTime.Now;
         db.ItemTypes.Add(itemType);
         await db.SaveChangesAsync();
         return true;
