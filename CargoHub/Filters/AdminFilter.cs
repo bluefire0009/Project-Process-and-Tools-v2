@@ -7,13 +7,13 @@ using System.Diagnostics.CodeAnalysis;
 namespace CargoHub.Filters
 {
     
-    public class ManagerOnlyFilter : IAsyncActionFilter
+    public class AdminOnlyFilter : IAsyncActionFilter
     {
         private const string ApiKeyHeader = "Api-Key"; // Header
         private readonly IApiKeyValidationInterface _apiKeyValidationService;
 
         
-        public ManagerOnlyFilter(IApiKeyValidationInterface apiKeyValidationService)
+        public AdminOnlyFilter(IApiKeyValidationInterface apiKeyValidationService)
         {
             _apiKeyValidationService = apiKeyValidationService;
         }
@@ -40,10 +40,10 @@ namespace CargoHub.Filters
         }
     }
 
-    // Define the ManagerOnly attribute as a TypeFilter that uses the ManagerOnlyFilter
-    public class ManagerOnlyAttribute : TypeFilterAttribute
+    // Define the AdminOnly attribute as a TypeFilter that uses the AdminOnlyFilter
+    public class AdminOnlyAttribute : TypeFilterAttribute
     {
        
-        public ManagerOnlyAttribute() : base(typeof(ManagerOnlyFilter)) { }
+        public AdminOnlyAttribute() : base(typeof(AdminOnlyFilter)) { }
     }
 }

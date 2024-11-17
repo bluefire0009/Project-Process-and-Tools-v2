@@ -22,7 +22,7 @@ using System.Diagnostics.CodeAnalysis;
         public async Task<bool> IsValidApiKeyAsync(string apiKey)
         {
             // List of valid API key types
-            List<string> validKeyTypes = new List<string> { "floor_manager", "warehouse_manager", "admin" };
+            List<string> validKeyTypes = new List<string> { "admin" };
 
             // Check if the key exists in the database with a valid key type
             var exists = await _context.ApiKeys

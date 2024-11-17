@@ -11,7 +11,7 @@ namespace TestProject1
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
-    public class ManagerFilterTest
+    public class AdminFilterTest
     {
         private IApiKeyValidationInterface _apiKeyValidationService;
 
@@ -24,27 +24,26 @@ namespace TestProject1
 
         [TestMethod]
         // valid Api
-        public async Task TestManagerFilter_Allowed()
+        public async Task TestAdminFilter_Allowed()
         {
             // Arrange
-            var filterContext = CreateContextWithApiKey("floor_manager_key");
-            var filter = new ManagerOnlyFilter(_apiKeyValidationService);
+            var filterContext = CreateContextWithApiKey("admin_key");
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
 
             // Assert
-            
             Assert.IsNull(filterContext.Result);
         }
 
         [TestMethod]
         //Invalid api
-        public async Task TestManagerFilter_Unauthorized()
+        public async Task TestAdminFilter_Unauthorized()
         {
             // Arrange
             var filterContext = CreateContextWithApiKey("invalid_key");
-            var filter = new ManagerOnlyFilter(_apiKeyValidationService);
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
@@ -54,12 +53,12 @@ namespace TestProject1
         }
 
         [TestMethod]
-        // User Key
-        public async Task TestManagerFilter_WrongKey()
+        //wrong user with user api
+        public async Task TestAdminFilter_WrongKey()
         {
             // Arrange
             var filterContext = CreateContextWithApiKey("user_key");
-            var filter = new ManagerOnlyFilter(_apiKeyValidationService);
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
@@ -68,32 +67,32 @@ namespace TestProject1
             Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
         }
         [TestMethod]
-        //Admin Key
-        public async Task TestManagerFilter_Manager_ManagerKey()
+        //wrong user with Manager key
+        public async Task TestAdminFilter_Admin_ManagerKey()
         {
             // Arrange
-            var filterContext = CreateContextWithApiKey("admin_key");
-            var filter = new ManagerOnlyFilter(_apiKeyValidationService);
+            var filterContext = CreateContextWithApiKey("floor_manager_key");
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
 
-             // Assert
-            Assert.IsNull(filterContext.Result);
+            // Assert
+            Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
         }
         [TestMethod]
-        //Warehouse Key
-        public async Task TestManagerFilter_Manager_WarehouseKey()
+        //wrong user with WAREHOUSE key
+        public async Task TestAdminFilter_Admin_WarehouseKey()
         {
             // Arrange
             var filterContext = CreateContextWithApiKey("warehouse_manager_key");
-            var filter = new ManagerOnlyFilter(_apiKeyValidationService);
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
 
-             // Assert
-            Assert.IsNull(filterContext.Result);
+            // Assert
+            Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
         }
 
        //Create context
@@ -121,25 +120,20 @@ namespace TestProject1
             // Api keys
             _apiKeys = new Dictionary<string, string>
             {
-                { "admin_key", "admin"},
+                { "admin_key", "admin" },
                 { "user_key", "user" },
-                { "floor_manager_key", "floor_manager" },
+                { "floor_manager", "floor_manager_key" },
                 {"warehouse_manager_key", "warehouse_manager"}
             };
         }
 
-        // Check if the API key is valid and has the Manager type
+        // Check if the API key is valid and has the admin type
         public async Task<bool> IsValidApiKeyAsync(string apiKey)
-        {// List of valid API key types
-            List<string> validKeyTypes = new List<string> { "floor_manager", "warehouse_manager", "admin" };
+        {
           
             await Task.CompletedTask;
 
-            return _apiKeys.ContainsKey(apiKey) && validKeyTypes.Contains(_apiKeys[apiKey]);
-
-            
-
-           
+            return _apiKeys.ContainsKey(apiKey) && _apiKeys[apiKey] == "admin";
         }
     }
 }
