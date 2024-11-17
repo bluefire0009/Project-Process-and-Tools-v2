@@ -2,7 +2,7 @@ using Microsoft.AspNetCore.Mvc;
 using CargoHub.Models;
 using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
-using CargoHub.Filters;
+
 [Route("/api/v2/suppliers")]
 // Doesn't have to be covered because we have integration tests for that
 [ExcludeFromCodeCoverage]
@@ -13,7 +13,7 @@ public class SuppliersController : Controller
     {
         this.supplierStorage = supplierStorage;
     }
-    [ManagerOnly]
+    
     [HttpGet("")]
     public async Task<IActionResult> GetAllSuppliers()
     {
