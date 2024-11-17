@@ -3,11 +3,11 @@ using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
 
-public class ShipmnetStorage : IShipmentStorage
+public class ShipmentStorage : IShipmentStorage
 {
     DatabaseContext DB;
 
-    public ShipmnetStorage(DatabaseContext db)
+    public ShipmentStorage(DatabaseContext db)
     {
         DB = db;
     }
@@ -42,24 +42,21 @@ public class ShipmnetStorage : IShipmentStorage
         // add shipment to shipments
         if (shipment == null) return false;
 
-        // extract items from shipment
+        // extract items from order
         List<ShipmentItems> shipmentItems = shipment.Items.ToList();
 
-        // make a shipment without items
-        Shipment shipmnetWithoutItems = shipment;
-        shipmnetWithoutItems.Items = [];
-
         // give it the correct CreatedAt field
-        shipmnetWithoutItems.CreatedAt = DateTime.Now;
-        // add the shipment without items so they can be added by the UpdateItemsInShipment
-        await DB.Shipments.AddAsync(shipmnetWithoutItems);
+        shipment.CreatedAt = DateTime.Now;
+        // add the shipment
+        await DB.Shipments.AddAsync(shipment);
 
         // Save to make it available in the DB for the UpdateItemsInShipment
         if (await DB.SaveChangesAsync() < 1) return false;
 
-        await UpdateItemsInShipment(shipment.Id, shipmentItems);
+        // update the items with add setting so it adjusts the inventories propperly
+        await UpdateItemsInShipment(shipment.Id, shipmentItems, settings: "add");
 
-        if (await DB.SaveChangesAsync() < 1) return false;
+        // var itms = GetItemsInOrder(order.Id);
         return true;
     }
     public async Task<bool> UpdateShipment(int shipmentId, Shipment shipment)
@@ -71,29 +68,88 @@ public class ShipmnetStorage : IShipmentStorage
         Shipment? FoundShipment = await DB.Shipments.FirstOrDefaultAsync(x => x.Id == shipmentId);
         if (FoundShipment == null) return false;
 
-        // make sure the id doesnt get changed
-        shipment.Id = shipmentId;
+        // first empty the items incase the ShipmentStatus or Shipmenttype changed
+        await UpdateItemsInShipment(shipmentId, []);
+
+        // update orderstatus/type here as it is needed for the UpdateItemsInOrder func
+        FoundShipment.ShipmentStatus = shipment.ShipmentStatus;
+        FoundShipment.ShipmentType = shipment.ShipmentType;
+        await DB.SaveChangesAsync();
+
+        // Update the items first
+        await UpdateItemsInShipment(shipment.Id, shipment.Items.ToList(), settings: "add");
+
         // update updated at
         shipment.UpdatedAt = DateTime.Now;
 
-        // Update the items first
-        await UpdateItemsInShipment(shipment.Id, shipment.Items.ToList());
+        // Update the rest of the existing shipment
+        FoundShipment.SourceId = shipment.SourceId;
+        FoundShipment.OrderDate = shipment.OrderDate;
+        FoundShipment.RequestDate = shipment.RequestDate;
+        FoundShipment.ShipmentDate = shipment.ShipmentDate;
+        FoundShipment.ShipmentType = shipment.ShipmentType;
+        FoundShipment.ShipmentStatus = shipment.ShipmentStatus;
+        FoundShipment.Notes = shipment.Notes;
+        FoundShipment.CarrierCode = shipment.CarrierCode;
+        FoundShipment.CarrierDescription = shipment.CarrierDescription;
+        FoundShipment.ServiceCode = shipment.ServiceCode;
+        FoundShipment.PaymentType = shipment.PaymentType;
+        FoundShipment.TransferMode = shipment.TransferMode;
+        FoundShipment.TotalPackageCount = shipment.TotalPackageCount;
+        FoundShipment.TotalPackageWeight = shipment.TotalPackageWeight;
+        // FoundShipment.CreatedAt = shipment.CreatedAt;
+        // FoundShipment.UpdatedAt = shipment.UpdatedAt;
+        // FoundShipment.Items = shipment.Items;
 
-        // update exsting shipment
-        DB.Shipments.Update(shipment);
 
-        if (await DB.SaveChangesAsync() < 1) return false;
+        // using .Update doesnt work for shipment.Items so I remove and then add the items
+        foreach (var item in FoundShipment.Items)
+        {
+            ShipmentItems? foundItem = DB.ShipmentItems.FirstOrDefault(x => x.Id == item.Id);
+            if (foundItem == null) continue;
+            DB.ShipmentItems.Remove(foundItem);
+        }
+        await DB.SaveChangesAsync();
+
+        foreach (var item in shipment.Items)
+        {
+            var existingItem = await DB.ShipmentItems.FirstOrDefaultAsync(x => x.Id == item.Id);
+            if (existingItem != null)
+            {
+                // Attach existing item to the context if it exists
+                DB.ShipmentItems.Update(item); // Update the existing item
+            }
+            else
+            {
+                // Add new item to the context if it doesn't exist
+                DB.ShipmentItems.Add(item);
+            }
+        }
+        await DB.SaveChangesAsync();
         return true;
     }
 
-    public async Task<bool> UpdateItemsInShipment(int shipmentId, List<ShipmentItems> list2)
+    public async Task<bool> UpdateItemsInShipment(int shipmentId, List<ShipmentItems> list2, string settings = "")
     {
+        // Unique Shipment Types:
+        // { None, 'O', 'I'}
+
+        // Unique Shipment Statuses:
+        // { None, 'Pending', 'Transit', 'Delivered'}
         // check if shipment exists
+        List<ShipmentItems> list1 = new();
         Shipment? CurrentShipment = DB.Shipments.FirstOrDefault(x => x.Id == shipmentId);
         if (CurrentShipment == null) return false;
 
+        if (settings == "add")
+        {
+            list1 = new();
+        }
+        else
+        {
+            list1 = DB.ShipmentItems.Where(x => x.ShipmentId == shipmentId).ToList();
+        }
         // find the shipmentItems for this shipmentId
-        List<ShipmentItems> list1 = DB.ShipmentItems.Where(x => x.ShipmentId == shipmentId).ToList();
 
         // Get items with the difference in Amount between list1 and list2, including new items
         // this gives a list of items where the amount is how to amount increased / decreased compared
@@ -111,12 +167,12 @@ public class ShipmnetStorage : IShipmentStorage
                 if (x.item1Group != null)
                 {
                     // If item exists in list1, calculate the difference in Amount
-                    return new ShipmentItems(x.item2.ItemUid, x.item2.Amount - x.item1Group.Amount);
+                    return new ShipmentItems(x.item2.ItemUid, x.item2.Amount - x.item1Group.Amount, shipmentId);
                 }
                 else
                 {
                     // If item is new (not found in list1), add the entire Amount
-                    return new ShipmentItems(x.item2.ItemUid, x.item2.Amount);
+                    return new ShipmentItems(x.item2.ItemUid, x.item2.Amount, shipmentId);
                 }
             })
             .ToList();
@@ -124,7 +180,7 @@ public class ShipmnetStorage : IShipmentStorage
         // Now add items from list1 that are missing in list2 (those will have negative Amount)
         var itemsFromList1 = list1
             .Where(item1 => !list2.Any(item2 => item2.ItemUid == item1.ItemUid))
-            .Select(item1 => new ShipmentItems(item1.ItemUid, -item1.Amount))
+            .Select(item1 => new ShipmentItems(item1.ItemUid, -item1.Amount, shipmentId))
             .ToList();
 
         // Add those missing items from list1 to the update list
@@ -156,8 +212,8 @@ public class ShipmnetStorage : IShipmentStorage
                 // if its Outgoing then change total available and total on hand
                 else if (ShipmentType == "O")
                 {
-                    inventory.total_available += item.Amount;
-                    inventory.total_on_hand += item.Amount;
+                    inventory.total_available -= item.Amount;
+                    inventory.total_on_hand -= item.Amount;
                 }
             }
             else if (ShipmentStatus == "Delivered")
@@ -184,7 +240,7 @@ public class ShipmnetStorage : IShipmentStorage
                 else if (ShipmentType == "O")
                 {
                     inventory.total_allocated += item.Amount;
-                    inventory.total_available += item.Amount;
+                    inventory.total_available -= item.Amount;
                 }
             }
             else

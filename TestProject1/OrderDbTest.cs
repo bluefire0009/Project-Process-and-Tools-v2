@@ -1,6 +1,8 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using CargoHub.Models;
+using CargoHub.HelperFuctions;
+
 
 namespace TestProject1;
 
@@ -21,7 +23,7 @@ public class OrderDBTest
         PostTestData(db);
     }
 
-    private void PostTestData(DatabaseContext DB)
+    private async void PostTestData(DatabaseContext DB)
     {
         // Fields other than the [Key] can be left empty as they don't matter for the test
         Warehouse warehouse1 = new() { Id = 1 };
@@ -33,7 +35,7 @@ public class OrderDBTest
         Client client1 = new() { Id = 1 };
         DB.Clients.Add(client1);
 
-        Shipment shipment1 = new() { Id = 1 };
+        Shipment shipment1 = new() { Id = 1, OrderId = 1 };
         DB.Shipments.Add(shipment1);
 
         // invenories need total fields for testing item counts
@@ -72,6 +74,7 @@ public class OrderDBTest
             total_available = 5
         };
         DB.Inventories.Add(inventory3);
+        await DB.SaveChangesAsync();
     }
 
     [TestCleanup]
@@ -95,45 +98,134 @@ public class OrderDBTest
             Assert.IsTrue(orderpostsucces);
         }
 
-        Inventory? inventory1 = db.Inventories.FirstOrDefault(x => x.Id == 1);
-        Inventory? inventory2 = db.Inventories.FirstOrDefault(x => x.Id == 2);
-        Inventory? inventory3 = db.Inventories.FirstOrDefault(x => x.Id == 3);
-        Assert.IsNotNull(inventory1);
-        Assert.IsNotNull(inventory2);
-        Assert.IsNotNull(inventory3);
+        List<Inventory> inventories = GetTestInventories();
 
-        Console.WriteLine($"--------------- Inventories for test ------------------");
-        Console.WriteLine($"Total On Hand: {inventory1.total_on_hand}, Total Expected: {inventory1.total_expected}, Total Ordered: {inventory1.total_ordered}, Total Allocated: {inventory1.total_allocated}, Total Available: {inventory1.total_available}");
-        Console.WriteLine($"Total On Hand: {inventory2.total_on_hand}, Total Expected: {inventory2.total_expected}, Total Ordered: {inventory2.total_ordered}, Total Allocated: {inventory2.total_allocated}, Total Available: {inventory2.total_available}");
-        Console.WriteLine($"Total On Hand: {inventory3.total_on_hand}, Total Expected: {inventory3.total_expected}, Total Ordered: {inventory3.total_ordered}, Total Allocated: {inventory3.total_allocated}, Total Available: {inventory3.total_available}");
+        // Assert the amounts in the inventories
+        AssertInventoryAmounts(expectedInventories, inventories);
+    }
 
-        // ---------------Inventories for test------------------
-        // Total On Hand: 80, Total Expected: 0, Total Ordered: 0, Total Allocated: 0, Total Available: 80
-        // Total On Hand: 50, Total Expected: 0, Total Ordered: 0, Total Allocated: 0, Total Available: 50
-        // Total On Hand: 5, Total Expected: 0, Total Ordered: 0, Total Allocated: 0, Total Available: 5
-        // -------------- - Inventories for test------------------
-        // Total On Hand: 100, Total Expected: 0, Total Ordered: 0, Total Allocated: 0, Total Available: 100
-        // Total On Hand: 40, Total Expected: 0, Total Ordered: 0, Total Allocated: 0, Total Available: 40
-        // Total On Hand: 0, Total Expected: 0, Total Ordered: 0, Total Allocated: 0, Total Available: 0
-        // -------------- - Inventories for test------------------
-        // Total On Hand: 100, Total Expected: 0, Total Ordered: 0, Total Allocated: 8, Total Available: 92
-        // Total On Hand: 50, Total Expected: 0, Total Ordered: 15, Total Allocated: 2, Total Available: 33
-        // Total On Hand: 5, Total Expected: 0, Total Ordered: 20, Total Allocated: 0, Total Available: -15
+    [TestMethod]
+    [DynamicData(nameof(TestOrdersData), typeof(OrderDBTest))]
+    public async Task TestGetOrder(List<Order> orders, List<Tuple<int, int, int, int, int>> expectedInventories)
+    {
+        // Arrange && Act
+        OrderStroage storage = new(db);
 
+        foreach (var order in orders)
+        {
+            // add each order and assert that the order has been added
+            bool orderpostsucces = (await storage.AddOrder(order));
+            Assert.IsTrue(orderpostsucces);
+        }
 
+        foreach (var order in orders)
+        {
+            Order? FoundOrder = await storage.GetOrder(order.Id);
+            Assert.IsTrue(FoundOrder != null);
 
-        // Assert
-        // Assert.IsTrue(result.Count() == orders.Count());
+            Assert.IsTrue(FoundOrder == order);
+        }
+    }
 
-        // for (int i = 0; i < orders.Count; i++)
-        // {
-        //     Assert.IsTrue(orders[i].Equals(result[i]));
-        // }
+    [TestMethod]
+    [DynamicData(nameof(TestOrdersData), typeof(OrderDBTest))]
+    public async Task TestGetItemsInOrder(List<Order> orders, List<Tuple<int, int, int, int, int>> expectedInventories)
+    {
+        // Arrange && Act
+        OrderStroage storage = new(db);
+
+        foreach (var order in orders)
+        {
+            // add each order and assert that the order has been added
+            bool orderpostsucces = (await storage.AddOrder(order));
+            Assert.IsTrue(orderpostsucces);
+        }
+
+        foreach (var order in orders)
+        {
+            List<OrderItems?> FoundOrderitems = (await storage.GetItemsInOrder(order.Id)).ToList()!;
+            Assert.IsTrue(FoundOrderitems != null);
+
+            // use this to ignore order of the items
+            Assert.IsTrue(new HashSet<OrderItems>(FoundOrderitems!).SetEquals(order.Items));
+        }
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(TestOrdersData), typeof(OrderDBTest))]
+    public async Task TestGetOrdersInShipments(List<Order> orders, List<Tuple<int, int, int, int, int>> expectedInventories)
+    {
+        // expand this test later when it becomes possible/easy to add multiple orders to a shipment
+        OrderStroage storage = new(db);
+
+        foreach (var order in orders)
+        {
+            // add each order and assert that the order has been added
+            bool orderpostsucces = (await storage.AddOrder(order));
+            Assert.IsTrue(orderpostsucces);
+
+            if (order.Id == 1)
+            {
+                List<int> ordersInShipmetns = (await storage.GetOrdersInShipment(1)).ToList();
+                Assert.IsTrue(ordersInShipmetns.Contains(1));
+            }
+        }
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(TestSingleOrderData), typeof(OrderDBTest))]
+    public async Task TestUpdateOrder(List<Order> orders, List<List<Tuple<int, int, int, int, int>>> ListOfexpectedInventories, List<string> NewOrderStatuses)
+    {
+        // an order can be: {'Pending', 'Packed', 'Shipped', 'Delivered'}
+
+        OrderStroage storage = new(db);
+
+        foreach (var order in orders)
+        {
+            // add each order and assert that the order has been added
+            bool orderpostsucces = (await storage.AddOrder(order));
+            Assert.IsTrue(orderpostsucces);
+        }
+
+        for (int i = 0; i < NewOrderStatuses.Count; i++)
+        {
+            // change orderstatus and assert inventory amounts
+            var NewOrderStatus = NewOrderStatuses[i];
+            var expectedInventories = ListOfexpectedInventories[i];
+
+            // update the order
+            Order ClonedOrder = ObjectCopier.Clone(orders[0]);
+            ClonedOrder.OrderStatus = NewOrderStatus;
+
+            Assert.IsTrue(await storage.UpdateOrder(orders[0].Id, ClonedOrder));
+            // Compare expected inventories to actual inventories
+            AssertInventoryAmounts(expectedInventories, GetTestInventories());
+        }
+    }
+
+    [TestMethod]
+    [DynamicData(nameof(TestOrdersData), typeof(OrderDBTest))]
+    public async Task TestDeleteOrder(List<Order> orders, List<Tuple<int, int, int, int, int>> expectedInventories)
+    {
+        OrderStroage storage = new(db);
+
+        foreach (var order in orders)
+        {
+            // add each order and assert that the order has been added
+            bool orderpostsucces = (await storage.AddOrder(order));
+            Assert.IsTrue(orderpostsucces);
+        }
+
+        foreach (var order in orders)
+        {
+            // add each order and assert that the order has been added
+            Assert.IsTrue(await storage.DelteOrder(order.Id));
+        }
     }
 
 
     public static IEnumerable<object[]> TestOrdersData => new List<object[]>
-{
+    {
     new object[]
     {
         // First test order
@@ -162,7 +254,7 @@ public class OrderDBTest
                 UpdatedAt = DateTime.Parse("1971-11-27T14:25:07Z"),
                 Items = new List<OrderItems>
                 {
-                    new OrderItems("P000001", 20)
+                    new OrderItems("P000001", 20, 1)
                 }
             }
         },
@@ -201,14 +293,14 @@ public class OrderDBTest
                 UpdatedAt = DateTime.Parse("1980-05-16T11:00:00Z"),
                 Items = new List<OrderItems>
                 {
-                    new OrderItems("P000002", 10),
-                    new OrderItems("P000003", 5)
+                    new OrderItems("P000002", 10, 2),
+                    new OrderItems("P000003", 5, 2)
                 }
             }
         },
         // Expected inventory values for the second set of inventories
         new List<Tuple<int, int, int, int, int>> {
-            new Tuple<int, int, int, int, int>(100, 0, 0, 0, 100), // unchanged
+            new Tuple<int, int, int, int, int>(100, 0, 0, 0, 100), // (Total On Hand, Total Expected, Total Ordered, Total Allocated, Total Available)
             new Tuple<int, int, int, int, int>(40, 0, 0, 0, 40),
             new Tuple<int, int, int, int, int>(0, 0, 0, 0, 0)
         }
@@ -242,8 +334,8 @@ public class OrderDBTest
                 UpdatedAt = DateTime.Parse("1990-12-03T10:30:00Z"),
                 Items = new List<OrderItems>
                 {
-                    new OrderItems("P000001", 8),
-                    new OrderItems("P000002", 2)
+                    new OrderItems("P000001", 8, 3),
+                    new OrderItems("P000002", 2, 3)
                 }
             },
             new Order
@@ -269,18 +361,119 @@ public class OrderDBTest
                 UpdatedAt = DateTime.Parse("2000-01-13T09:00:00Z"),
                 Items = new List<OrderItems>
                 {
-                    new OrderItems("P000002", 15),
-                    new OrderItems("P000003", 20)
+                    new OrderItems("P000002", 15, 3),
+                    new OrderItems("P000003", 20, 3)
                 }
             }
         },
             // Expected inventory values for the third set of inventories
             new List<Tuple<int, int, int, int, int>> {
-            new Tuple<int, int, int, int, int>(100, 0, 0, 8, 92),
+            new Tuple<int, int, int, int, int>(100, 0, 0, 8, 92), // (Total On Hand, Total Expected, Total Ordered, Total Allocated, Total Available)
             new Tuple<int, int, int, int, int>(50, 0, 15, 2, 33),
             new Tuple<int, int, int, int, int>(5, 0, 20, 0, -15)
             }
     }
-};
+    };
+
+    public static IEnumerable<object[]> TestSingleOrderData => new List<object[]>
+    {
+        new object[]
+        {
+            // First test order
+            new List<Order>
+            {
+                new Order
+                {
+                    Id = 1,
+                    SourceId = 1,
+                    OrderDate = DateTime.Parse("1971-11-25T18:25:07Z"),
+                    RequestDate = DateTime.Parse("1971-11-29T18:25:07Z"),
+                    Reference = "ORD00004",
+                    OrderStatus = "Pending",
+                    Notes = "Licht gebruikelijk melk brug.",
+                    ShippingNotes = "Afmaken thee fris.",
+                    PickingNotes = "Meisje vis volgende overal hallo vrijheid gebeurtenis hut.",
+                    WareHouseId = 1,
+                    ShipTo = 1,
+                    BillTo = 1,
+                    ShipmentId = 1,
+                    TotalAmount = 6182.77f,
+                    TotalDiscount = 401.42f,
+                    TotalTax = 780.29f,
+                    TotalSurcharge = 85.5f,
+                    CreatedAt = DateTime.Parse("1971-11-25T18:25:07Z"),
+                    UpdatedAt = DateTime.Parse("1971-11-27T14:25:07Z"),
+                    Items = new List<OrderItems>
+                    {
+                        new OrderItems("P000001", 10, 1),
+                        new OrderItems("P000002", 20, 1),
+                        new OrderItems("P000003", 5, 1)
+                    }
+                }
+            },
+        new List<List<Tuple<int, int, int, int, int>>> {
+            // Pending
+            new List<Tuple<int, int, int, int, int>> {
+                new Tuple<int, int, int, int, int>(100, 0, 0, 10, 90), // (Total On Hand, Total Expected, Total Ordered, Total Allocated, Total Available)
+                new Tuple<int, int, int, int, int>(50, 0, 0, 20, 30),
+                new Tuple<int, int, int, int, int>(5, 0, 0, 5, 0)
+            },
+            // Packed
+            new List<Tuple<int, int, int, int, int>> {
+                new Tuple<int, int, int, int, int>(100, 0, 10, 0, 90),
+                new Tuple<int, int, int, int, int>(50, 0, 20, 0, 30),
+                new Tuple<int, int, int, int, int>(5, 0, 5, 0, 0)
+            },
+            // Shipped
+            new List<Tuple<int, int, int, int, int>> {
+                new Tuple<int, int, int, int, int>(90, 0, 0, 0, 90),
+                new Tuple<int, int, int, int, int>(30, 0, 0, 0, 30),
+                new Tuple<int, int, int, int, int>(0, 0, 0, 0, 0)
+            },
+            // Delivered
+            new List<Tuple<int, int, int, int, int>> {
+                new Tuple<int, int, int, int, int>(90, 0, 0, 0, 90),
+                new Tuple<int, int, int, int, int>(30, 0, 0, 0, 30),
+                new Tuple<int, int, int, int, int>(0, 0, 0, 0, 0)
+            }
+        }
+,
+
+            new List<string> {"Pending", "Packed", "Shipped", "Delivered"}
+        }
+    };
+
+
+    private List<Inventory> GetTestInventories(string type = "")
+    {
+        // Get all the test inventories
+        Inventory? inventory1 = db.Inventories.FirstOrDefault(x => x.Id == 1);
+        Inventory? inventory2 = db.Inventories.FirstOrDefault(x => x.Id == 2);
+        Inventory? inventory3 = db.Inventories.FirstOrDefault(x => x.Id == 3);
+        Assert.IsNotNull(inventory1);
+        Assert.IsNotNull(inventory2);
+        Assert.IsNotNull(inventory3);
+
+        Console.WriteLine($"--------------- Inventories for test {type} ------------------");
+        // Console.WriteLine($"Total On Hand: {inventory1.total_on_hand}, Total Expected: {inventory1.total_expected}, Total Ordered: {inventory1.total_ordered}, Total Allocated: {inventory1.total_allocated}, Total Available: {inventory1.total_available}");
+        // Console.WriteLine($"Total On Hand: {inventory2.total_on_hand}, Total Expected: {inventory2.total_expected}, Total Ordered: {inventory2.total_ordered}, Total Allocated: {inventory2.total_allocated}, Total Available: {inventory2.total_available}");
+        // Console.WriteLine($"Total On Hand: {inventory3.total_on_hand}, Total Expected: {inventory3.total_expected}, Total Ordered: {inventory3.total_ordered}, Total Allocated: {inventory3.total_allocated}, Total Available: {inventory3.total_available}");
+
+        List<Inventory> inventories = new() { inventory1, inventory2, inventory3 };
+        return inventories;
+    }
+
+    private void AssertInventoryAmounts(List<Tuple<int, int, int, int, int>> expectedInventories, List<Inventory> inventories)
+    {
+        for (int i = 0; i < expectedInventories.Count; i++)
+        {
+            Assert.IsTrue(expectedInventories[i].Item1 == inventories[i].total_on_hand);
+            Assert.IsTrue(expectedInventories[i].Item2 == inventories[i].total_expected);
+            Assert.IsTrue(expectedInventories[i].Item3 == inventories[i].total_ordered);
+            Assert.IsTrue(expectedInventories[i].Item4 == inventories[i].total_allocated);
+            Assert.IsTrue(expectedInventories[i].Item5 == inventories[i].total_available);
+        }
+    }
+
 
 }
