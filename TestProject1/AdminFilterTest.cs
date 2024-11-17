@@ -4,7 +4,7 @@ using Microsoft.AspNetCore.Mvc.Filters;
 using CargoHub.Filters;
 using Microsoft.AspNetCore.Mvc.Abstractions;
 using Microsoft.AspNetCore.Routing;
-using CargoHub.Interface;
+
 using System.Diagnostics.CodeAnalysis;
 
 namespace TestProject1
