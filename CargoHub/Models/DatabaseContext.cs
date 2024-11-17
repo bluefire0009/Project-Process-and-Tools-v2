@@ -16,7 +16,7 @@ public class DatabaseContext : DbContext
     public DbSet<Transfer> Transfers { get; set; }
     public DbSet<TransferItem> TransferItems { get; set; }
     public DbSet<Warehouse> Warehouses { get; set; }
-    
+    public DbSet<ApiKey> ApiKeys { get; set; } 
 
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {

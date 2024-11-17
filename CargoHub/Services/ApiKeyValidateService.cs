@@ -23,7 +23,7 @@ namespace CargoHub.Services
         {
             // Check value and if is admin
             var exists = await _context.ApiKeys
-                                       .Where(k => k.Key_value == apiKey && k.Key_type == "admin")
+                                       .Where(k => k.Key_value == apiKey && k.Key_type == "floor_manager")
                                        .AnyAsync();
 
             return exists;  // True exist and == admin
