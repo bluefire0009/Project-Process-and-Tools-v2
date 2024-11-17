@@ -2,7 +2,7 @@ namespace CargoHub.Models;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using Newtonsoft.Json;
 
 public class Item : IEquatable<Item>
 {
@@ -17,15 +17,15 @@ public class Item : IEquatable<Item>
     public string? CommodityCode { get; set; }
 
     [ForeignKey("ItemLine")]
-    public ItemLine? itemLine { get; set; }
+    public ItemLine? itemLineJson { get; set; }
     public int ItemLine { get; set; }
 
     [ForeignKey("ItemGroup")]
-    public ItemGroup? itemGroup { get; set; }
+    public ItemGroup? itemGroupJson { get; set; }
     public int ItemGroup { get; set; }
 
     [ForeignKey("ItemType")]
-    public ItemType? itemType { get; set; }
+    public ItemType? itemTypeJson { get; set; }
     public int ItemType { get; set; }
 
     public int UnitPurchaseQuantity { get; set; }
@@ -55,6 +55,8 @@ public class Item : IEquatable<Item>
                Description == other.Description &&
                ShortDescription == other.ShortDescription &&
                UpcCode == other.UpcCode &&
+               ItemType == other.ItemType &&
+               ItemLine == other.ItemLine &&
                ModelNumber == other.ModelNumber &&
                CommodityCode == other.CommodityCode &&
                UnitPurchaseQuantity == other.UnitPurchaseQuantity &&

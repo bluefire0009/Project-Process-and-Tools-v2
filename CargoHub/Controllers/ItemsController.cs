@@ -13,13 +13,13 @@ public class ItemsController : Controller {
         ItemStorage = itemStorage;
     }
 
-    [HttpGet]
+    [HttpGet("get")]
     public async Task<IActionResult> GetAllItems() {
         List<Item> items = await ItemStorage.GetItems();
         return Ok(items);
     }
 
-    [HttpGet("{uid}")]
+    [HttpGet("get/{uid}")]
     public async Task<IActionResult> GetItem(string uid) {
         if (uid == "") return BadRequest("invalid uid");
         Item? item = await ItemStorage.GetItem(uid);

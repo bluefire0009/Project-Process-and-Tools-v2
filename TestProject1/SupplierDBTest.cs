@@ -238,23 +238,7 @@ public class SupplierDBTest
         // Assert
         for (int itemsIterator = 0; itemsIterator < resultList.Count; itemsIterator++)
         {
-            Assert.IsTrue(resultList[itemsIterator].Uid == items[itemsIterator].Uid);
-            Assert.IsTrue(resultList[itemsIterator].Code == items[itemsIterator].Code);
-            Assert.IsTrue(resultList[itemsIterator].Description == items[itemsIterator].Description);
-            Assert.IsTrue(resultList[itemsIterator].ShortDescription == items[itemsIterator].ShortDescription);
-            Assert.IsTrue(resultList[itemsIterator].UpcCode == items[itemsIterator].UpcCode);
-            Assert.IsTrue(resultList[itemsIterator].ModelNumber == items[itemsIterator].ModelNumber);
-            Assert.IsTrue(resultList[itemsIterator].CommodityCode == items[itemsIterator].CommodityCode);
-            Assert.IsTrue(resultList[itemsIterator].itemLine == items[itemsIterator].itemLine);
-            Assert.IsTrue(resultList[itemsIterator].itemGroup == items[itemsIterator].itemGroup);
-            Assert.IsTrue(resultList[itemsIterator].itemType == items[itemsIterator].itemType);
-            Assert.IsTrue(resultList[itemsIterator].UnitPurchaseQuantity == items[itemsIterator].UnitPurchaseQuantity);
-            Assert.IsTrue(resultList[itemsIterator].UnitOrderQuantity == items[itemsIterator].UnitOrderQuantity);
-            Assert.IsTrue(resultList[itemsIterator].PackOrderQuantity == items[itemsIterator].PackOrderQuantity);
-            Assert.IsTrue(resultList[itemsIterator].SupplierId == items[itemsIterator].SupplierId);
-            Assert.IsTrue(resultList[itemsIterator].SupplierCode == items[itemsIterator].SupplierCode);
-            Assert.IsTrue(resultList[itemsIterator].SupplierPartNumber == items[itemsIterator].SupplierPartNumber);
-            Assert.IsTrue(resultList[itemsIterator].UpdatedAt == items[itemsIterator].UpdatedAt);
+            Assert.IsTrue(resultList[itemsIterator].Equals(items[itemsIterator]));
         }
         if (resultList.Count == 0 && result != null)
             Assert.IsTrue(items != null);

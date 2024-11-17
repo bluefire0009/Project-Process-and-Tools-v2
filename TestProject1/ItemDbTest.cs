@@ -92,7 +92,11 @@ public class ItemDBTest
         bool actualResult = storage.AddItem(item).Result;
 
         // Assert
-        Assert.IsTrue(actualResult == expectedResult);
+        Assert.IsTrue(actualResult.Equals(expectedResult));
+        if (expectedResult == true)
+            Assert.IsTrue(db.Items.Contains(item));
+        if (expectedResult == false)
+            Assert.IsTrue(!db.Items.Contains(item));
     }
 
     [TestMethod]
@@ -138,6 +142,10 @@ public class ItemDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.Items.Count() == items.Count -1);
+        if (expectedResult == false)
+            Assert.IsTrue(db.Items.Count() == items.Count);
     }
 
     [TestMethod]
@@ -185,6 +193,10 @@ public class ItemDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.Items.Contains(updatedItem));
+        if (expectedResult == false)
+            Assert.IsTrue(!db.Items.Contains(updatedItem));
     }
 
     public static IEnumerable<object[]> GetItemInventoriesTestData => new List<object[]>
