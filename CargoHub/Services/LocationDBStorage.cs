@@ -8,10 +8,9 @@ public class LocationStroage : ILocationStorage
 
     private readonly int _maxItemsLimit;
 
-    public LocationStroage(DatabaseContext db, IConfiguration configuration)
+    public LocationStroage(DatabaseContext db)
     {
         DB = db;
-        _maxItemsLimit = configuration.GetValue<int>("MaxResultsLimit");
     }
 
     public int MaxItemsLimit()

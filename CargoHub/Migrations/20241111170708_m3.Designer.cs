@@ -4,11 +4,14 @@ using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
+using System.Diagnostics.CodeAnalysis;
+
 
 #nullable disable
 
 namespace CargoHub.Migrations
 {
+    [ExcludeFromCodeCoverage]
     [DbContext(typeof(DatabaseContext))]
     [Migration("20241111170708_m3")]
     partial class m3
