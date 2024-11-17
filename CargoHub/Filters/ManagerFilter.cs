@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Filters;
 using System.Threading.Tasks;
-using CargoHub.Interface;
+
 using System.Diagnostics.CodeAnalysis;
 namespace CargoHub.Filters
 {
