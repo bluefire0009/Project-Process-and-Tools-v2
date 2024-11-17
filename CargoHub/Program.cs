@@ -10,7 +10,8 @@ namespace CargoHub
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddControllersWithViews();
-
+            
+            builder.Services.AddScoped<IDocksStorage, DockDBStorage>();
             builder.Services.AddScoped<IWarehouseStorage, WarehouseDBStorage>();
             builder.Services.AddScoped<ITransferStorage, TransferDBStorage>();
             builder.Services.AddScoped<ISupplierStorage, SupplierDBStorage>();
