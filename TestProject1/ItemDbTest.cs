@@ -92,7 +92,7 @@ public class ItemDBTest
         bool actualResult = storage.AddItem(item).Result;
 
         // Assert
-        Assert.IsTrue(actualResult == expectedResult);
+        Assert.IsTrue(actualResult.Equals(expectedResult));
         if (expectedResult == true)
             Assert.IsTrue(db.Items.Contains(item));
         if (expectedResult == false)
