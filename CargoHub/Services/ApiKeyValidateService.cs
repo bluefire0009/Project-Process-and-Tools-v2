@@ -1,12 +1,11 @@
 
 using Microsoft.EntityFrameworkCore;
 
-using CargoHub.Interface;
+
 
 using System.Diagnostics.CodeAnalysis;
 
-namespace CargoHub.Services
-{
+
     [ExcludeFromCodeCoverage] //Method gets called in the filter. Filter gets tested.
     public class ApiKeyValidationService : IApiKeyValidationInterface
     {
@@ -29,4 +28,3 @@ namespace CargoHub.Services
             return exists;  // True exist and == admin
         }
     }
-}
