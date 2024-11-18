@@ -8,7 +8,7 @@ public class Item
 {
 
     [Key]
-    public int Uid { get; set; }
+    public string Uid { get; set; }
     public string? Code { get; set; }
     public string? Description { get; set; }
     public string? ShortDescription { get; set; }

@@ -11,8 +11,10 @@ public class DatabaseContext : DbContext
     public DbSet<Item> Items { get; set; }
     public DbSet<ItemType> ItemTypes { get; set; }
     public DbSet<Order> Orders { get; set; }
+    public DbSet<OrderItems> OrderItems { get; set; }
     public DbSet<Location> Locations { get; set; }
     public DbSet<Shipment> Shipments { get; set; }
+    public DbSet<ShipmentItems> ShipmentItems { get; set; }
     public DbSet<Supplier> Suppliers { get; set; }
     public DbSet<Transfer> Transfers { get; set; }
     public DbSet<TransferItem> TransferItems { get; set; }

@@ -34,6 +34,8 @@ public class LocationStroage : ILocationStorage
         // add location to Locations
         if (location == null) return false;
 
+        location.CreatedAt = DateTime.Now;
+
         await DB.Locations.AddAsync(location);
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;
@@ -48,7 +50,10 @@ public class LocationStroage : ILocationStorage
         if (Foundlocation == null) return false;
 
         // make sure the id doesnt get changed
-        Foundlocation.Id = locationId;
+        location.Id = locationId;
+        // update updated at
+        location.UpdatedAt = DateTime.Now;
+
         // update exsting location
         DB.Locations.Update(location);
 
