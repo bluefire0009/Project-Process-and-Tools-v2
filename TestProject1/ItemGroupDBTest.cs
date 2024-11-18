@@ -171,8 +171,8 @@ public class ItemGroupDBStorageTest
 
     public static IEnumerable<object[]> ItemGroupItemsTestData => new List<object[]>
     {
-        new object[] { 1, new List<Item> { new Item { ItemGroup = 1 } }, 1 },
-        new object[] { 2, new List<Item> { new Item { ItemGroup = 1 } }, 0 },
+        new object[] { 1, new List<Item> { new Item { Uid = "1", ItemGroup = 1 } }, 1 },
+        new object[] { 2, new List<Item> { new Item { Uid = "1", ItemGroup = 1 } }, 0 },
         new object[] { 1, new List<Item> { }, 0 }
     };
 

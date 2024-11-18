@@ -202,10 +202,10 @@ public class SupplierDBTest
 
     public static IEnumerable<object[]> GetSupplierItemsTestData => new List<object[]>
         {
-            new object[] { new List<Supplier> {new(){Id = 1}}, new List<Item> {new(){Uid = 1, SupplierId = 1}, new(){Uid = 2, SupplierId = 1}, new(){Uid = 3, SupplierId = 1}}, 1},
+            new object[] { new List<Supplier> {new(){Id = 1}}, new List<Item> {new(){Uid = "1", SupplierId = 1}, new(){Uid = "2", SupplierId = 1}, new(){Uid = "3", SupplierId = 1}}, 1},
             new object[] { new List<Supplier> {new(){Id = 1}}, null, 0},
             new object[] { new List<Supplier> {new(){Id = 1}}, null, -1},
-            new object[] { new List<Supplier> {new(){Id = 2}}, new List<Item> {new(){Uid = 1, SupplierId = 1}, new(){Uid = 2, SupplierId = 1}, new(){Uid = 3, SupplierId = 1}}, 2},
+            new object[] { new List<Supplier> {new(){Id = 2}}, new List<Item> {new(){Uid = "1", SupplierId = 1}, new(){Uid = "2", SupplierId = 1}, new(){Uid = "3", SupplierId = 1}}, 2},
         };
     [TestMethod]
     [DynamicData(nameof(GetSupplierItemsTestData), DynamicDataSourceType.Property)]
