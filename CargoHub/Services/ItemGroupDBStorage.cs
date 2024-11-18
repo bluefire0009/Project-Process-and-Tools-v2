@@ -29,6 +29,8 @@ public class ItemGroupDBStorage : IItemGroupStorage
         ItemGroup? itemGroupInDatabase = await db.ItemGroups.Where(i => i.Id == itemGroup.Id).FirstOrDefaultAsync(); 
         if (itemGroupInDatabase != null) return false;
 
+        itemGroup.CreatedAt = DateTime.Now;
+
         await db.ItemGroups.AddAsync(itemGroup);
 
         await db.SaveChangesAsync();
@@ -45,6 +47,8 @@ public class ItemGroupDBStorage : IItemGroupStorage
 
         db.Remove(itemGroupInDatabase);
         await db.SaveChangesAsync();
+
+        updatedItemGroup.UpdatedAt = DateTime.Now;
 
         db.Add(updatedItemGroup);
         await db.SaveChangesAsync();
