@@ -5,6 +5,7 @@ using Microsoft.EntityFrameworkCore.Migrations;
 
 namespace CargoHub.Migrations
 {
+
     /// <inheritdoc />
     public partial class m3 : Migration
     {

@@ -6,15 +6,22 @@ public class LocationStroage : ILocationStorage
 {
     DatabaseContext DB;
 
+    private readonly int _maxItemsLimit;
+
     public LocationStroage(DatabaseContext db)
     {
         DB = db;
     }
 
+    public int MaxItemsLimit()
+    {
+        return _maxItemsLimit;
+    }
+
     public async Task<IEnumerable<Location>> GetLocations()
     {
-        // retun all locations
-        return await DB.Locations.ToListAsync();
+        // retun first 100 locations
+        return await DB.Locations.Take(100).ToListAsync();
     }
     public async Task<Location?> GetLocation(int locationId)
     {
@@ -24,7 +31,7 @@ public class LocationStroage : ILocationStorage
 
     public async Task<IEnumerable<Location>> GetLocationsInWarehouses(int GivenWarehouseId)
     {
-        // find all location with the given WarehouseId
+        // find all locations with the given WarehouseId
         // currently not used by location controller
         return await DB.Locations.Where(x => x.WareHouseId == GivenWarehouseId).ToListAsync();
     }
