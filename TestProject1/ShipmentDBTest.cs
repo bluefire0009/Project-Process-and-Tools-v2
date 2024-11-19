@@ -93,7 +93,11 @@ public class ShipmentDBTest
         }
         var FoundShipments = await storage.GetShipments();
 
+        List<Inventory> inventories = GetTestInventories();
+
         Assert.IsTrue(FoundShipments.Count() == shipments.Count());
+        AssertInventoryAmounts(expectedInventories, inventories);
+
     }
 
     [TestMethod]
@@ -220,9 +224,9 @@ public class ShipmentDBTest
                 }
             },
                     new List<Tuple<int, int, int, int, int>> {
-            new Tuple<int, int, int, int, int>(100, 0, 0, 8, 92), // (Total On Hand, Total Expected, Total Ordered, Total Allocated, Total Available)
-            new Tuple<int, int, int, int, int>(50, 0, 15, 2, 33),
-            new Tuple<int, int, int, int, int>(5, 0, 20, 0, -15)
+                        new Tuple<int, int, int, int, int>(100, 0, 0, 20, 80),
+                        new Tuple<int, int, int, int, int>(50, 0, 0, 10, 40),
+                        new Tuple<int, int, int, int, int>(5, 0, 0, 0, 5)
                     }
         },
         new object[]
@@ -283,9 +287,9 @@ public class ShipmentDBTest
                 }
             },
                     new List<Tuple<int, int, int, int, int>> {
-            new Tuple<int, int, int, int, int>(100, 0, 0, 8, 92), // (Total On Hand, Total Expected, Total Ordered, Total Allocated, Total Available)
-            new Tuple<int, int, int, int, int>(50, 0, 15, 2, 33),
-            new Tuple<int, int, int, int, int>(5, 0, 20, 0, -15)
+                        new Tuple<int, int, int, int, int>(70, 0, 0, 0, 70),
+                        new Tuple<int, int, int, int, int>(50, 0, 0, 0, 50),
+                        new Tuple<int, int, int, int, int>(-10, 0, 0, 0, -10)
             }
         },
         new object[]
@@ -372,9 +376,9 @@ public class ShipmentDBTest
                 }
             },
                     new List<Tuple<int, int, int, int, int>> {
-            new Tuple<int, int, int, int, int>(100, 0, 0, 8, 92), // (Total On Hand, Total Expected, Total Ordered, Total Allocated, Total Available)
-            new Tuple<int, int, int, int, int>(50, 0, 15, 2, 33),
-            new Tuple<int, int, int, int, int>(5, 0, 20, 0, -15)
+                        new Tuple<int, int, int, int, int>(150, 30, 0, 0, 150),
+                        new Tuple<int, int, int, int, int>(120, 40, 0, 0, 120),
+                        new Tuple<int, int, int, int, int>(5, 60, 0, 0, 5)
                     }
         }
     };

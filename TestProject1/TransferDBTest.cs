@@ -392,7 +392,14 @@ public class TransferDBTest
             return obj; // No need to copy, return as is
 
         // Create a new instance of the object type
-        T copy = (T)Activator.CreateInstance(obj.GetType());
+        T copy;
+        if (obj is string str)
+        {
+            copy = (T)(object)string.Copy(str); // Create a copy of the string
+        } else {
+            copy = (T)Activator.CreateInstance(obj.GetType());
+        }
+        
 
         // Add the current object to the visitedObjects dictionary
         visitedObjects[obj] = copy;
