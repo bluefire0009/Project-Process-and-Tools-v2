@@ -42,7 +42,7 @@ public class LocationDBTest
         await db.Locations.AddRangeAsync(locations); // Use AddRangeAsync for multiple entries
         await db.SaveChangesAsync();
 
-        LocationStroage storage = new(db);
+        LocationStorage storage = new(db);
 
         // Act
         IEnumerable<Location> x = await storage.GetLocations();
@@ -71,7 +71,7 @@ public class LocationDBTest
         await db.Locations.AddAsync(location);
         await db.SaveChangesAsync();
 
-        LocationStroage storage = new(db);
+        LocationStorage storage = new(db);
 
         // Act
         Location? result = await storage.GetLocation(id);
@@ -95,7 +95,7 @@ public class LocationDBTest
         await db.Locations.AddRangeAsync(locations);
         await db.SaveChangesAsync();
 
-        LocationStroage storage = new(db);
+        LocationStorage storage = new(db);
 
         // Act
         List<Location> FoundLocations = (await storage.GetLocationsInWarehouses(GivenWareHouseId)).ToList();
@@ -117,7 +117,7 @@ public class LocationDBTest
     public async Task TestAddLocation(Location location)
     {
         // Arrange
-        LocationStroage storage = new(db);
+        LocationStorage storage = new(db);
 
         // Act
         await storage.AddLocation(location);
@@ -142,7 +142,7 @@ public class LocationDBTest
         await db.Locations.AddAsync(location);
         await db.SaveChangesAsync();
 
-        LocationStroage storage = new(db);
+        LocationStorage storage = new(db);
 
 
 
@@ -175,7 +175,7 @@ public class LocationDBTest
         await db.Locations.AddAsync(location);
         await db.SaveChangesAsync();
 
-        LocationStroage storage = new(db);
+        LocationStorage storage = new(db);
 
         // Act
         // Assert
