@@ -19,7 +19,7 @@ public class DatabaseContext : DbContext
     public DbSet<Transfer> Transfers { get; set; }
     public DbSet<TransferItem> TransferItems { get; set; }
     public DbSet<Warehouse> Warehouses { get; set; }
-    
+    public DbSet<ApiKey> ApiKeys { get; set; } 
 
     public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
     {
@@ -27,6 +27,7 @@ public class DatabaseContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<ApiKey>().ToTable("API_keys");
         modelBuilder.Entity<TransferItem>().HasKey(i => new { i.TransferId, i.ItemUid });
         modelBuilder.Entity<InventoryLocation>().HasKey(l => new { l.InventoryId, l.LocationId });
         modelBuilder.Entity<Transfer>().HasOne(t => t.LocationFrom).WithMany().HasForeignKey(t => t.TransferFrom);
