@@ -2,12 +2,12 @@ using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
 
-public class LocationStroage : ILocationStorage
+public class LocationStorage : ILocationStorage
 {
     DatabaseContext DB;
 
 
-    public LocationStroage(DatabaseContext db)
+    public LocationStorage(DatabaseContext db)
     {
         DB = db;
     }

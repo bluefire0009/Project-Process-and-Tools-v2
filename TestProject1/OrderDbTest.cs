@@ -89,7 +89,7 @@ public class OrderDBTest
     public async Task TestGetOrders(List<Order> orders, List<Tuple<int, int, int, int, int>> expectedInventories)
     {
         // Arrange && Act
-        OrderStroage storage = new(db);
+        OrderStorage storage = new(db);
 
         foreach (var order in orders)
         {
@@ -109,7 +109,7 @@ public class OrderDBTest
     public async Task TestGetOrder(List<Order> orders, List<Tuple<int, int, int, int, int>> expectedInventories)
     {
         // Arrange && Act
-        OrderStroage storage = new(db);
+        OrderStorage storage = new(db);
 
         foreach (var order in orders)
         {
@@ -132,7 +132,7 @@ public class OrderDBTest
     public async Task TestGetItemsInOrder(List<Order> orders, List<Tuple<int, int, int, int, int>> expectedInventories)
     {
         // Arrange && Act
-        OrderStroage storage = new(db);
+        OrderStorage storage = new(db);
 
         foreach (var order in orders)
         {
@@ -156,7 +156,7 @@ public class OrderDBTest
     public async Task TestGetOrdersInShipments(List<Order> orders, List<Tuple<int, int, int, int, int>> expectedInventories)
     {
         // expand this test later when it becomes possible/easy to add multiple orders to a shipment
-        OrderStroage storage = new(db);
+        OrderStorage storage = new(db);
 
         foreach (var order in orders)
         {
@@ -178,7 +178,7 @@ public class OrderDBTest
     {
         // an order can be: {'Pending', 'Packed', 'Shipped', 'Delivered'}
 
-        OrderStroage storage = new(db);
+        OrderStorage storage = new(db);
 
         foreach (var order in orders)
         {
@@ -207,7 +207,7 @@ public class OrderDBTest
     [DynamicData(nameof(TestOrdersData), typeof(OrderDBTest))]
     public async Task TestDeleteOrder(List<Order> orders, List<Tuple<int, int, int, int, int>> expectedInventories)
     {
-        OrderStroage storage = new(db);
+        OrderStorage storage = new(db);
 
         foreach (var order in orders)
         {
