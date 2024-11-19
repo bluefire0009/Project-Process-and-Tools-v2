@@ -93,6 +93,10 @@ public class SupplierDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.Suppliers.Contains(supplier));
+        if (expectedResult == false)
+            Assert.IsTrue(!db.Suppliers.Contains(supplier));
     }
 
     [TestMethod]
@@ -138,6 +142,10 @@ public class SupplierDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.Suppliers.Count() == suppliers.Count -1);
+        if (expectedResult == false)
+            Assert.IsTrue(db.Suppliers.Count() == suppliers.Count);
     }
 
     [TestMethod]
@@ -185,6 +193,10 @@ public class SupplierDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.Suppliers.Contains(updatedSupplier));
+        if (expectedResult == false)
+            Assert.IsTrue(!db.Suppliers.Contains(updatedSupplier));
     }
 
     public static IEnumerable<object[]> GetSupplierItemsTestData => new List<object[]>

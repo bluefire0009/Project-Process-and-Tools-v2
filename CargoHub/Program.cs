@@ -15,6 +15,8 @@ namespace CargoHub
             builder.Services.AddScoped<ITransferStorage, TransferDBStorage>();
             builder.Services.AddScoped<ISupplierStorage, SupplierDBStorage>();
             builder.Services.AddScoped<IItemStorage, ItemsDBStorage>();
+            builder.Services.AddScoped<IItemTypeStorage, ItemTypesDBStorage>();
+            builder.Services.AddScoped<IItemLineStorage, ItemLinesDBStorage>();
             builder.Services.AddScoped<ILocationStorage, LocationStroage>();
             builder.Services.AddScoped<IOrderStorage, OrderStroage>();
             builder.Services.AddScoped<IShipmentStorage, ShipmentStorage>();
