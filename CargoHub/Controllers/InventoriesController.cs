@@ -13,12 +13,12 @@ public class InventoriesController : Controller
     {
         this.inventoryStorage = inventoryStorage;
     }
-    
+
     [HttpGet("")]
-    public Task<IActionResult> GetAllInventories()
+    public async Task<IActionResult> GetAllInventories()
     {
-        List<Inventory> inventories = inventoryStorage.getInventories().ToList();
-        return Task.FromResult<IActionResult>(Ok(inventories));
+        List<Inventory> inventories = (await inventoryStorage.getInventories()).ToList();
+        return Ok(inventories);
     }
 
     [HttpGet("{id}")]
@@ -46,7 +46,7 @@ public class InventoriesController : Controller
     {
         if (id <= 0) return BadRequest("Invalid id in the url");
         bool deleted = await inventoryStorage.deleteInventory(id);
-        
+
         if (!deleted) return NotFound($"No inventory with id:{id} in the database");
         return Ok($"Deleted inventory with id: {id}");
     }
@@ -58,7 +58,7 @@ public class InventoriesController : Controller
         if (updatedInventory == null) BadRequest("updated Inventory cannot be null");
 
         bool updated = await inventoryStorage.updateInventory(idToUpdate, updatedInventory);
-        
+
         if (!updated) return NotFound($"No inventory with id:{idToUpdate} in the database");
         return Ok($"Updated inventory id:{idToUpdate} to:{updatedInventory}");
     }

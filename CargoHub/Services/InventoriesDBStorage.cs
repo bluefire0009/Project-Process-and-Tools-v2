@@ -9,9 +9,9 @@ public class InventoriesDBStorage : IInventoryStorage
         this.db = db;
     }
 
-    public IEnumerable<Inventory> getInventories()
+    public async Task<IEnumerable<Inventory>> getInventories()
     {
-        IEnumerable<Inventory> inventories = db.Inventories.AsEnumerable();
+        IEnumerable<Inventory> inventories = await db.Inventories.ToListAsync();
         return inventories;
     }
 
@@ -26,7 +26,7 @@ public class InventoriesDBStorage : IInventoryStorage
         if (inventory == null) return false;
         if (inventory.Id <= 0) return false;
 
-        Inventory? inventoryInDatabase = await db.Inventories.Where(w => w.Id == inventory.Id).FirstOrDefaultAsync(); 
+        Inventory? inventoryInDatabase = await db.Inventories.Where(w => w.Id == inventory.Id).FirstOrDefaultAsync();
         if (inventoryInDatabase != null) return false;
 
         await db.Inventories.AddAsync(inventory);
@@ -43,7 +43,7 @@ public class InventoriesDBStorage : IInventoryStorage
         if (inventoryInDatabase == null) return false;
 
         db.Inventories.Remove(inventoryInDatabase);
-        
+
         await db.SaveChangesAsync();
         return true;
     }
