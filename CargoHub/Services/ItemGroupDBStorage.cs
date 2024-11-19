@@ -14,6 +14,14 @@ public class ItemGroupDBStorage : IItemGroupStorage
         ItemGroup? itemGroup = await db.ItemGroups.Where(i => i.Id == id).FirstOrDefaultAsync();
         return itemGroup;
     }
+    public async Task<IEnumerable<ItemGroup>> GetItemGroupsInPagination(int offset, int limit)
+    {
+        // Fetch locations with pagination
+        return await db.ItemGroups
+            .Skip(offset) // Skip the first 'offset' items
+            .Take(limit)  // Take the next 'limit' items
+            .ToListAsync();
+    }
 
     public async Task<IEnumerable<ItemGroup>> getItemGroups()
     {

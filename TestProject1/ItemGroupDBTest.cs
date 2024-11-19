@@ -52,6 +52,34 @@ public class ItemGroupDBStorageTest
         new object[] { new List<ItemGroup> { new ItemGroup() { Id = 1 } }, 1, true },
         new object[] { new List<ItemGroup> { new ItemGroup() { Id = 1 }, new ItemGroup() { Id = 2 } }, 2, true }
     };
+    [TestMethod]
+    public void TestGetItemGroupsInPagination()
+    {
+        // Arrange
+        var itemGroups = new List<ItemGroup>
+        {
+            new ItemGroup { Id = 1, Name = "ItemGroup 1" },
+            new ItemGroup { Id = 2, Name = "ItemGroup 2" },
+            new ItemGroup { Id = 3, Name = "ItemGroup 3" },
+            new ItemGroup { Id = 4, Name = "ItemGroup 4" }
+        };
+
+        db.ItemGroups.AddRange(itemGroups);
+        db.SaveChangesAsync();
+
+        int offset = 1; // Start from the second ItemGroup
+        int limit = 2;  // Retrieve two ItemGroup
+
+        ItemGroupDBStorage storage = new(db);
+
+        // Act
+        var result = storage.GetItemGroupsInPagination(offset, limit).Result.ToList();
+
+        // Assert
+        Assert.AreEqual(limit, result.Count, "The number of retrieved ItemGroups should match the limit.");
+        Assert.AreEqual(2, result[0].Id, "The first ItemGroup in the result should match the offset.");
+        Assert.AreEqual(3, result[1].Id, "The second ItemGroup in the result should be the next one.");
+    }
 
     [TestMethod]
     [DynamicData(nameof(SpecificItemGroupTestData), DynamicDataSourceType.Property)]

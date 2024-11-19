@@ -20,6 +20,12 @@ public class ItemGroupController : Controller
         List<ItemGroup> itemGroups = (await itemGroupStorage.getItemGroups()).ToList();
         return Ok(itemGroups);
     }
+    [HttpGet("pagination")]
+    public async Task<IActionResult> GetItemGroupsInPagination([FromQuery] int offset = 0, [FromQuery] int limit = 100)
+    {
+        var itemGroups = await itemGroupStorage.GetItemGroupsInPagination(offset, limit);
+        return Ok(itemGroups);
+    }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSpecificItemGroup(int id)
