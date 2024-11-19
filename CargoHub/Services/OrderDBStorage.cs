@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using CargoHub.HelperFuctions;
 using System.Diagnostics.CodeAnalysis;
 
-public class OrderStroage : IOrderStorage
+public class OrderStorage : IOrderStorage
 {
     DatabaseContext DB;
 
-    public OrderStroage(DatabaseContext db)
+    public OrderStorage(DatabaseContext db)
     {
         DB = db;
     }
