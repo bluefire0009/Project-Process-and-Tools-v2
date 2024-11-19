@@ -15,10 +15,10 @@ public class ItemGroupController : Controller
     }
 
     [HttpGet("")]
-    public Task<IActionResult> GetAllItemGroup()
+    public async Task<IActionResult> GetAllItemGroup()
     {
-        List<ItemGroup> itemGroups = itemGroupStorage.getItemGroups().ToList();
-        return Task.FromResult<IActionResult>(Ok(itemGroups));
+        List<ItemGroup> itemGroups = (await itemGroupStorage.getItemGroups()).ToList();
+        return Ok(itemGroups);
     }
 
     [HttpGet("{id}")]
