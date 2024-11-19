@@ -39,7 +39,7 @@ public class InventoriesDBTest
         InventoriesDBStorage storage = new(db);
 
         // Act
-        List<Inventory> result = storage.getInventories().ToList();
+        List<Inventory> result = storage.getInventories().Result.ToList();
 
         // Assert
         Assert.IsTrue(result.Count == inventories.Count);

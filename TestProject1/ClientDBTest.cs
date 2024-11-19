@@ -10,7 +10,7 @@ namespace TestProject1;
 public class ClientDBTest
 {
     private DatabaseContext db;
-    
+
     [TestInitialize]
     public void setUp()
     {
@@ -35,7 +35,7 @@ public class ClientDBTest
         ClientDBStorage storage = new(db);
 
         // Act
-        var result = storage.getClients().ToList();
+        var result = storage.getClients().Result.ToList();
 
         // Assert
         Assert.AreEqual(clients.Count, result.Count);
