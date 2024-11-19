@@ -14,11 +14,18 @@ public class LocationController : Controller
         Storage = storage;
     }
 
+    [HttpGet("maxRate")]
+    public IActionResult Maxrate()
+    {
+        return Ok(Storage.MaxItemsLimit());
+    }
+
+
     [HttpGet("")]
     public async Task<IActionResult> GetLocations()
     {
-        IEnumerable<Location> suppliers = await Storage.GetLocations();
-        return Ok(suppliers);
+        IEnumerable<Location> locations = await Storage.GetLocations();
+        return Ok(locations);
     }
 
     [HttpGet("{Id}")]
@@ -43,5 +50,10 @@ public class LocationController : Controller
         return BadRequest();
     }
 
-
+    [HttpDelete("{Id}")]
+    public async Task<IActionResult> DelteLocation([FromRoute] int Id)
+    {
+        if (await Storage.DeleteLocation(Id)) return Ok($"Location with Id:{Id} Delted");
+        return BadRequest();
+    }
 }

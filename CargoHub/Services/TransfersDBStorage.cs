@@ -180,7 +180,7 @@ public class TransferDBStorage : ITransferStorage
         return (true, TransferResult.possible);
     }
 
-    private async Task<bool> checkIfItemTransferPossible(int itemId, int locationTo, int amountToTransfer)
+    private async Task<bool> checkIfItemTransferPossible(string itemId, int locationTo, int amountToTransfer)
     {
         Inventory? inventoryWithAskedItem = await db.Inventories.FirstOrDefaultAsync(i => i.ItemId == itemId);
         Inventory? inventoryToTransferTo = await db.Inventories.Where(i => i.InventoryLocations.Select(l => l.InventoryId).Contains(locationTo)).FirstOrDefaultAsync();
