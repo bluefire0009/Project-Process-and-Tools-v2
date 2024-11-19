@@ -45,6 +45,33 @@ public class ClientDBTest
             Assert.AreEqual(clients[i].Name, result[i].Name);
         }
     }
+    [TestMethod]
+    public void TestGetClientsInPagination()
+    {
+        // Arrange
+        var clients = new List<Client>
+        {
+            new Client { Id = 1, Name = "Client 1" },
+            new Client { Id = 2, Name = "Client 2" },
+            new Client { Id = 3, Name = "Client 3" },
+            new Client { Id = 4, Name = "Client 4" }
+        };
+        db.Clients.AddRange(clients);
+        db.SaveChanges();
+        
+        int offset = 1; // Start from the second client
+        int limit = 2;  // Retrieve two clients
+
+        ClientDBStorage storage = new(db);
+
+        // Act
+        var result = storage.GetClientsInPagination(offset, limit).Result.ToList();
+
+        // Assert
+        Assert.AreEqual(limit, result.Count); // Ensure the limit is respected
+        Assert.AreEqual(2, result[0].Id);    // The first client in the result should match the offset
+        Assert.AreEqual(3, result[1].Id);    // The second client in the result should be the next one
+    }
 
     [TestMethod]
     [DataRow(1, true)]

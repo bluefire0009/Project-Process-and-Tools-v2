@@ -13,6 +13,14 @@ public class ClientDBStorage : IClientStorage
         IEnumerable<Client> client = db.Clients.AsEnumerable();
         return client;
     }
+    public async Task<IEnumerable<Client>> GetClientsInPagination(int offset, int limit)
+    {
+    // Fetch locations with pagination
+    return await db.Clients
+        .Skip(offset) // Skip the first 'offset' items
+        .Take(limit)  // Take the next 'limit' items
+        .ToListAsync();
+    }
     public async Task<Client?> getClient(int id)
     {
         Client? client = await db.Clients.Where(s => s.Id == id).FirstOrDefaultAsync();
@@ -69,5 +77,5 @@ public class ClientDBStorage : IClientStorage
         
         IEnumerable<Order> orders = db.Orders.Where(o => o.BillTo == clientId || o.ShipTo == clientId);
         return orders;
-    }
+    }    
 }

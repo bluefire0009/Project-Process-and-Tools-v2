@@ -21,6 +21,12 @@ public class ClientsController : Controller
         List<Client> clients = clientStorage.getClients().ToList();
         return Task.FromResult<IActionResult>(Ok(clients));
     }
+    [HttpGet("pagination")]
+    public async Task<IActionResult> GetClientsInPagination([FromQuery] int offset = 0, [FromQuery] int limit = 100)
+    {
+        var clients = await clientStorage.GetClientsInPagination(offset, limit);
+        return Ok(clients);
+    }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSpecificClient(int id)

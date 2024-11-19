@@ -2,6 +2,7 @@ using CargoHub.Models;
 public interface IClientStorage
 {
     IEnumerable<Client> getClients();
+    Task<IEnumerable<Client>> GetClientsInPagination(int offset, int limit);
     Task<Client?> getClient(int id);
     Task<bool> addClient(Client client);
     Task<bool> deleteClient(int id);
