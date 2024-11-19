@@ -35,4 +35,24 @@ public class Location : IEquatable<Location>
                CreatedAt == other.CreatedAt &&
                UpdatedAt == other.UpdatedAt;
     }
+
+    public static bool operator ==(Location? left, Location? right)
+    {
+        // If both are null, return true
+        if (ReferenceEquals(left, null) && ReferenceEquals(right, null))
+            return true;
+
+        // If one is null and the other isn't, return false
+        if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
+            return false;
+
+        // Use the Equals method to compare the actual objects
+        return left.Equals(right);
+    }
+
+    // Implement inequality operator
+    public static bool operator !=(Location? left, Location? right)
+    {
+        return !(left == right);
+    }
 }

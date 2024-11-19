@@ -10,7 +10,7 @@ public class Inventory
 
     [ForeignKey("ItemId")]
     public Item item { get; set; } = null!;
-    public string ItemId { get; set; }
+    public string? ItemId { get; set; }
     public string? Description { get; set; }
     public string? ItemReference { get; set; }
     public int total_on_hand { get; set; } = 0;
@@ -20,6 +20,12 @@ public class Inventory
     public int total_available { get; set; } = 0;
 
     public ICollection<InventoryLocation> InventoryLocations { get; set; } = new List<InventoryLocation>();
+    
+    [DataType(DataType.DateTime)]
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+    [DataType(DataType.DateTime)]
+    public DateTime? UpdatedAt { get; set; } = null;
 }
 
 public class InventoryLocation
