@@ -27,8 +27,8 @@ namespace TestProject1
         public async Task TestManagerFilter_Allowed()
         {
             // Arrange
-            var filterContext = CreateContextWithApiKey("floor_manager_key");
-            var filter = new ManagerOnlyFilter(_apiKeyValidationService);
+            var filterContext = CreateContextWithApiKey("warehouse_manager_key");
+            var filter = new WarehouseManagerFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
@@ -44,7 +44,7 @@ namespace TestProject1
         {
             // Arrange
             var filterContext = CreateContextWithApiKey("invalid_key");
-            var filter = new ManagerOnlyFilter(_apiKeyValidationService);
+            var filter = new WarehouseManagerFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
@@ -59,7 +59,7 @@ namespace TestProject1
         {
             // Arrange
             var filterContext = CreateContextWithApiKey("user_key");
-            var filter = new ManagerOnlyFilter(_apiKeyValidationService);
+            var filter = new WarehouseManagerFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
@@ -69,11 +69,11 @@ namespace TestProject1
         }
         [TestMethod]
         //Admin Key
-        public async Task TestManagerFilter_Manager_ManagerKey()
+        public async Task TestManagerFilter_Warehouse_ManagerKey()
         {
             // Arrange
             var filterContext = CreateContextWithApiKey("admin_key");
-            var filter = new ManagerOnlyFilter(_apiKeyValidationService);
+            var filter = new WarehouseManagerFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
@@ -83,17 +83,17 @@ namespace TestProject1
         }
         [TestMethod]
         //Warehouse Key
-        public async Task TestManagerFilter_Manager_WarehouseKey()
+        public async Task TestManagerFilter_Warehouse_FloorManagerKey()
         {
             // Arrange
-            var filterContext = CreateContextWithApiKey("warehouse_manager_key");
-            var filter = new ManagerOnlyFilter(_apiKeyValidationService);
+            var filterContext = CreateContextWithApiKey("floor_manager_key");
+            var filter = new WarehouseManagerFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
 
              // Assert
-            Assert.IsNull(filterContext.Result);
+            Assert.IsInstanceOfType(filterContext.Result, typeof(UnauthorizedResult));
         }
 
        //Create context
@@ -131,7 +131,7 @@ namespace TestProject1
         // Check if the API key is valid and has the Manager type
         public async Task<bool> IsValidApiKeyAsync(string apiKey)
         {// List of valid API key types
-            List<string> validKeyTypes = new List<string> { "floor_manager", "warehouse_manager", "admin" };
+            List<string> validKeyTypes = new List<string> { "warehouse_manager", "admin" };
           
             await Task.CompletedTask;
 
