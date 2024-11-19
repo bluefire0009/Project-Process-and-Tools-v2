@@ -43,19 +43,7 @@ public class WarehouseDBTest
         Assert.IsTrue(result.Count == warehouses.Count);
         for (int warehouseIterator = 0; warehouseIterator < result.Count; warehouseIterator++)
         {
-            Assert.IsTrue(result[warehouseIterator].Id == warehouses[warehouseIterator].Id);
-            Assert.IsTrue(result[warehouseIterator].Code == warehouses[warehouseIterator].Code);
-            Assert.IsTrue(result[warehouseIterator].Name == warehouses[warehouseIterator].Name);
-            Assert.IsTrue(result[warehouseIterator].Address == warehouses[warehouseIterator].Address);
-            Assert.IsTrue(result[warehouseIterator].Zip == warehouses[warehouseIterator].Zip);
-            Assert.IsTrue(result[warehouseIterator].City == warehouses[warehouseIterator].City);
-            Assert.IsTrue(result[warehouseIterator].Province == warehouses[warehouseIterator].Province);
-            Assert.IsTrue(result[warehouseIterator].Country == warehouses[warehouseIterator].Country);
-            Assert.IsTrue(result[warehouseIterator].ContactName == warehouses[warehouseIterator].ContactName);
-            Assert.IsTrue(result[warehouseIterator].ContactEmail == warehouses[warehouseIterator].ContactEmail);
-            Assert.IsTrue(result[warehouseIterator].ContactPhone == warehouses[warehouseIterator].ContactPhone);
-            Assert.IsTrue(result[warehouseIterator].CreatedAt == warehouses[warehouseIterator].CreatedAt);
-            Assert.IsTrue(result[warehouseIterator].UpdatedAt == warehouses[warehouseIterator].UpdatedAt);
+            Assert.IsTrue(result[warehouseIterator].Equals(warehouses[warehouseIterator]));
         }
     }
 
@@ -104,6 +92,10 @@ public class WarehouseDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.Warehouses.Contains(warehouse));
+        if (expectedResult == false)
+            Assert.IsTrue(!db.Warehouses.Contains(warehouse));        
     }
 
     [TestMethod]
@@ -149,6 +141,10 @@ public class WarehouseDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.Warehouses.Count() == warehouses.Count -1);
+        if (expectedResult == false)
+            Assert.IsTrue(db.Warehouses.Count() == warehouses.Count);
     }
 
     [TestMethod]
@@ -196,6 +192,11 @@ public class WarehouseDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.Warehouses.Contains(updatedWarehouse));
+        if (expectedResult == false)
+            Assert.IsTrue(!db.Warehouses.Contains(updatedWarehouse));
     }
 
     public static IEnumerable<object[]> GetWarehouseLocationsTestData => new List<object[]>

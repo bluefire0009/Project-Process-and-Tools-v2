@@ -3,7 +3,7 @@ namespace CargoHub.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class Shipment
+public class Shipment : IEquatable<Shipment>
 {
 
     [Key]
@@ -38,11 +38,34 @@ public class Shipment
     public DateTime? UpdatedAt { get; set; } = null;
 
     public ICollection<ShipmentItems> Items { get; set; } = new List<ShipmentItems>();
+    public bool Equals(Shipment? other)
+    {
+        if (other == null) return false;
+
+        return Id == other.Id &&
+               OrderId == other.OrderId &&
+               SourceId == other.SourceId &&
+               OrderDate == other.OrderDate &&
+               RequestDate == other.RequestDate &&
+               ShipmentDate == other.ShipmentDate &&
+               ShipmentType == other.ShipmentType &&
+               ShipmentStatus == other.ShipmentStatus &&
+               Notes == other.Notes &&
+               CarrierCode == other.CarrierCode &&
+               CarrierDescription == other.CarrierDescription &&
+               ServiceCode == other.ServiceCode &&
+               PaymentType == other.PaymentType &&
+               TransferMode == other.TransferMode &&
+               TotalPackageCount == other.TotalPackageCount &&
+               TotalPackageWeight == other.TotalPackageWeight &&
+               Items.SequenceEqual(other.Items);
+    }
 }
 
 public class ShipmentItems
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
     [ForeignKey("ShipmentId")]
@@ -51,7 +74,14 @@ public class ShipmentItems
 
     [ForeignKey("ItemUid")]
     public Item? item { get; set; }
-    public int ItemUid { get; set; }
+    public string ItemUid { get; set; }
 
     public int Amount { get; set; }
+
+    public ShipmentItems(string ItemUid, int amount, int shipmentId)
+    {
+        this.ItemUid = ItemUid;
+        this.Amount = amount;
+        this.ShipmentId = shipmentId;
+    }
 }

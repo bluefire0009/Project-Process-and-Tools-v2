@@ -77,14 +77,36 @@ namespace CargoHub.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("ItemId")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ItemId")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("ItemReference")
                         .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("total_allocated")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_available")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_expected")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_on_hand")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_ordered")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -105,14 +127,13 @@ namespace CargoHub.Migrations
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("InventoryLocation");
+                    b.ToTable("InventoryLocations");
                 });
 
             modelBuilder.Entity("CargoHub.Models.Item", b =>
                 {
-                    b.Property<int>("Uid")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("Uid")
+                        .HasColumnType("TEXT");
 
                     b.Property<string>("Code")
                         .HasColumnType("TEXT");
@@ -355,8 +376,9 @@ namespace CargoHub.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ItemUid")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ItemUid")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("INTEGER");
@@ -444,8 +466,9 @@ namespace CargoHub.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ItemUid")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ItemUid")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("ShipmentId")
                         .HasColumnType("INTEGER");
@@ -547,8 +570,8 @@ namespace CargoHub.Migrations
                     b.Property<int>("TransferId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<int>("ItemUid")
-                        .HasColumnType("INTEGER");
+                    b.Property<string>("ItemUid")
+                        .HasColumnType("TEXT");
 
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
@@ -611,9 +634,7 @@ namespace CargoHub.Migrations
                 {
                     b.HasOne("CargoHub.Models.Item", "item")
                         .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ItemId");
 
                     b.Navigation("item");
                 });
