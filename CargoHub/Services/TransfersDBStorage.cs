@@ -21,6 +21,12 @@ public class TransferDBStorage : ITransferStorage
         return transfer;
     }
 
+    public async Task<IEnumerable<TransferItem>> getTransferItems(int transferId)
+    {
+        IEnumerable<TransferItem> items = await db.TransferItems.Where(i => i.TransferId == transferId).ToListAsync();
+        return items;
+    }
+
     public async Task<bool> addTransfer(Transfer transfer)
     {
         if (transfer == null) return false;
