@@ -11,13 +11,13 @@ public class TransferDBStorage : ITransferStorage
 
     public async Task<IEnumerable<Transfer>> getTransfers()
     {
-        List<Transfer> transfers = await db.Transfers.ToListAsync();
+        List<Transfer> transfers = await db.Transfers.Include(t => t.Items).ToListAsync();
         return transfers;
     }
 
     public async Task<Transfer?> getTransfer(int id)
     {
-        Transfer? transfer = await db.Transfers.Where(t => t.Id == id).FirstOrDefaultAsync();
+        Transfer? transfer = await db.Transfers.Include(t => t.Items).FirstOrDefaultAsync(t => t.Id == id);
         return transfer;
     }
 
