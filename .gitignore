@@ -485,3 +485,4 @@ $RECYCLE.BIN/
 
 # My own
 *.sln
+*.vscode
