@@ -14,6 +14,14 @@ public class InventoriesDBStorage : IInventoryStorage
         IEnumerable<Inventory> inventories = await db.Inventories.ToListAsync();
         return inventories;
     }
+    public async Task<IEnumerable<Inventory>> GetInventoriesInPagination(int offset, int limit)
+    {
+        // Fetch locations with pagination
+        return await db.Inventories
+            .Skip(offset) // Skip the first 'offset' items
+            .Take(limit)  // Take the next 'limit' items
+            .ToListAsync();
+    }
 
     public async Task<Inventory?> getInventory(int id)
     {

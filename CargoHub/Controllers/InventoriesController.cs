@@ -20,6 +20,12 @@ public class InventoriesController : Controller
         List<Inventory> inventories = (await inventoryStorage.getInventories()).ToList();
         return Ok(inventories);
     }
+    [HttpGet("pagination")]
+    public async Task<IActionResult> GetInventoriesInPagination([FromQuery] int offset = 0, [FromQuery] int limit = 100)
+    {
+        var inventories = await inventoryStorage.GetInventoriesInPagination(offset, limit);
+        return Ok(inventories);
+    }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSpecificInventory(int id)
