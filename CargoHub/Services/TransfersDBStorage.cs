@@ -55,7 +55,9 @@ public class TransferDBStorage : ITransferStorage
         {
             await db.TransferItems.AddAsync(item);
         }
-
+        transfer.CreatedAt = DateTime.Now;
+        transfer.UpdatedAt = DateTime.Now;
+        transfer.TransferStatus = "Scheduled";
         await db.Transfers.AddAsync(transfer);
 
         await db.SaveChangesAsync();
@@ -122,6 +124,8 @@ public class TransferDBStorage : ITransferStorage
         db.Remove(transferInDatabase);
         await db.SaveChangesAsync();
 
+        updatedTransfer.UpdatedAt = DateTime.Now;
+
         db.Add(updatedTransfer);
         await db.SaveChangesAsync();
 
@@ -154,7 +158,7 @@ public class TransferDBStorage : ITransferStorage
             inventoryWithAskedItem.total_expected = inventoryWithAskedItem.total_on_hand + inventoryWithAskedItem.total_ordered;
             inventoryWithAskedItem.total_available = inventoryWithAskedItem.total_on_hand - inventoryWithAskedItem.total_allocated;
             // remove the item if the transfer results in total_available lower than 0
-            if(inventoryWithAskedItem.total_available <= 0)
+            if (inventoryWithAskedItem.total_available <= 0)
             {
                 db.InventoryLocations.RemoveRange(inventoryWithAskedItem.InventoryLocations);
                 db.Inventories.Remove(inventoryWithAskedItem);
@@ -166,7 +170,7 @@ public class TransferDBStorage : ITransferStorage
             inventoryToTransferTo.total_expected = inventoryToTransferTo.total_on_hand + inventoryToTransferTo.total_ordered;
             inventoryToTransferTo.total_available = inventoryToTransferTo.total_on_hand - inventoryToTransferTo.total_allocated;
             // add the inventoryLocation if it's the first
-            InventoryLocation ilToAdd = new(){InventoryId=inventoryToTransferTo.Id, LocationId = transferInDatabase.TransferTo};
+            InventoryLocation ilToAdd = new() { InventoryId = inventoryToTransferTo.Id, LocationId = transferInDatabase.TransferTo };
             if (!inventoryToTransferTo.InventoryLocations.Any(l => l.LocationId == ilToAdd.LocationId && l.InventoryId == ilToAdd.InventoryId))
             {
                 inventoryToTransferTo.InventoryLocations.ToList().Add(ilToAdd);
