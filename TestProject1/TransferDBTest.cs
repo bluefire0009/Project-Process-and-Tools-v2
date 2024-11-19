@@ -120,6 +120,10 @@ public class TransferDBTest
         addTestResourceToDB(items);
         TransferDBStorage storage = new(db);
 
+        DateTime dateAtStart = new();
+        if (transfer != null)
+            dateAtStart = transfer.CreatedAt;
+
         // Act
         bool actualResult = storage.addTransfer(transfer).Result;
 
@@ -139,6 +143,8 @@ public class TransferDBTest
                 }
                 Assert.IsTrue(db.Transfers.Select(t => t.Id).Contains(transfer.Id));
                 Assert.IsTrue(transfer.Items.Count == db.TransferItems.Count());
+                Assert.IsTrue(transfer.TransferStatus == "Scheduled");
+                Assert.IsTrue(transfer.CreatedAt != dateAtStart);
             }
         }
     }
@@ -242,6 +248,10 @@ public class TransferDBTest
         addTestResourceToDB(items);
         addTestResourceToDB(transfers);
 
+        DateTime dateAtStart = new();
+        if (updatedTransfer != null)
+            dateAtStart = updatedTransfer.UpdatedAt;
+
         TransferDBStorage storage = new(db);
 
         // Act
@@ -249,6 +259,8 @@ public class TransferDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(updatedTransfer.UpdatedAt != dateAtStart);
     }
 
     public static IEnumerable<object[]> CommitTransferTestData => new List<object[]>
@@ -331,6 +343,10 @@ public class TransferDBTest
         }
 
         TransferDBStorage storage = new(db);
+
+        DateTime dateAtStart = new();
+        if (db.Transfers.FirstOrDefault(t => t.Id == idToCommit) != null)
+            dateAtStart = db.Transfers.FirstOrDefault(t => t.Id == idToCommit).UpdatedAt;
 
         // Act
         List<Inventory> copiedInventories = DeepCopy(inventories);
