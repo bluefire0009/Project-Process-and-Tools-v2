@@ -120,6 +120,10 @@ public class TransferDBTest
         addTestResourceToDB(items);
         TransferDBStorage storage = new(db);
 
+        DateTime dateAtStart = new();
+        if (transfer != null)
+            dateAtStart = transfer.CreatedAt;
+
         // Act
         bool actualResult = storage.addTransfer(transfer).Result;
 
@@ -139,6 +143,8 @@ public class TransferDBTest
                 }
                 Assert.IsTrue(db.Transfers.Select(t => t.Id).Contains(transfer.Id));
                 Assert.IsTrue(transfer.Items.Count == db.TransferItems.Count());
+                Assert.IsTrue(transfer.TransferStatus == "Scheduled");
+                Assert.IsTrue(transfer.CreatedAt != dateAtStart);
             }
         }
     }
@@ -241,7 +247,11 @@ public class TransferDBTest
         // Arrange
         addTestResourceToDB(items);
         addTestResourceToDB(transfers);
-        
+
+        DateTime dateAtStart = new();
+        if (updatedTransfer != null)
+            dateAtStart = updatedTransfer.UpdatedAt;
+
         TransferDBStorage storage = new(db);
 
         // Act
@@ -249,67 +259,69 @@ public class TransferDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(updatedTransfer.UpdatedAt != dateAtStart);
     }
 
     public static IEnumerable<object[]> CommitTransferTestData => new List<object[]>
     {
         // Expected false because transfer amount of both transferItems is 110 and amount in inventory is 100
-        new object[] { 
+        new object[] {
             new List<Inventory> {
                 new(){Id = 1, ItemId = "1", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
                 new(){Id = 2, ItemId = "2", InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
-            new List<Location> {new(){Id = 1}, new(){Id = 2}}, 
-            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}}, 
+            new List<Location> {new(){Id = 1}, new(){Id = 2}},
+            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}},
             new List<Transfer> {new(){
-                Id = 1, TransferFrom = 1, TransferTo = 2, 
+                Id = 1, TransferFrom = 1, TransferTo = 2,
                 Items = {
-                    new(){ItemUid = "1", TransferId = 1, Amount = 110}, 
-                    new(){ItemUid = "2", TransferId = 1, Amount = 110} }}}, 
+                    new(){ItemUid = "1", TransferId = 1, Amount = 110},
+                    new(){ItemUid = "2", TransferId = 1, Amount = 110} }}},
             1,
             false,
             TransferDBStorage.TransferResult.notEnoughItems},
         // Same as above but only one amount is bigger than allowed
-        new object[] { 
+        new object[] {
             new List<Inventory> {
                 new(){Id = 1, ItemId = "1", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
                 new(){Id = 2, ItemId = "2", InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
-            new List<Location> {new(){Id = 1}, new(){Id = 2}}, 
-            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}}, 
+            new List<Location> {new(){Id = 1}, new(){Id = 2}},
+            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}},
             new List<Transfer> {new(){
-                Id = 1, TransferFrom = 1, TransferTo = 2, 
+                Id = 1, TransferFrom = 1, TransferTo = 2,
                 Items = {
-                    new(){ItemUid = "1", TransferId = 1, Amount = 90}, 
-                    new(){ItemUid = "2", TransferId = 1, Amount = 110} }}}, 
+                    new(){ItemUid = "1", TransferId = 1, Amount = 90},
+                    new(){ItemUid = "2", TransferId = 1, Amount = 110} }}},
             1,
             false,
             TransferDBStorage.TransferResult.notEnoughItems},
         // Happy Flow test
-        new object[] { 
+        new object[] {
             new List<Inventory> {
                 new(){Id = 1, ItemId = "1", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
                 new(){Id = 2, ItemId = "2", InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
-            new List<Location> {new(){Id = 1}, new(){Id = 2}}, 
-            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}}, 
+            new List<Location> {new(){Id = 1}, new(){Id = 2}},
+            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}},
             new List<Transfer> {new(){
-                Id = 1, TransferFrom = 1, TransferTo = 2, 
+                Id = 1, TransferFrom = 1, TransferTo = 2,
                 Items = {
-                    new(){ItemUid = "1", TransferId = 1, Amount = 90}, 
-                    new(){ItemUid = "2", TransferId = 1, Amount = 90} }}}, 
+                    new(){ItemUid = "1", TransferId = 1, Amount = 90},
+                    new(){ItemUid = "2", TransferId = 1, Amount = 90} }}},
             1,
             true,
             TransferDBStorage.TransferResult.possible},
         // Happy Flow test but inventoryLocation should also be emptied from TransferFrom
-        new object[] { 
+        new object[] {
             new List<Inventory> {
                 new(){Id = 1, ItemId = "1", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
                 new(){Id = 2, ItemId = "2", InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
-            new List<Location> {new(){Id = 1}, new(){Id = 2}}, 
-            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}}, 
+            new List<Location> {new(){Id = 1}, new(){Id = 2}},
+            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}},
             new List<Transfer> {new(){
-                Id = 1, TransferFrom = 1, TransferTo = 2, 
+                Id = 1, TransferFrom = 1, TransferTo = 2,
                 Items = {
-                    new(){ItemUid = "1", TransferId = 1, Amount = 100}, 
-                    new(){ItemUid = "2", TransferId = 1, Amount = 100} }}}, 
+                    new(){ItemUid = "1", TransferId = 1, Amount = 100},
+                    new(){ItemUid = "2", TransferId = 1, Amount = 100} }}},
             1,
             true,
             TransferDBStorage.TransferResult.possible},
@@ -332,6 +344,10 @@ public class TransferDBTest
 
         TransferDBStorage storage = new(db);
 
+        DateTime dateAtStart = new();
+        if (db.Transfers.FirstOrDefault(t => t.Id == idToCommit) != null)
+            dateAtStart = db.Transfers.FirstOrDefault(t => t.Id == idToCommit).UpdatedAt;
+
         // Act
         List<Inventory> copiedInventories = DeepCopy(inventories);
         (bool succeded, TransferDBStorage.TransferResult message) actualResult = storage.commitTransfer(idToCommit).Result;
@@ -340,11 +356,11 @@ public class TransferDBTest
         Assert.IsTrue(actualResult.succeded == expectedResult);
         Assert.IsTrue(actualResult.message == expectedMessage);
         // check amount and location of each transferItem
-        foreach(Transfer transfer in db.Transfers)
+        foreach (Transfer transfer in db.Transfers)
         {
             if (expectedResult == true)
                 Assert.IsTrue(transfer.TransferStatus == "Processed");
-            foreach(TransferItem transferItem in transfer.Items)
+            foreach (TransferItem transferItem in transfer.Items)
             {
                 // false uses the actually original inventories because the original won't be changed if commit fails
                 if (expectedResult == false)
@@ -367,14 +383,14 @@ public class TransferDBTest
         if (resources != null)
         {
             var testTable = db.Set<T>();
-            foreach(T resource in resources)
+            foreach (T resource in resources)
             {
                 testTable.Add(resource);
                 db.SaveChanges();
             }
         }
     }
-    
+
 
     public T DeepCopy<T>(T obj, Dictionary<object, object> visitedObjects = null)
     {
@@ -392,7 +408,14 @@ public class TransferDBTest
             return obj; // No need to copy, return as is
 
         // Create a new instance of the object type
-        T copy = (T)Activator.CreateInstance(obj.GetType());
+        T copy;
+        if (obj is string str)
+        {
+            copy = (T)(object)string.Copy(str); // Create a copy of the string
+        } else {
+            copy = (T)Activator.CreateInstance(obj.GetType());
+        }
+        
 
         // Add the current object to the visitedObjects dictionary
         visitedObjects[obj] = copy;

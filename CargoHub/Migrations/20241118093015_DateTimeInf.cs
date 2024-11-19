@@ -1,22 +1,18 @@
-﻿using System.Diagnostics.CodeAnalysis;
+﻿using System;
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore.Migrations;
 
 #nullable disable
 
 namespace CargoHub.Migrations
 {
-
+    [ExcludeFromCodeCoverage]
     /// <inheritdoc />
-    public partial class m3 : Migration
+    public partial class DateTimeInf : Migration
     {
-        [ExcludeFromCodeCoverage]
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
-            migrationBuilder.DropForeignKey(
-                name: "FK_Inventories_Items_ItemId",
-                table: "Inventories");
-
             migrationBuilder.DropForeignKey(
                 name: "FK_InventoryLocation_Inventories_InventoryId",
                 table: "InventoryLocation");
@@ -38,58 +34,23 @@ namespace CargoHub.Migrations
                 table: "InventoryLocations",
                 newName: "IX_InventoryLocations_LocationId");
 
-            migrationBuilder.AlterColumn<string>(
-                name: "ItemUid",
-                table: "TransferItems",
-                type: "TEXT",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "ItemUid",
-                table: "ShipmentItems",
-                type: "TEXT",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "ItemUid",
-                table: "OrderItems",
-                type: "TEXT",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
-
-            migrationBuilder.AlterColumn<string>(
-                name: "Uid",
-                table: "Items",
-                type: "TEXT",
-                nullable: false,
-                oldClrType: typeof(int),
-                oldType: "INTEGER")
-                .OldAnnotation("Sqlite:Autoincrement", true);
-
-            migrationBuilder.AlterColumn<string>(
-                name: "ItemId",
+            migrationBuilder.AddColumn<DateTime>(
+                name: "CreatedAt",
                 table: "Inventories",
                 type: "TEXT",
-                nullable: true,
-                oldClrType: typeof(int),
-                oldType: "INTEGER");
+                nullable: false,
+                defaultValue: new DateTime(1, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified));
+
+            migrationBuilder.AddColumn<DateTime>(
+                name: "UpdatedAt",
+                table: "Inventories",
+                type: "TEXT",
+                nullable: true);
 
             migrationBuilder.AddPrimaryKey(
                 name: "PK_InventoryLocations",
                 table: "InventoryLocations",
                 columns: new[] { "InventoryId", "LocationId" });
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Inventories_Items_ItemId",
-                table: "Inventories",
-                column: "ItemId",
-                principalTable: "Items",
-                principalColumn: "Uid");
 
             migrationBuilder.AddForeignKey(
                 name: "FK_InventoryLocations_Inventories_InventoryId",
@@ -112,10 +73,6 @@ namespace CargoHub.Migrations
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_Inventories_Items_ItemId",
-                table: "Inventories");
-
-            migrationBuilder.DropForeignKey(
                 name: "FK_InventoryLocations_Inventories_InventoryId",
                 table: "InventoryLocations");
 
@@ -127,6 +84,14 @@ namespace CargoHub.Migrations
                 name: "PK_InventoryLocations",
                 table: "InventoryLocations");
 
+            migrationBuilder.DropColumn(
+                name: "CreatedAt",
+                table: "Inventories");
+
+            migrationBuilder.DropColumn(
+                name: "UpdatedAt",
+                table: "Inventories");
+
             migrationBuilder.RenameTable(
                 name: "InventoryLocations",
                 newName: "InventoryLocation");
@@ -136,61 +101,10 @@ namespace CargoHub.Migrations
                 table: "InventoryLocation",
                 newName: "IX_InventoryLocation_LocationId");
 
-            migrationBuilder.AlterColumn<int>(
-                name: "ItemUid",
-                table: "TransferItems",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "TEXT");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "ItemUid",
-                table: "ShipmentItems",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "TEXT");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "ItemUid",
-                table: "OrderItems",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "TEXT");
-
-            migrationBuilder.AlterColumn<int>(
-                name: "Uid",
-                table: "Items",
-                type: "INTEGER",
-                nullable: false,
-                oldClrType: typeof(string),
-                oldType: "TEXT")
-                .Annotation("Sqlite:Autoincrement", true);
-
-            migrationBuilder.AlterColumn<int>(
-                name: "ItemId",
-                table: "Inventories",
-                type: "INTEGER",
-                nullable: false,
-                defaultValue: 0,
-                oldClrType: typeof(string),
-                oldType: "TEXT",
-                oldNullable: true);
-
             migrationBuilder.AddPrimaryKey(
                 name: "PK_InventoryLocation",
                 table: "InventoryLocation",
                 columns: new[] { "InventoryId", "LocationId" });
-
-            migrationBuilder.AddForeignKey(
-                name: "FK_Inventories_Items_ItemId",
-                table: "Inventories",
-                column: "ItemId",
-                principalTable: "Items",
-                principalColumn: "Uid",
-                onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
                 name: "FK_InventoryLocation_Inventories_InventoryId",
