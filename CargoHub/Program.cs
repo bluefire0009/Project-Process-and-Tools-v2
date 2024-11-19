@@ -16,6 +16,7 @@ namespace CargoHub
             builder.Services.AddScoped<ISupplierStorage, SupplierDBStorage>();
             builder.Services.AddScoped<IItemStorage, ItemsDBStorage>();
             builder.Services.AddScoped<IItemLineStorage, ItemLinesDBStorage>();
+            builder.Services.AddScoped<ILocationStorage, LocationStroage>();
 
             builder.Services.AddDbContext<DatabaseContext>(x => x.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
@@ -28,3 +29,9 @@ namespace CargoHub
         }
     }
 }
+
+
+
+
+// this is needed to make c# integration tests work
+public partial class Program { }

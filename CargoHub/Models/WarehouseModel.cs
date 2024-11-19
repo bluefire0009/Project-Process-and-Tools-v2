@@ -3,7 +3,7 @@ namespace CargoHub.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class Warehouse
+public class Warehouse : IEquatable<Warehouse>
 {
     [Key]
     public int Id { get; set; }
@@ -24,4 +24,25 @@ public class Warehouse
 
     [DataType(DataType.DateTime)]
     public DateTime UpdatedAt { get; set; }
+
+    public bool Equals(Warehouse? other)
+    {
+        if (other is null)
+            return false;
+
+        // Compare all relevant properties except foreign keys
+        return this.Id == other.Id &&
+               this.Code == other.Code &&
+               this.Name == other.Name &&
+               this.Address == other.Address &&
+               this.Zip == other.Zip &&
+               this.City == other.City &&
+               this.Province == other.Province &&
+               this.Country == other.Country &&
+               this.ContactName == other.ContactName &&
+               this.ContactPhone == other.ContactPhone &&
+               this.ContactEmail == other.ContactEmail &&
+               this.CreatedAt == other.CreatedAt &&
+               this.UpdatedAt == other.UpdatedAt;        
+    }
 }
