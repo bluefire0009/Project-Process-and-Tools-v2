@@ -3,17 +3,19 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace CargoHub.Migrations
 {
-    [ExcludeFromCodeCoverage]
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20241118093015_DateTimeInf")]
+    partial class DateTimeInf
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -83,9 +85,8 @@ namespace CargoHub.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
-                    b.Property<string>("ItemId")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("ItemId")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("ItemReference")
                         .HasColumnType("TEXT");
@@ -132,8 +133,9 @@ namespace CargoHub.Migrations
 
             modelBuilder.Entity("CargoHub.Models.Item", b =>
                 {
-                    b.Property<string>("Uid")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("Uid")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Code")
                         .HasColumnType("TEXT");
@@ -376,9 +378,8 @@ namespace CargoHub.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ItemUid")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("ItemUid")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("OrderId")
                         .HasColumnType("INTEGER");
@@ -466,9 +467,8 @@ namespace CargoHub.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ItemUid")
-                        .IsRequired()
-                        .HasColumnType("TEXT");
+                    b.Property<int>("ItemUid")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("ShipmentId")
                         .HasColumnType("INTEGER");
@@ -570,8 +570,8 @@ namespace CargoHub.Migrations
                     b.Property<int>("TransferId")
                         .HasColumnType("INTEGER");
 
-                    b.Property<string>("ItemUid")
-                        .HasColumnType("TEXT");
+                    b.Property<int>("ItemUid")
+                        .HasColumnType("INTEGER");
 
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
@@ -634,7 +634,9 @@ namespace CargoHub.Migrations
                 {
                     b.HasOne("CargoHub.Models.Item", "item")
                         .WithMany()
-                        .HasForeignKey("ItemId");
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("item");
                 });

@@ -20,6 +20,12 @@ public class Inventory
     public int total_available { get; set; } = 0;
 
     public ICollection<InventoryLocation> InventoryLocations { get; set; } = new List<InventoryLocation>();
+    
+    [DataType(DataType.DateTime)]
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
+
+    [DataType(DataType.DateTime)]
+    public DateTime? UpdatedAt { get; set; } = null;
 }
 
 public class InventoryLocation

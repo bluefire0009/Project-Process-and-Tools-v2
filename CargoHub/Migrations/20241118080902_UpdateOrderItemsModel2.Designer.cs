@@ -3,17 +3,19 @@ using System;
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
 namespace CargoHub.Migrations
-{
-    [ExcludeFromCodeCoverage]
+{   
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20241118080902_UpdateOrderItemsModel2")]
+    partial class UpdateOrderItemsModel2
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -77,20 +79,13 @@ namespace CargoHub.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
-
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ItemId")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ItemReference")
-                        .HasColumnType("TEXT");
-
-                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<int>("total_allocated")

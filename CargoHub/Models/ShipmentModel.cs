@@ -65,6 +65,7 @@ public class Shipment : IEquatable<Shipment>
 public class ShipmentItems
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
     [ForeignKey("ShipmentId")]
