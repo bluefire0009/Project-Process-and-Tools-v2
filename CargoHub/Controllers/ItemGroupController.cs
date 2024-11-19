@@ -15,10 +15,10 @@ public class ItemGroupController : Controller
     }
 
     [HttpGet("")]
-    public IActionResult GetAllItemGroup()
+    public Task<IActionResult> GetAllItemGroup()
     {
         List<ItemGroup> itemGroups = itemGroupStorage.getItemGroups().ToList();
-        return Ok(itemGroups);
+        return Task.FromResult<IActionResult>(Ok(itemGroups));
     }
 
     [HttpGet("{id}")]
@@ -59,7 +59,7 @@ public class ItemGroupController : Controller
     {
         if (id <= 0) return BadRequest("Invalid id in the url");
         bool deleted = await itemGroupStorage.deleteItemGroup(id);
-        
+
         if (!deleted) return NotFound($"No itemGroup with id:{id} in the database");
         return Ok($"Deleted itemGroup with id: {id}");
     }
@@ -71,7 +71,7 @@ public class ItemGroupController : Controller
         if (updatedItemGroup == null) BadRequest("updatedItemGroup cannot be null");
 
         bool updated = await itemGroupStorage.updateItemGroup(idToUpdate, updatedItemGroup);
-        
+
         if (!updated) return NotFound($"No itemGroupe with id:{idToUpdate} in the database");
         return Ok($"Updated warhouse id:{idToUpdate} to:{updatedItemGroup}");
     }
