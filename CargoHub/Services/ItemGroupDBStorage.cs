@@ -15,18 +15,18 @@ public class ItemGroupDBStorage : IItemGroupStorage
         return itemGroup;
     }
 
-    public IEnumerable<ItemGroup> getItemGroups()
+    public async Task<IEnumerable<ItemGroup>> getItemGroups()
     {
-        IEnumerable<ItemGroup> itemGroups = db.ItemGroups.AsEnumerable();
+        IEnumerable<ItemGroup> itemGroups = await db.ItemGroups.ToListAsync();
         return itemGroups;
     }
-    
+
     public async Task<bool> addItemGroup(ItemGroup itemGroup)
     {
         if (itemGroup == null) return false;
         if (itemGroup.Id <= 0) return false;
 
-        ItemGroup? itemGroupInDatabase = await db.ItemGroups.Where(i => i.Id == itemGroup.Id).FirstOrDefaultAsync(); 
+        ItemGroup? itemGroupInDatabase = await db.ItemGroups.Where(i => i.Id == itemGroup.Id).FirstOrDefaultAsync();
         if (itemGroupInDatabase != null) return false;
 
         itemGroup.CreatedAt = DateTime.Now;
@@ -64,7 +64,7 @@ public class ItemGroupDBStorage : IItemGroupStorage
         if (itemGroupInDatabase == null) return false;
 
         db.ItemGroups.Remove(itemGroupInDatabase);
-        
+
         await db.SaveChangesAsync();
         return true;
     }
@@ -72,7 +72,7 @@ public class ItemGroupDBStorage : IItemGroupStorage
     public IEnumerable<Item>? getItemGroupItems(int itemGroupId)
     {
         if (itemGroupId <= 0) return null;
-        
+
         IEnumerable<Item> items = db.Items.Where(l => l.ItemGroup == itemGroupId);
         return items;
     }

@@ -8,9 +8,9 @@ public class ClientDBStorage : IClientStorage
     {
         this.db = db;
     }
-    public IEnumerable<Client> getClients()
+    public async Task<IEnumerable<Client>> getClients()
     {
-        IEnumerable<Client> client = db.Clients.AsEnumerable();
+        IEnumerable<Client> client = await db.Clients.ToListAsync();
         return client;
     }
     public async Task<IEnumerable<Client>> GetClientsInPagination(int offset, int limit)
@@ -31,7 +31,7 @@ public class ClientDBStorage : IClientStorage
         if (client == null) return false;
         if (client.Id <= 0) return false;
 
-        Client? clientInDatabase = await db.Clients.Where(c => c.Id == client.Id).FirstOrDefaultAsync(); 
+        Client? clientInDatabase = await db.Clients.Where(c => c.Id == client.Id).FirstOrDefaultAsync();
         if (clientInDatabase != null) return false;
 
         client.CreatedAt = DateTime.Now;
@@ -48,7 +48,7 @@ public class ClientDBStorage : IClientStorage
         if (clientInDatabase == null) return false;
 
         db.Clients.Remove(clientInDatabase);
-        
+
         await db.SaveChangesAsync();
         return true;
     }
@@ -74,7 +74,7 @@ public class ClientDBStorage : IClientStorage
     public IEnumerable<Order>? getClientOrders(int clientId)
     {
         if (clientId <= 0) return null;
-        
+
         IEnumerable<Order> orders = db.Orders.Where(o => o.BillTo == clientId || o.ShipTo == clientId);
         return orders;
     }    

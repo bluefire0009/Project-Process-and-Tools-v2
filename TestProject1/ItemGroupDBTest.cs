@@ -39,7 +39,7 @@ public class ItemGroupDBStorageTest
         ItemGroupDBStorage storage = new(db);
 
         // Act
-        List<ItemGroup> result = storage.getItemGroups().ToList();
+        List<ItemGroup> result = storage.getItemGroups().Result.ToList();
 
         // Assert
         Assert.AreEqual(itemGroups.Count, result.Count);
