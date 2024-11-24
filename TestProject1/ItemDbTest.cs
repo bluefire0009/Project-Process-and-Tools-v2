@@ -107,7 +107,7 @@ public class ItemDBTest
                     new List<Warehouse> { new Warehouse { Id = 1, Code = "WH1", Name = "Warehouse 1" }, new Warehouse { Id = 2, Code = "WH2", Name = "Warehouse 2" } },
                     new List<Inventory> { new Inventory { Id = 1, ItemId = "P00001", total_on_hand = 15, InventoryLocations = new List<InventoryLocation> { new() { InventoryId = 1, LocationId = 1 } } }, new Inventory { Id = 2, ItemId = "P00002", total_on_hand = 20, InventoryLocations = new List<InventoryLocation> { new() { InventoryId = 2, LocationId = 2 } } }, new Inventory { Id = 3, ItemId = "P00003", total_on_hand = 10, InventoryLocations = new List<InventoryLocation> { new() { InventoryId = 3, LocationId = 3 } } } },
                     "P00002", 1, 20},
-        // Test with two items in database, each in different warehouse, in one warehouse there are the same item on two location
+        // Test with two items in database, each in different warehouse, in one warehouse there two locations with the same item
         new object[]{
                     new List<Item> { new Item { Uid = "P00001", Code = "ITEM1", Description = "Test Item 1" }, new Item { Uid = "P00002", Code = "ITEM2", Description = "Test Item 2" } },
                     new List<Location> { new Location { Id = 1, WareHouseId = 1, Code = "LOC1", Name = "Location 1" }, new Location { Id = 2, WareHouseId = 1, Code = "LOC2", Name = "Location 2" }, new Location { Id = 3, WareHouseId = 2, Code = "LOC3", Name = "Location 3" } },
