@@ -24,7 +24,7 @@ public class ItemTypesController : Controller {
         if (id < 0) return BadRequest("invalid uid");
         ItemType? itemType = await ItemTypeStorage.GetItemType(id);
 
-        if (itemType == null) return NotFound($"No item with id:{id} found");
+        if (itemType == null) return NotFound($"No item type with id:{id} found");
         return Ok(itemType);
     }
 
@@ -42,8 +42,8 @@ public class ItemTypesController : Controller {
 
         bool added = await ItemTypeStorage.AddItemType(itemType);
 
-        if (!added) return BadRequest($"Couldn't add item:{JsonConvert.SerializeObject(itemType)}");
-        return Ok("Item has been created");
+        if (!added) return BadRequest($"Couldn't add item type:{JsonConvert.SerializeObject(itemType)}");
+        return Ok("Item type has been created");
     }
 
     [HttpDelete("{id}")]
@@ -51,8 +51,8 @@ public class ItemTypesController : Controller {
         if (id < 0) return BadRequest("invalid id");
 
         bool removed = await ItemTypeStorage.DeleteItemType(id);
-        if (!removed) return BadRequest($"Couldn't remove item with id {id}");
-        return Ok("Item has been created");
+        if (!removed) return BadRequest($"Couldn't remove item type with id {id}");
+        return Ok("Item type has been created");
     }
 
     [HttpPut("{id}")]
@@ -61,11 +61,11 @@ public class ItemTypesController : Controller {
         if (itemType.Id != id) return BadRequest("id does not type up");
 
         ItemType? existingItemType = await ItemTypeStorage.GetItemType(id);
-        if (existingItemType is null) return NotFound($"Item with uid:{id} not found");
+        if (existingItemType is null) return NotFound($"Item type with uid:{id} not found");
 
         bool updated = await ItemTypeStorage.UpdateItemType(id, itemType);
-        if (!updated) return NotFound($"No item with uid:{id} in the database");
+        if (!updated) return NotFound($"No item type with uid:{id} in the database");
 
-        return Ok($"Updated warhouse id:{id} to:{itemType}");
+        return Ok($"Updated item type id:{id} to:{itemType}");
     }
 }

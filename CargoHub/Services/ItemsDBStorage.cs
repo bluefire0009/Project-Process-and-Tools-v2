@@ -16,6 +16,11 @@ public class ItemsDBStorage : IItemStorage
 
         Item? itemInDb = await db.Items.FirstOrDefaultAsync(_ => _.Uid == item.Uid);
         if (itemInDb != null) return false;
+
+        ItemLine? itemLineInDb = await db.ItemLines.FirstOrDefaultAsync(_ => _.Id == item.ItemLine);
+        if (itemInDb == null) return false;
+        ItemType? itemTypeInDb = await db.ItemTypes.FirstOrDefaultAsync(_ => _.Id == item.ItemType);
+        if (itemInDb == null) return false;
         
         item.CreatedAt = DateTime.Now;
         item.UpdatedAt = DateTime.Now;
