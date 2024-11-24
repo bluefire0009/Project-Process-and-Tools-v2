@@ -14,23 +14,23 @@ namespace CargoHub.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropForeignKey(
-                name: "FK_InventoryLocation_Inventories_InventoryId",
-                table: "InventoryLocation");
+                name: "FK_InventoryLocations_Inventories_InventoryId",
+                table: "InventoryLocations");
 
             migrationBuilder.DropForeignKey(
-                name: "FK_InventoryLocation_Locations_LocationId",
-                table: "InventoryLocation");
+                name: "FK_InventoryLocations_Locations_LocationId",
+                table: "InventoryLocations");
 
             migrationBuilder.DropPrimaryKey(
-                name: "PK_InventoryLocation",
-                table: "InventoryLocation");
+                name: "PK_InventoryLocations",
+                table: "InventoryLocations");
 
             migrationBuilder.RenameTable(
-                name: "InventoryLocation",
+                name: "InventoryLocations",
                 newName: "InventoryLocations");
 
             migrationBuilder.RenameIndex(
-                name: "IX_InventoryLocation_LocationId",
+                name: "IX_InventoryLocations_LocationId",
                 table: "InventoryLocations",
                 newName: "IX_InventoryLocations_LocationId");
 
@@ -94,29 +94,29 @@ namespace CargoHub.Migrations
 
             migrationBuilder.RenameTable(
                 name: "InventoryLocations",
-                newName: "InventoryLocation");
+                newName: "InventoryLocations");
 
             migrationBuilder.RenameIndex(
                 name: "IX_InventoryLocations_LocationId",
-                table: "InventoryLocation",
-                newName: "IX_InventoryLocation_LocationId");
+                table: "InventoryLocations",
+                newName: "IX_InventoryLocations_LocationId");
 
             migrationBuilder.AddPrimaryKey(
-                name: "PK_InventoryLocation",
-                table: "InventoryLocation",
+                name: "PK_InventoryLocations",
+                table: "InventoryLocations",
                 columns: new[] { "InventoryId", "LocationId" });
 
             migrationBuilder.AddForeignKey(
-                name: "FK_InventoryLocation_Inventories_InventoryId",
-                table: "InventoryLocation",
+                name: "FK_InventoryLocations_Inventories_InventoryId",
+                table: "InventoryLocations",
                 column: "InventoryId",
                 principalTable: "Inventories",
                 principalColumn: "Id",
                 onDelete: ReferentialAction.Cascade);
 
             migrationBuilder.AddForeignKey(
-                name: "FK_InventoryLocation_Locations_LocationId",
-                table: "InventoryLocation",
+                name: "FK_InventoryLocations_Locations_LocationId",
+                table: "InventoryLocations",
                 column: "LocationId",
                 principalTable: "Locations",
                 principalColumn: "Id",
