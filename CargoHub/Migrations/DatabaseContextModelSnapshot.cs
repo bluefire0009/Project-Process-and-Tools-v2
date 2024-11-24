@@ -18,6 +18,28 @@ namespace CargoHub.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
 
+            modelBuilder.Entity("CargoHub.Models.ApiKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key_type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key_value")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("API_keys", (string)null);
+                });
+
             modelBuilder.Entity("CargoHub.Models.Client", b =>
                 {
                     b.Property<int>("Id")
@@ -84,7 +106,6 @@ namespace CargoHub.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ItemId")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ItemReference")
@@ -660,19 +681,19 @@ namespace CargoHub.Migrations
 
             modelBuilder.Entity("CargoHub.Models.Item", b =>
                 {
-                    b.HasOne("CargoHub.Models.ItemGroup", "itemGroup")
+                    b.HasOne("CargoHub.Models.ItemGroup", "itemGroupJson")
                         .WithMany()
                         .HasForeignKey("ItemGroup")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CargoHub.Models.ItemLine", "itemLine")
+                    b.HasOne("CargoHub.Models.ItemLine", "itemLineJson")
                         .WithMany()
                         .HasForeignKey("ItemLine")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CargoHub.Models.ItemType", "itemType")
+                    b.HasOne("CargoHub.Models.ItemType", "itemTypeJson")
                         .WithMany()
                         .HasForeignKey("ItemType")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -686,11 +707,11 @@ namespace CargoHub.Migrations
 
                     b.Navigation("SupplierById");
 
-                    b.Navigation("itemGroup");
+                    b.Navigation("itemGroupJson");
 
-                    b.Navigation("itemLine");
+                    b.Navigation("itemLineJson");
 
-                    b.Navigation("itemType");
+                    b.Navigation("itemTypeJson");
                 });
 
             modelBuilder.Entity("CargoHub.Models.Location", b =>
