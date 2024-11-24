@@ -69,4 +69,14 @@ public class ItemsDBStorage : IItemStorage
 
         return true;
     }
+
+    public async Task<int> GetItemAmountInWarehouse(string itemId, int warehouseId)
+    {
+        int amountFound = 0;
+        List<int> locationsIds = await db.Locations.Where(l => l.WareHouseId == warehouseId).Select(l => l.Id).ToListAsync();
+        var inventories = await db.Inventories.Where(i => i.ItemId == itemId && i.InventoryLocations.Select(il => il.LocationId).Any(id => locationsIds.Contains(id))).ToListAsync();
+        foreach (Inventory inventory in inventories)
+            if (inventory.ItemId == itemId) amountFound += inventory.total_on_hand;
+        return amountFound;
+    }
 }
