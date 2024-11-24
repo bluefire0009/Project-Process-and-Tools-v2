@@ -12,7 +12,7 @@ public class Item : IEquatable<Item>
     public string? Code { get; set; }
     public string? Description { get; set; }
     public string? ShortDescription { get; set; }
-    public int UpcCode { get; set; }
+    public string? UpcCode { get; set; }
     public string? ModelNumber { get; set; }
     public string? CommodityCode { get; set; }
 
@@ -35,7 +35,7 @@ public class Item : IEquatable<Item>
     [ForeignKey("SupplierId")]
     public Supplier? SupplierById { get; set; }
     public int SupplierId { get; set; }
-    public int SupplierCode { get; set; }
+    public string? SupplierCode { get; set; }
     public string? SupplierPartNumber { get; set; }
 
     [DataType(DataType.DateTime)]
