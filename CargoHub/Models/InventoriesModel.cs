@@ -20,7 +20,7 @@ public class Inventory
     public int total_available { get; set; } = 0;
 
     public ICollection<InventoryLocation> InventoryLocations { get; set; } = new List<InventoryLocation>();
-    
+
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
@@ -30,6 +30,10 @@ public class Inventory
 
 public class InventoryLocation
 {
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+
     [ForeignKey("InventoryId")]
     public Inventory? inventory { get; set; }
     public int InventoryId { get; set; }

@@ -32,8 +32,7 @@ public class Order : IEquatable<Order>
     public Client? client { get; set; }
     public int? BillTo { get; set; }
 
-    public Shipment? ShipmentById { get; set; }
-    public int? ShipmentId { get; set; }
+    public ICollection<ShipmentsInOrders> ShipmentIds { get; set; } = new List<ShipmentsInOrders>();
 
     public float TotalAmount { get; set; }
     public float TotalDiscount { get; set; }
@@ -65,13 +64,14 @@ public class Order : IEquatable<Order>
                WareHouseId == other.WareHouseId &&
                ShipTo == other.ShipTo &&
                BillTo == other.BillTo &&
-               ShipmentId == other.ShipmentId &&
                TotalAmount == other.TotalAmount &&
                TotalDiscount == other.TotalDiscount &&
                TotalTax == other.TotalTax &&
                TotalSurcharge == other.TotalSurcharge &&
                (Items == other.Items ||
-                (Items != null && other.Items != null && Items.SequenceEqual(other.Items)));
+                (Items != null && other.Items != null && Items.SequenceEqual(other.Items))) &&
+               (ShipmentIds == other.ShipmentIds ||
+                (ShipmentIds != null && other.ShipmentIds != null && ShipmentIds.SequenceEqual(other.ShipmentIds)));
     }
 
     public static bool operator ==(Order? left, Order? right)
@@ -126,5 +126,28 @@ public class OrderItems : IEquatable<OrderItems>
         return this.OrderId == other.OrderId &&
         this.ItemUid == other.ItemUid &&
         this.Amount == other.Amount;
+    }
+
+
+}
+
+public class ShipmentsInOrders
+{
+    [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    public int Id { get; set; }
+
+    [ForeignKey("OrderId")]
+    public Order? order { get; set; }
+    public int OrderId { get; set; }
+
+    [ForeignKey("ShipmentId")]
+    public Shipment? shipment { get; set; }
+    public int ShipmentId { get; set; }
+
+    public ShipmentsInOrders(int orderId, int shipmentId)
+    {
+        this.ShipmentId = shipmentId;
+        this.OrderId = orderId;
     }
 }

@@ -101,6 +101,11 @@ public class ShipmentStorage : IShipmentStorage
         // FoundShipment.UpdatedAt = shipment.UpdatedAt;
         // FoundShipment.Items = shipment.Items;
 
+        DB.OrdersInShipment.RemoveRange(FoundShipment.OrderIds);
+        DB.OrdersInShipment.AddRange(shipment.OrderIds);
+
+        await DB.SaveChangesAsync();
+
 
         // using .Update doesnt work for shipment.Items so I remove and then add the items
         foreach (var item in FoundShipment.Items)

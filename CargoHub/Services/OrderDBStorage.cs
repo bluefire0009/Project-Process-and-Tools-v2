@@ -36,8 +36,8 @@ public class OrderStorage : IOrderStorage
     public async Task<IEnumerable<int>> GetOrdersInShipment(int shipmentId)
     {
         // get all ordersId's in a shipment with shipmentId
-        List<Shipment> Shipments = await DB.Shipments.Where(x => x.Id == shipmentId).ToListAsync();
-        return Shipments.Select(x => x.OrderId).ToList();
+        List<ShipmentsInOrders> orderShipments = await DB.ShipmentsInOrders.Where(x => x.ShipmentId == shipmentId).ToListAsync();
+        return orderShipments.Select(x => x.ShipmentId);
     }
 
     // This already exists in the clients controller
@@ -105,8 +105,7 @@ public class OrderStorage : IOrderStorage
         // FoundOrder.location = order.location;
         // FoundOrder.BillTo = order.BillTo;
         // FoundOrder.client = order.client;
-        // FoundOrder.ShipmentById = order.ShipmentById;
-        // FoundOrder.ShipmentId = order.ShipmentId;
+        // FoundOrder.ShipmentIds = order.ShipmentIds;
         FoundOrder.TotalAmount = order.TotalAmount;
         FoundOrder.TotalDiscount = order.TotalDiscount;
         FoundOrder.TotalTax = order.TotalTax;
@@ -114,6 +113,12 @@ public class OrderStorage : IOrderStorage
         // FoundOrder.CreatedAt = order.CreatedAt;
         // FoundOrder.UpdatedAt = order.UpdatedAt;
         // FoundOrder.Items = order.Items;
+
+        // use this to update the list of ShipmentIds 
+        DB.ShipmentsInOrders.RemoveRange(FoundOrder.ShipmentIds);
+        DB.ShipmentsInOrders.AddRange(order.ShipmentIds);
+
+        await DB.SaveChangesAsync();
 
         foreach (var item in FoundOrder.Items)
         {
@@ -268,7 +273,7 @@ public class OrderStorage : IOrderStorage
             {
                 Order? order = await GetOrder(orderId);
                 if (order == null) return false;
-                order.ShipmentId = -1;
+                order.ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(order.Id, -1) };
                 order.OrderStatus = "Scheduled";
                 await UpdateOrder(orderId, order);
             }
@@ -277,7 +282,7 @@ public class OrderStorage : IOrderStorage
         {
             Order? order = await GetOrder(orderId);
             if (order == null) return false;
-            order.ShipmentId = shipmentId;
+            order.ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(order.Id, shipmentId) };
             order.OrderStatus = "Packed";
             await UpdateOrder(orderId, order);
         }

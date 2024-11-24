@@ -35,9 +35,6 @@ public class OrderDBTest
         Client client1 = new() { Id = 1 };
         DB.Clients.Add(client1);
 
-        Shipment shipment1 = new() { Id = 1, OrderId = 1 };
-        DB.Shipments.Add(shipment1);
-
         // invenories need total fields for testing item counts
         Inventory inventory1 = new()
         {
@@ -153,7 +150,7 @@ public class OrderDBTest
 
     [TestMethod]
     [DynamicData(nameof(TestOrdersData), typeof(OrderDBTest))]
-    public async Task TestGetOrdersInShipments(List<Order> orders, List<Tuple<int, int, int, int, int>> expectedInventories)
+    public async Task TestGetShipmentsInOrderss(List<Order> orders, List<Tuple<int, int, int, int, int>> expectedInventories)
     {
         // expand this test later when it becomes possible/easy to add multiple orders to a shipment
         OrderStorage storage = new(db);
@@ -223,6 +220,56 @@ public class OrderDBTest
         }
     }
 
+    [TestMethod]
+    public async Task TestShipmentIds()
+    {
+        OrderStorage storage = new(db);
+
+        Order testOrder = new()
+        {
+            Id = 10,
+            ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(1, 1), new ShipmentsInOrders(1, 2), new ShipmentsInOrders(1, 3) }
+        };
+
+        bool orderpostsucces = await storage.AddOrder(testOrder);
+        Assert.IsTrue(orderpostsucces);
+
+        Order? FoundOrder = await storage.GetOrder(testOrder.Id);
+        Assert.IsNotNull(FoundOrder);
+
+        Assert.AreEqual(3, FoundOrder.ShipmentIds.Count());
+    }
+
+    [TestMethod]
+    public async Task TestAddingShipmentIds()
+    {
+        OrderStorage storage = new(db);
+
+        Order testOrder = new()
+        {
+            Id = 1,
+            ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(1, 1) }
+        };
+
+        Order updatedTestOrder = new()
+        {
+            Id = 1,
+            ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(1, 1), new ShipmentsInOrders(1, 2), new ShipmentsInOrders(1, 3) }
+        };
+
+        bool orderpostsucces = await storage.AddOrder(testOrder);
+        Assert.IsTrue(orderpostsucces);
+
+        bool orderupdatesucces = await storage.UpdateOrder(updatedTestOrder.Id, updatedTestOrder);
+        Assert.IsTrue(orderupdatesucces);
+
+        Order? FoundOrder = await storage.GetOrder(testOrder.Id);
+        Assert.IsNotNull(FoundOrder);
+
+        Assert.AreEqual(3, FoundOrder.ShipmentIds.Count());
+    }
+
+
 
     public static IEnumerable<object[]> TestOrdersData => new List<object[]>
     {
@@ -245,7 +292,7 @@ public class OrderDBTest
                 WareHouseId = 1,
                 ShipTo = 1,
                 BillTo = 1,
-                ShipmentId = 1,
+                ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(1, 1) },
                 TotalAmount = 6182.77f,
                 TotalDiscount = 401.42f,
                 TotalTax = 780.29f,
@@ -284,7 +331,7 @@ public class OrderDBTest
                 WareHouseId = 1,
                 ShipTo = 1,
                 BillTo = 1,
-                ShipmentId = 1,
+                ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(2, 1) },
                 TotalAmount = 1520.50f,
                 TotalDiscount = 100.00f,
                 TotalTax = 120.75f,
@@ -325,7 +372,7 @@ public class OrderDBTest
                 WareHouseId = 1,
                 ShipTo = 1,
                 BillTo = 1,
-                ShipmentId = 1,
+                ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(3, 1) },
                 TotalAmount = 850.25f,
                 TotalDiscount = 50.00f,
                 TotalTax = 68.75f,
@@ -352,7 +399,7 @@ public class OrderDBTest
                 WareHouseId = 1,
                 ShipTo = 1,
                 BillTo = 1,
-                ShipmentId = 1,
+                ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(4, 1) },
                 TotalAmount = 3200.00f,
                 TotalDiscount = 300.00f,
                 TotalTax = 200.00f,
@@ -396,7 +443,7 @@ public class OrderDBTest
                     WareHouseId = 1,
                     ShipTo = 1,
                     BillTo = 1,
-                    ShipmentId = 1,
+                    ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(1, 1) },
                     TotalAmount = 6182.77f,
                     TotalDiscount = 401.42f,
                     TotalTax = 780.29f,

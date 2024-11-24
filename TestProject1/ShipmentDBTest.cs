@@ -181,7 +181,54 @@ public class ShipmentDBTest
     }
 
 
+    [TestMethod]
+    public async Task TestOrderIds()
+    {
+        ShipmentStorage storage = new(db);
 
+        Shipment testShipment = new()
+        {
+            Id = 10,
+            OrderIds = new List<OrdersInShipment> { new OrdersInShipment(1, 1), new OrdersInShipment(1, 2), new OrdersInShipment(1, 3) }
+        };
+
+        bool postsucces = await storage.AddShipment(testShipment);
+        Assert.IsTrue(postsucces);
+
+        Shipment? FoundOrder = await storage.GetShipment(testShipment.Id);
+        Assert.IsNotNull(FoundOrder);
+
+        Assert.AreEqual(3, FoundOrder.OrderIds.Count());
+    }
+
+    [TestMethod]
+    public async Task TestAddingOrderIds()
+    {
+        ShipmentStorage storage = new(db);
+
+        Shipment testShipment = new()
+        {
+            Id = 1,
+            OrderIds = new List<OrdersInShipment> { new OrdersInShipment(1, 1) }
+        };
+
+        Shipment updatedTestShipment = new()
+        {
+            Id = 1,
+            OrderIds = new List<OrdersInShipment> { new OrdersInShipment(1, 1), new OrdersInShipment(2, 1), new OrdersInShipment(3, 1) }
+        };
+
+        bool orderpostsucces = await storage.AddShipment(testShipment);
+        Assert.IsTrue(orderpostsucces);
+
+        bool orderupdatesucces = await storage.UpdateShipment(updatedTestShipment.Id, updatedTestShipment);
+        Assert.IsTrue(orderupdatesucces);
+
+        Shipment? FoundShipment = await storage.GetShipment(updatedTestShipment.Id);
+        Assert.IsNotNull(FoundShipment);
+
+        Assert.AreEqual(3, FoundShipment.OrderIds.Count());
+    }
 
 
     // Unique Shipment Types:
@@ -199,7 +246,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 1,
-                    OrderId = 1,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(1, 1) },
                     SourceId = 201,
                     OrderDate = DateTime.Parse("2024-11-01 10:00:00"),
                     RequestDate = DateTime.Parse("2024-11-02 12:00:00"),
@@ -237,7 +284,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 2,
-                    OrderId = 2,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(2, 2) },
                     SourceId = 202,
                     OrderDate = DateTime.Parse("2024-11-04 09:30:00"),
                     RequestDate = DateTime.Parse("2024-11-05 14:00:00"),
@@ -263,7 +310,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 3,
-                    OrderId = 3,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(3, 3) },
                     SourceId = 203,
                     OrderDate = DateTime.Parse("2024-11-07 13:00:00"),
                     RequestDate = DateTime.Parse("2024-11-08 16:00:00"),
@@ -300,7 +347,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 4,
-                    OrderId = 4,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(4, 4) },
                     SourceId = 204,
                     OrderDate = DateTime.Parse("2024-11-10 11:00:00"),
                     RequestDate = DateTime.Parse("2024-11-11 14:30:00"),
@@ -326,7 +373,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 5,
-                    OrderId = 5,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(5, 5) },
                     SourceId = 205,
                     OrderDate = DateTime.Parse("2024-11-13 12:00:00"),
                     RequestDate = DateTime.Parse("2024-11-14 15:00:00"),
@@ -351,7 +398,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 6,
-                    OrderId = 6,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(6, 6) },
                     SourceId = 206,
                     OrderDate = DateTime.Parse("2024-11-16 14:00:00"),
                     RequestDate = DateTime.Parse("2024-11-17 16:00:00"),
@@ -393,7 +440,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 1,
-                    OrderId = 1,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(1, 1) },
                     SourceId = 1,
                     OrderDate = DateTime.Parse("2024-11-15T10:00:00Z"),
                     RequestDate = DateTime.Parse("2024-11-16T12:00:00Z"),
@@ -454,7 +501,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 2,
-                    OrderId = 2,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(2, 2) },
                     SourceId = 2,
                     OrderDate = DateTime.Parse("2024-11-18T09:00:00Z"),
                     RequestDate = DateTime.Parse("2024-11-19T14:00:00Z"),
