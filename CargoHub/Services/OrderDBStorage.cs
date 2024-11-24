@@ -2,6 +2,7 @@ using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 using CargoHub.HelperFuctions;
 using System.Diagnostics.CodeAnalysis;
+using System.Security.Cryptography;
 
 public class OrderStorage : IOrderStorage
 {
@@ -283,5 +284,19 @@ public class OrderStorage : IOrderStorage
         }
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;
+    }
+
+    public async Task<List<Location>> GetAllItemLocations(int id) {
+        List<OrderItems> orderItems = await DB.OrderItems.Where(_ => _.OrderId == id).ToListAsync();
+        Console.WriteLine(orderItems);
+        List<Item> items = await DB.Items.Where(_ => orderItems.Select(o => o.ItemUid).Contains(_.Uid)).ToListAsync();
+        Console.WriteLine(items);
+        List<Inventory> inventories = await DB.Inventories.Where(_ => items.Select(i => i.Uid).Contains(_.ItemId)).ToListAsync();
+        Console.WriteLine(inventories);
+        List<InventoryLocation> inventoryLocations = await DB.InventoryLocations.Where(_ => inventories.Select(i => i.Id).Contains(_.InventoryId)).ToListAsync();
+        Console.WriteLine(inventoryLocations);
+        List<Location> Locations = await DB.Locations.Where(_ => inventoryLocations.Select(i => i.LocationId).Contains(_.Id)).ToListAsync();
+        Console.WriteLine(Locations);
+        return Locations;
     }
 }
