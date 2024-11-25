@@ -68,4 +68,15 @@ public class ItemTypesController : Controller {
 
         return Ok($"Updated warhouse id:{id} to:{itemType}");
     }
+    [HttpGet("{id}/weight")]
+    public async Task<IActionResult> GetItemTypeWeight(int id)
+    {
+        if (id < 0) return BadRequest("Invalid ID");
+
+        float? weight = await ItemTypeStorage.GetItemTypeWeight(id);
+
+        if (weight == null) return NotFound($"No item type with ID {id} found or weight not set");
+
+        return Ok(weight);
+    }
 }
