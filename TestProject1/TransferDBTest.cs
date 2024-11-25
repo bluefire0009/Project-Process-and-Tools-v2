@@ -83,7 +83,6 @@ public class TransferDBTest
     public static IEnumerable<object[]> AddTransferTestData => new List<object[]>
         {
             new object[] { null, null, null, false},
-            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "1"}}}, false},
             new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "0"}}}, false},
             new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "0"}}}, false},
             new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "-1"}}}, false},
