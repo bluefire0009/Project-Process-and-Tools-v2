@@ -475,5 +475,54 @@ public class OrderDBTest
         }
     }
 
+    public static IEnumerable<object[]> ItemsTestData => new List<object[]>
+        {
+            new object[] { 565, new List<OrderItems> {new ("565", 565, 565)}, new List<Item> { new() {Uid = "565"} }, new List<Inventory> { new() {Id = 565, ItemId = "565", Description = "InventoryDescription"} }, new List<InventoryLocation> { new() { InventoryId = 565, LocationId = 565 } }, new List<Location> { new() { Id = 565, Name = "Location Name 565" } }, new List<Location> { new() { Id = 565, Name = "Location Name 565" } }},
+        };
+    [TestMethod]
+    [DynamicData(nameof(ItemsTestData), DynamicDataSourceType.Property)]
+    public void TestGetAllItemLocations(int soughtId, List<OrderItems> orderItems, List<Item> items, List<Inventory> inventories, List<InventoryLocation> inventoryLocations, List<Location> locations, List<Location> expectedLocations)
+    {
+        // Arrange
+        foreach (Item item in items)
+        {
+            db.Items.Add(item);
+            db.SaveChanges();
+        }
 
+        foreach (OrderItems orderItem in orderItems)
+        {
+            db.OrderItems.Add(orderItem);
+            db.SaveChanges();
+        }
+
+        foreach (Inventory inventory in inventories)
+        {
+            db.Inventories.Add(inventory);
+            db.SaveChanges();
+        }
+
+        foreach (Location location in locations)
+        {
+            db.Locations.Add(location);
+            db.SaveChanges();
+        }
+
+        foreach (InventoryLocation inventoryLocation in inventoryLocations)
+        {
+            db.InventoryLocations.Add(inventoryLocation);
+            db.SaveChanges();
+        }
+        OrderStorage storage = new(db);
+
+        // Act
+        List<Location> result = storage.GetAllItemLocations(soughtId).Result.ToList();
+
+        // Assert
+        Assert.IsTrue(result.Count == expectedLocations.Count);
+        for (int locationIterator = 0; locationIterator < result.Count; locationIterator++)
+        {
+            Assert.IsTrue(result[locationIterator].Equals(expectedLocations[locationIterator]));
+        }
+    }
 }
