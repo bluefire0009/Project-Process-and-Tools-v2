@@ -84,6 +84,7 @@ namespace CargoHub.Migrations
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ItemId")
+                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ItemReference")

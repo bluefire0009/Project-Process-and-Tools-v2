@@ -2,21 +2,16 @@ using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
 
-public class LocationStroage : ILocationStorage
+public class LocationStorage : ILocationStorage
 {
     DatabaseContext DB;
 
-    private readonly int _maxItemsLimit;
 
-    public LocationStroage(DatabaseContext db)
+    public LocationStorage(DatabaseContext db)
     {
         DB = db;
     }
 
-    public int MaxItemsLimit()
-    {
-        return _maxItemsLimit;
-    }
 
     public async Task<IEnumerable<Location>> GetLocations()
     {

@@ -43,20 +43,7 @@ public class SupplierDBTest
         Assert.IsTrue(result.Count == suppliers.Count);
         for (int supplierIterator = 0; supplierIterator < result.Count; supplierIterator++)
         {
-            Assert.IsTrue(result[supplierIterator].Id == suppliers[supplierIterator].Id);
-            Assert.IsTrue(result[supplierIterator].Code == suppliers[supplierIterator].Code);
-            Assert.IsTrue(result[supplierIterator].Name == suppliers[supplierIterator].Name);
-            Assert.IsTrue(result[supplierIterator].Address == suppliers[supplierIterator].Address);
-            Assert.IsTrue(result[supplierIterator].AddressExtra == suppliers[supplierIterator].AddressExtra);
-            Assert.IsTrue(result[supplierIterator].City == suppliers[supplierIterator].City);
-            Assert.IsTrue(result[supplierIterator].ZipCode == suppliers[supplierIterator].ZipCode);
-            Assert.IsTrue(result[supplierIterator].Province == suppliers[supplierIterator].Province);
-            Assert.IsTrue(result[supplierIterator].Country == suppliers[supplierIterator].Country);
-            Assert.IsTrue(result[supplierIterator].ContactName == suppliers[supplierIterator].ContactName);
-            Assert.IsTrue(result[supplierIterator].PhoneNumber == suppliers[supplierIterator].PhoneNumber);
-            Assert.IsTrue(result[supplierIterator].Reference == suppliers[supplierIterator].Reference);
-            Assert.IsTrue(result[supplierIterator].CreatedAt == suppliers[supplierIterator].CreatedAt);
-            Assert.IsTrue(result[supplierIterator].UpdatedAt == suppliers[supplierIterator].UpdatedAt);
+            Assert.IsTrue(result[supplierIterator].Equals(suppliers[supplierIterator]));
         }
     }
 
@@ -106,6 +93,10 @@ public class SupplierDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.Suppliers.Contains(supplier));
+        if (expectedResult == false)
+            Assert.IsTrue(!db.Suppliers.Contains(supplier));
     }
 
     [TestMethod]
@@ -151,6 +142,10 @@ public class SupplierDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.Suppliers.Count() == suppliers.Count -1);
+        if (expectedResult == false)
+            Assert.IsTrue(db.Suppliers.Count() == suppliers.Count);
     }
 
     [TestMethod]
@@ -198,6 +193,10 @@ public class SupplierDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(db.Suppliers.Contains(updatedSupplier));
+        if (expectedResult == false)
+            Assert.IsTrue(!db.Suppliers.Contains(updatedSupplier));
     }
 
     public static IEnumerable<object[]> GetSupplierItemsTestData => new List<object[]>
