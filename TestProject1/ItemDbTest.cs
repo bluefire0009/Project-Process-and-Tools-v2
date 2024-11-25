@@ -79,12 +79,18 @@ public class ItemDBTest
         {
             new object[] { null, false},
             new object[] { new Item(){Uid = ""}, false},
-            new object[] { new Item(){Uid = "P00001"}, true}
+            new object[] { new Item(){Uid = "P00001", ItemLine=1, ItemGroup=1, ItemType=1, SupplierId=1}, true}
         };
     [TestMethod]
     [DynamicData(nameof(AddItemTestData), DynamicDataSourceType.Property)]
     public void TestAdd(Item item, bool expectedResult)
     {
+        db.ItemLines.Add(new(){Id = 1});
+        db.ItemGroups.Add(new(){Id = 1});
+        db.ItemTypes.Add(new(){Id = 1});
+        db.Suppliers.Add(new(){Id = 1});
+        db.SaveChanges();
+
         // Arrange
         ItemsDBStorage storage = new(db);
 
@@ -102,9 +108,15 @@ public class ItemDBTest
     [TestMethod]
     public void TestAddSameIdTwice()
     {
+        db.ItemLines.Add(new(){Id = 1});
+        db.ItemGroups.Add(new(){Id = 1});
+        db.ItemTypes.Add(new(){Id = 1});
+        db.Suppliers.Add(new(){Id = 1});
+        db.SaveChanges();
+        
         // Arrange
-        Item i1 = new() { Uid = "P00001" };
-        Item i2 = new() { Uid = "P00001" };
+        Item i1 = new() {Uid = "P00001", ItemLine=1, ItemGroup=1, ItemType=1, SupplierId=1};
+        Item i2 = new() {Uid = "P00001", ItemLine=1, ItemGroup=1, ItemType=1, SupplierId=1};
         ItemsDBStorage storage = new(db);
 
         // Act
