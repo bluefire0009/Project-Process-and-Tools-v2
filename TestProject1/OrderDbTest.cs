@@ -522,7 +522,8 @@ public class OrderDBTest
         Assert.IsTrue(result.Count == expectedLocations.Count);
         for (int locationIterator = 0; locationIterator < result.Count; locationIterator++)
         {
-            Assert.IsTrue(result[locationIterator].Equals(expectedLocations[locationIterator]));
+            Assert.IsTrue(result[locationIterator].Id == expectedLocations[locationIterator].Id);
+            Assert.IsTrue(result[locationIterator].Name == expectedLocations[locationIterator].Name);
         }
     }
 }
