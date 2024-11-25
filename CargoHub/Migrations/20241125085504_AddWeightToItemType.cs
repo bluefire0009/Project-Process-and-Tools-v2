@@ -6,10 +6,10 @@ using System.Diagnostics.CodeAnalysis;
 
 namespace CargoHub.Migrations
 {
+    [ExcludeFromCodeCoverage]
     /// <inheritdoc />
     public partial class AddWeightToItemType : Migration
     {
-        [ExcludeFromCodeCoverage]
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
