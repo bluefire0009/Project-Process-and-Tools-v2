@@ -59,6 +59,7 @@ public class LocationDBTest
 
     public static IEnumerable<object[]> TestGetLocationTestData => new List<object[]>
         {
+            new object[] { null, 1, true},
             new object[] { new Location(){Id = 1}, 2, false},
             new object[] { new Location(){Id = 1}, 1, true},
         };
@@ -68,8 +69,11 @@ public class LocationDBTest
     public async Task TestGetLocation(Location location, int id, bool expected)
     {
         // Arrange
-        await db.Locations.AddAsync(location);
-        await db.SaveChangesAsync();
+        if (location != null)
+        {
+            await db.Locations.AddAsync(location);
+            await db.SaveChangesAsync();
+        }
 
         LocationStorage storage = new(db);
 

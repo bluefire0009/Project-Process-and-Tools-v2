@@ -30,10 +30,6 @@ public class Inventory
 
 public class InventoryLocation
 {
-    [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    public int Id { get; set; }
-
     [ForeignKey("InventoryId")]
     public Inventory? inventory { get; set; }
     public int InventoryId { get; set; }
