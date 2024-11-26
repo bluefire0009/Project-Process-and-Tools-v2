@@ -109,7 +109,7 @@ namespace CargoHub.Migrations
                     b.ToTable("Inventories");
                 });
 
-            modelBuilder.Entity("CargoHub.Models.InventoryLocation", b =>
+            modelBuilder.Entity("CargoHub.Models.InventoryLocations", b =>
                 {
                     b.Property<int>("InventoryId")
                         .HasColumnType("INTEGER");
@@ -121,7 +121,7 @@ namespace CargoHub.Migrations
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("InventoryLocation");
+                    b.ToTable("InventoryLocations");
                 });
 
             modelBuilder.Entity("CargoHub.Models.Item", b =>
@@ -634,7 +634,7 @@ namespace CargoHub.Migrations
                     b.Navigation("item");
                 });
 
-            modelBuilder.Entity("CargoHub.Models.InventoryLocation", b =>
+            modelBuilder.Entity("CargoHub.Models.InventoryLocations", b =>
                 {
                     b.HasOne("CargoHub.Models.Inventory", "inventory")
                         .WithMany("InventoryLocations")

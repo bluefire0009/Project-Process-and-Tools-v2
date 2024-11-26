@@ -6,4 +6,5 @@ public interface IItemTypeStorage {
     Task<bool> AddItemType(ItemType itemType);
     Task<bool> DeleteItemType(int id);
     Task<bool> UpdateItemType(int id, ItemType itemType);
+    Task<float?> GetItemTypeWeight(int id);
 }
