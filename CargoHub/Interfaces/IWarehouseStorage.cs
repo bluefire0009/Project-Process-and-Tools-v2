@@ -9,4 +9,5 @@ public interface IWarehouseStorage
     Task<bool> deleteWarehouse(int id);
     Task<bool> updateWarehouse(int id, Warehouse? warehouse);
     IEnumerable<Location>? getWarehouseLocations(int id);
+    Task<IEnumerable<Warehouse>?> getWarehousesRange(int offset, int amountToReturn);
 }
