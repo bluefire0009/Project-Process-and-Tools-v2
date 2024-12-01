@@ -106,7 +106,7 @@ public class TransferDBTest
         addTestResourceToDB(items);
         TransferDBStorage storage = new(db);
 
-        DateTime dateAtStart = new();
+        DateTime? dateAtStart = new();
         if (transfer != null)
             dateAtStart = transfer.CreatedAt;
 
@@ -234,7 +234,7 @@ public class TransferDBTest
         addTestResourceToDB(items);
         addTestResourceToDB(transfers);
 
-        DateTime dateAtStart = new();
+        DateTime? dateAtStart = new();
         if (updatedTransfer != null)
             dateAtStart = updatedTransfer.UpdatedAt;
 
@@ -330,7 +330,7 @@ public class TransferDBTest
 
         TransferDBStorage storage = new(db);
 
-        DateTime dateAtStart = new();
+        DateTime? dateAtStart = new();
         if (db.Transfers.FirstOrDefault(t => t.Id == idToCommit) != null)
             dateAtStart = db.Transfers.FirstOrDefault(t => t.Id == idToCommit).UpdatedAt;
 
@@ -398,10 +398,12 @@ public class TransferDBTest
         if (obj is string str)
         {
             copy = (T)(object)string.Copy(str); // Create a copy of the string
-        } else {
+        }
+        else
+        {
             copy = (T)Activator.CreateInstance(obj.GetType());
         }
-        
+
 
         // Add the current object to the visitedObjects dictionary
         visitedObjects[obj] = copy;

@@ -284,6 +284,9 @@ namespace CargoHub.Migrations
                     b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<float?>("Weight")
+                        .HasColumnType("REAL");
+
                     b.HasKey("Id");
 
                     b.ToTable("ItemTypes");
@@ -559,7 +562,7 @@ namespace CargoHub.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("Reference")
@@ -574,7 +577,7 @@ namespace CargoHub.Migrations
                     b.Property<int>("TransferTo")
                         .HasColumnType("INTEGER");
 
-                    b.Property<DateTime>("UpdatedAt")
+                    b.Property<DateTime?>("UpdatedAt")
                         .HasColumnType("TEXT");
 
                     b.HasKey("Id");

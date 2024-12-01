@@ -7,4 +7,5 @@ public interface ITransferStorage
     Task<bool> deleteTransfer(int id);
     Task<bool> updateTransfer(int id, Transfer? supplier);
     Task<(bool succeded, TransferDBStorage.TransferResult message)> commitTransfer(int id);
+    Task<IEnumerable<TransferItem>> getTransferItems(int id);
 }
