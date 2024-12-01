@@ -32,9 +32,23 @@ public class TransferController : Controller
         return Ok(foundTransfer);
     }
 
+    [HttpGet("{id}/items")]
+    public async Task<IActionResult> GetSpecificTransferItems(int id)
+    {
+        if (id <= 0) return BadRequest("Invalid id in the url");
+
+        Transfer? foundTransfer = await transferStorage.getTransfer(id);
+        if (foundTransfer == null) return NotFound($"No transfer with id:{id} found");
+
+        List<TransferItem> items = (await transferStorage.getTransferItems(id)).ToList();
+
+        return Ok(items);
+    }
+
     [HttpPost("")]
     public async Task<IActionResult> PostTransfer([FromBody] Transfer transfer)
     {
+        if (transfer == null) return BadRequest("Transfer cannot be null");
         bool added = await transferStorage.addTransfer(transfer);
 
         if (!added) return BadRequest($"Couldn't add transfer:{JsonConvert.SerializeObject(transfer)}");
@@ -60,7 +74,7 @@ public class TransferController : Controller
         bool updated = await transferStorage.updateTransfer(idToUpdate, updatedTransfer);
 
         if (!updated) return NotFound($"No transfer with id:{idToUpdate} in the database");
-        return Ok($"Updated transfer id:{idToUpdate} to:{updatedTransfer}");
+        return Ok($"Updated transfer id:{idToUpdate} to:{JsonConvert.SerializeObject(updatedTransfer)}");
     }
 
     [HttpPut("{idToUpdate}/commit")]
