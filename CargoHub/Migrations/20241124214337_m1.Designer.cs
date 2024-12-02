@@ -10,14 +10,36 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CargoHub.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20241105135203_itemIdToString")]
-    partial class itemIdToString
+    [Migration("20241124214337_m1")]
+    partial class m1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
+
+            modelBuilder.Entity("CargoHub.Models.ApiKey", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key_type")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.Property<string>("Key_value")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("API_keys", (string)null);
+                });
 
             modelBuilder.Entity("CargoHub.Models.Client", b =>
                 {
@@ -78,15 +100,35 @@ namespace CargoHub.Migrations
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
+                    b.Property<DateTime>("CreatedAt")
+                        .HasColumnType("TEXT");
+
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ItemId")
-                        .IsRequired()
                         .HasColumnType("TEXT");
 
                     b.Property<string>("ItemReference")
                         .HasColumnType("TEXT");
+
+                    b.Property<DateTime?>("UpdatedAt")
+                        .HasColumnType("TEXT");
+
+                    b.Property<int>("total_allocated")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_available")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_expected")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_on_hand")
+                        .HasColumnType("INTEGER");
+
+                    b.Property<int>("total_ordered")
+                        .HasColumnType("INTEGER");
 
                     b.HasKey("Id");
 
@@ -95,7 +137,7 @@ namespace CargoHub.Migrations
                     b.ToTable("Inventories");
                 });
 
-            modelBuilder.Entity("CargoHub.Models.InventoryLocations", b =>
+            modelBuilder.Entity("CargoHub.Models.InventoryLocation", b =>
                 {
                     b.Property<int>("InventoryId")
                         .HasColumnType("INTEGER");
@@ -614,14 +656,12 @@ namespace CargoHub.Migrations
                 {
                     b.HasOne("CargoHub.Models.Item", "item")
                         .WithMany()
-                        .HasForeignKey("ItemId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
+                        .HasForeignKey("ItemId");
 
                     b.Navigation("item");
                 });
 
-            modelBuilder.Entity("CargoHub.Models.InventoryLocations", b =>
+            modelBuilder.Entity("CargoHub.Models.InventoryLocation", b =>
                 {
                     b.HasOne("CargoHub.Models.Inventory", "inventory")
                         .WithMany("InventoryLocations")
@@ -642,19 +682,19 @@ namespace CargoHub.Migrations
 
             modelBuilder.Entity("CargoHub.Models.Item", b =>
                 {
-                    b.HasOne("CargoHub.Models.ItemGroup", "itemGroup")
+                    b.HasOne("CargoHub.Models.ItemGroup", "itemGroupJson")
                         .WithMany()
                         .HasForeignKey("ItemGroup")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CargoHub.Models.ItemLine", "itemLine")
+                    b.HasOne("CargoHub.Models.ItemLine", "itemLineJson")
                         .WithMany()
                         .HasForeignKey("ItemLine")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("CargoHub.Models.ItemType", "itemType")
+                    b.HasOne("CargoHub.Models.ItemType", "itemTypeJson")
                         .WithMany()
                         .HasForeignKey("ItemType")
                         .OnDelete(DeleteBehavior.Cascade)
@@ -668,11 +708,11 @@ namespace CargoHub.Migrations
 
                     b.Navigation("SupplierById");
 
-                    b.Navigation("itemGroup");
+                    b.Navigation("itemGroupJson");
 
-                    b.Navigation("itemLine");
+                    b.Navigation("itemLineJson");
 
-                    b.Navigation("itemType");
+                    b.Navigation("itemTypeJson");
                 });
 
             modelBuilder.Entity("CargoHub.Models.Location", b =>

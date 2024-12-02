@@ -241,4 +241,31 @@ public class ItemTypeDBTest
             Assert.IsTrue(items == null);
         }
     }
+    public static IEnumerable<object[]> GetItemTypeWeightTestData => new List<object[]>
+    {
+        new object[] { new List<ItemType> { new ItemType { Id = 1, Weight = 12.5f } }, 1, 12.5f },
+        new object[] { new List<ItemType> { new ItemType { Id = 2, Weight = 7.8f } }, 2, 7.8f },
+        new object[] { new List<ItemType> { new ItemType { Id = 1, Weight = null } }, 1, null },
+        new object[] { new List<ItemType> { }, 1, null }, // No items in the database
+        new object[] { new List<ItemType> { new ItemType { Id = 1, Weight = 5.0f } }, 999, null } // ID does not exist
+    };
+
+    [TestMethod]
+    [DynamicData(nameof(GetItemTypeWeightTestData), DynamicDataSourceType.Property)]
+    public void TestGetItemTypeWeight(List<ItemType> itemTypes, int soughtId, float? expectedWeight)
+    {
+        // Arrange
+        foreach (var itemType in itemTypes)
+        {
+            db.ItemTypes.Add(itemType);
+            db.SaveChanges();
+        }
+        ItemTypesDBStorage storage = new(db);
+
+        // Act
+        var actualWeight = storage.GetItemTypeWeight(soughtId).Result;
+
+        // Assert
+        Assert.AreEqual(expectedWeight, actualWeight);
+    }
 }

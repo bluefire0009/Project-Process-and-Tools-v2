@@ -69,4 +69,19 @@ public class ItemsDBStorage : IItemStorage
 
         return true;
     }
+
+    public async Task<int> GetItemAmountInWarehouse(string itemId, int warehouseId)
+    {
+        if (!db.Items.Select(i=>i.Uid).Contains(itemId)) return 0;
+        if (!db.Warehouses.Select(w=>w.Id).Contains(warehouseId)) return 0;
+
+        int amountFound = 0;
+        // location ids that are in the warehouse with warehouseId 
+        List<int> locationsIds = await db.Locations.Where(l => l.WareHouseId == warehouseId).Select(l => l.Id).ToListAsync();
+        // inventories which contain any of the locationIds and the ItemId is equal to itemId
+        List<Inventory> inventories = await db.Inventories.Where(i => i.ItemId == itemId && i.InventoryLocations.Select(il => il.LocationId).Any(id => locationsIds.Contains(id))).ToListAsync();
+        foreach (Inventory inventory in inventories)
+            if (inventory.ItemId == itemId) amountFound += inventory.total_on_hand;
+        return amountFound;
+    }
 }

@@ -70,4 +70,9 @@ public class ItemTypesDBStorage : IItemTypeStorage
         await db.SaveChangesAsync();
         return true;
     }
+    public async Task<float?> GetItemTypeWeight(int id)
+    {
+        var itemType = await db.ItemTypes.FirstOrDefaultAsync(it => it.Id == id);
+        return itemType?.Weight;
+    }
 }
