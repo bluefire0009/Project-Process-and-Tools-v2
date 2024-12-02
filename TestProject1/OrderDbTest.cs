@@ -95,7 +95,10 @@ public class OrderDBTest
             Assert.IsTrue(orderpostsucces);
         }
 
-        List<Inventory> inventories = GetTestInventories();
+        var FoundOrders = await storage.GetOrders();
+        Assert.IsTrue(FoundOrders.Count() == orders.Count());
+
+        List<Inventory> inventories = GetTestInventories();        
 
         // Assert the amounts in the inventories
         AssertInventoryAmounts(expectedInventories, inventories);
