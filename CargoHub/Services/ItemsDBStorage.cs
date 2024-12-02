@@ -16,6 +16,15 @@ public class ItemsDBStorage : IItemStorage
 
         Item? itemInDb = await db.Items.FirstOrDefaultAsync(_ => _.Uid == item.Uid);
         if (itemInDb != null) return false;
+
+        ItemLine? itemLineInDb = await db.ItemLines.FirstOrDefaultAsync(_ => _.Id == item.ItemLine);
+        if (itemLineInDb == null) return false;
+        ItemType? itemTypeInDb = await db.ItemTypes.FirstOrDefaultAsync(_ => _.Id == item.ItemType);
+        if (itemTypeInDb == null) return false;
+        ItemGroup? itemGroupInDb = await db.ItemGroups.FirstOrDefaultAsync(_ => _.Id == item.ItemGroup);
+        if (itemGroupInDb == null) return false;
+        Supplier? supplierInDb = await db.Suppliers.FirstOrDefaultAsync(_ => _.Id == item.SupplierId);
+        if (supplierInDb == null) return false;
         
         item.CreatedAt = DateTime.Now;
         item.UpdatedAt = DateTime.Now;
