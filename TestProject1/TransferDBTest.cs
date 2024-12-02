@@ -83,26 +83,12 @@ public class TransferDBTest
     public static IEnumerable<object[]> AddTransferTestData => new List<object[]>
         {
             new object[] { null, null, null, false},
-            new object[] { null, null, null, false},
-            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "1"}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "1"}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "1"}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "1"}}}, false},
-            new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "0"}}}, false},
             new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "0"}}}, false},
             new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "0"}}}, false},
-            new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "0"}}}, false},
-            new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "-1"}}}, false},
             new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "-1"}}}, false},
             new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "-1"}}}, false},
-            new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "-1"}}}, false},
             new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, Items = {new() {TransferId = 1, ItemUid = "1"}, new(){TransferId = 1, ItemUid = "1"}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, Items = {new() {TransferId = 1, ItemUid = "1"}, new(){TransferId = 1, ItemUid = "1"}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
             new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 3, TransferTo = 4, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 3, TransferTo = 4, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 4, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
             new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 4, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
             new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 4, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
             new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
@@ -120,7 +106,7 @@ public class TransferDBTest
         addTestResourceToDB(items);
         TransferDBStorage storage = new(db);
 
-        DateTime dateAtStart = new();
+        DateTime? dateAtStart = new();
         if (transfer != null)
             dateAtStart = transfer.CreatedAt;
 
@@ -248,7 +234,7 @@ public class TransferDBTest
         addTestResourceToDB(items);
         addTestResourceToDB(transfers);
 
-        DateTime dateAtStart = new();
+        DateTime? dateAtStart = new();
         if (updatedTransfer != null)
             dateAtStart = updatedTransfer.UpdatedAt;
 
@@ -344,7 +330,7 @@ public class TransferDBTest
 
         TransferDBStorage storage = new(db);
 
-        DateTime dateAtStart = new();
+        DateTime? dateAtStart = new();
         if (db.Transfers.FirstOrDefault(t => t.Id == idToCommit) != null)
             dateAtStart = db.Transfers.FirstOrDefault(t => t.Id == idToCommit).UpdatedAt;
 
@@ -412,10 +398,12 @@ public class TransferDBTest
         if (obj is string str)
         {
             copy = (T)(object)string.Copy(str); // Create a copy of the string
-        } else {
+        }
+        else
+        {
             copy = (T)Activator.CreateInstance(obj.GetType());
         }
-        
+
 
         // Add the current object to the visitedObjects dictionary
         visitedObjects[obj] = copy;

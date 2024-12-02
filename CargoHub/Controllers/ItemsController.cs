@@ -59,6 +59,16 @@ public class ItemsController : Controller {
         return Ok(totals);
     }
 
+    [HttpGet("get/amountInWarehouse")]
+    public async Task<IActionResult> GetItemAmountInWarehouse([FromQuery]string uid, [FromQuery] int warehouseId) {
+        if (uid == "") return BadRequest("invalid uid");
+        if (warehouseId <= 0) return BadRequest("invalid warehouseId");
+        int foundAmount = await ItemStorage.GetItemAmountInWarehouse(uid, warehouseId);
+
+        if (foundAmount == 0) return NotFound($"No item with id:{uid} found in warehouse:{warehouseId}");
+        return Ok($"Found {foundAmount} items in warehouse: {warehouseId}");
+    }
+
     [HttpPost()]
     public async Task<IActionResult> AddItem([FromBody] Item item) {
         if (item == null) return BadRequest("given Item was null");

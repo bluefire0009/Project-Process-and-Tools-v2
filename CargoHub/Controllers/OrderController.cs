@@ -63,5 +63,8 @@ public class OrderController : Controller
         return BadRequest();
     }
 
-
+    [HttpGet("{id}/items/locations")]
+    public async Task<IActionResult> GetAllItemLocations([FromRoute] int Id) {
+        return Ok(await Storage.GetAllItemLocations(Id));
+    }
 }

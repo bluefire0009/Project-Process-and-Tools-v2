@@ -19,6 +19,10 @@ public class Warehouse : IEquatable<Warehouse>
     public string? ContactPhone { get; set; }
     public string? ContactEmail { get; set; }
 
+    public string? SafetyRating { get; set; }
+    public int? AmountRows { get; set; }
+    public int? AmountShelfsPerRow { get; set; }
+
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; }
 

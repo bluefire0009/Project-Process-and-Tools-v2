@@ -37,6 +37,11 @@ public class InventoriesDBStorage : IInventoryStorage
         Inventory? inventoryInDatabase = await db.Inventories.Where(w => w.Id == inventory.Id).FirstOrDefaultAsync();
         if (inventoryInDatabase != null) return false;
 
+        foreach (InventoryLocation invLocation in inventory.InventoryLocations)
+        {
+            await db.InventoryLocations.AddAsync(invLocation);
+        }
+
         await db.Inventories.AddAsync(inventory);
 
         await db.SaveChangesAsync();
