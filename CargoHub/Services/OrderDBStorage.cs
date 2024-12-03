@@ -35,7 +35,7 @@ public class OrderStorage : IOrderStorage
         return await DB.Orders
             .Skip(offset) // Skip the first 'offset' items
             .Take(limit)  // Take the next 'limit' items
-            .ToListAsync(); ;
+            .ToListAsync();
     }
 
     public async Task<Order?> GetOrder(int orderId)

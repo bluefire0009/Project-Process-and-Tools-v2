@@ -34,7 +34,7 @@ public class ShipmentStorage : IShipmentStorage
         return await DB.Shipments
             .Skip(offset) // Skip the first 'offset' items
             .Take(limit)  // Take the next 'limit' items
-            .ToListAsync(); ;
+            .ToListAsync();
     }
 
     public async Task<Shipment?> GetShipment(int shipmentId)

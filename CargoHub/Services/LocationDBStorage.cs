@@ -33,7 +33,7 @@ public class LocationStorage : ILocationStorage
         return await DB.Locations
             .Skip(offset) // Skip the first 'offset' items
             .Take(limit)  // Take the next 'limit' items
-            .ToListAsync(); ;
+            .ToListAsync();
     }
 
     public async Task<Location?> GetLocation(int locationId)
