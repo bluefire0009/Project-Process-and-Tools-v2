@@ -38,6 +38,8 @@ public class Item : IEquatable<Item>
     public int SupplierCode { get; set; }
     public string? SupplierPartNumber { get; set; }
 
+    public bool IsDeleted { get; set; }
+
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
