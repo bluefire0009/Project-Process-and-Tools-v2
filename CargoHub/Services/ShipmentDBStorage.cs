@@ -1,4 +1,5 @@
 using CargoHub;
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -56,7 +57,7 @@ public class ShipmentStorage : IShipmentStorage
         List<ShipmentItems> shipmentItems = shipment.Items.ToList();
 
         // give it the correct CreatedAt field
-        shipment.CreatedAt = DateTime.Now;
+        shipment.CreatedAt = CETDateTime.Now();
         // add the shipment
         await DB.Shipments.AddAsync(shipment);
 
@@ -90,7 +91,7 @@ public class ShipmentStorage : IShipmentStorage
         await UpdateItemsInShipment(shipment.Id, shipment.Items.ToList(), settings: "add");
 
         // update updated at
-        shipment.UpdatedAt = DateTime.Now;
+        shipment.UpdatedAt = CETDateTime.Now();
 
         // Update the rest of the existing shipment
         FoundShipment.SourceId = shipment.SourceId;

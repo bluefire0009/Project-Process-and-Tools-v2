@@ -62,7 +62,7 @@ public class OrderStorage : IOrderStorage
         List<OrderItems> orderItems = order.Items.ToList();
 
         // give it the correct CreatedAt field
-        order.CreatedAt = DateTime.Now;
+        order.CreatedAt = CETDateTime.Now();
         // add the order
         await DB.Orders.AddAsync(order);
 
@@ -97,7 +97,7 @@ public class OrderStorage : IOrderStorage
         await UpdateItemsInOrder(order.Id, order.Items.ToList(), settings: "add");
 
         // update updated at
-        FoundOrder.UpdatedAt = DateTime.Now;
+        FoundOrder.UpdatedAt = CETDateTime.Now();
 
         // update rest of exsting order
         // DB.Orders.Update(FoundOrder);
