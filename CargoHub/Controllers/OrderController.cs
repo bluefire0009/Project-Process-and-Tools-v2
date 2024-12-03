@@ -15,9 +15,9 @@ public class OrderController : Controller
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> GetOrders([FromQuery] int offset = 0, [FromQuery] int limit = 100)
+    public async Task<IActionResult> GetOrders([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool orderById = false)
     {
-        IEnumerable<Order> orders = await Storage.GetOrders(offset, limit);
+        IEnumerable<Order> orders = await Storage.GetOrders(offset, limit, orderById);
         return Ok(orders);
     }
 
