@@ -15,9 +15,9 @@ public class LocationController : Controller
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> GetLocations()
+    public async Task<IActionResult> GetLocations([FromQuery] int offset = 0, [FromQuery] int limit = 100)
     {
-        IEnumerable<Location> locations = await Storage.GetLocations();
+        IEnumerable<Location> locations = await Storage.GetLocations(offset, limit);
         return Ok(locations);
     }
 

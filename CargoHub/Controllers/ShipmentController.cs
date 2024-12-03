@@ -17,9 +17,9 @@ public class ShipmentController : Controller
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> GetShipments()
+    public async Task<IActionResult> GetShipments([FromQuery] int offset = 0, [FromQuery] int limit = 100)
     {
-        IEnumerable<Shipment> shipments = await ShipmentStorage.GetShipments();
+        IEnumerable<Shipment> shipments = await ShipmentStorage.GetShipments(offset, limit);
         return Ok(shipments);
     }
 
