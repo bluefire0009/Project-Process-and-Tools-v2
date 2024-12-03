@@ -1,6 +1,6 @@
 using CargoHub.Models;
 public interface IItemLineStorage {
-    Task<List<ItemLine>> GetItemLines();
+    Task<List<ItemLine>> GetItemLines(int offset, int limit);
     Task<ItemLine?> GetItemLine(int id);
     Task<List<Item>> GetItemLineItems(int id);
     Task<bool> AddItemLine(ItemLine itemLine);
