@@ -230,6 +230,46 @@ public class ShipmentDBTest
         Assert.AreEqual(3, FoundShipment.OrderIds.Count());
     }
 
+    public static IEnumerable<object[]> TestGetShipmentsTestDataPagination => new List<object[]>
+    {
+    new object[] { Enumerable.Range(1, 0).Select(id => new Shipment { Id = id }).ToList(), 0, 5 },  //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Shipment { Id = id }).ToList(), 0, 5 }, //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Shipment { Id = id }).ToList(), 5, 5 }, //   5 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Shipment { Id = id }).ToList(), 8, 5 }, //   8 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Shipment { Id = id }).ToList(), 10, 5 }  //  10 offset, limit 5
+    };
+
+    [TestMethod]
+    [DynamicData(nameof(TestGetShipmentsTestDataPagination), DynamicDataSourceType.Property)]
+    public async Task TestGetShipmentsWithPagination(List<Shipment> shipments, int offset, int limit)
+    {
+        // Arrange
+        await db.Shipments.AddRangeAsync(shipments); // Add the test data
+        await db.SaveChangesAsync();
+
+        ShipmentStorage storage = new(db);
+
+        // Act
+        IEnumerable<Shipment> x = await storage.GetShipments(offset, limit);
+        List<Shipment> result = x.ToList();
+
+        // Console.WriteLine($"offset: {offset}  limit:{limit}  count in db:{shipments.Count()}  result count:{result.Count()}");
+        // foreach (Shipment location in result)
+        // {
+        //     Console.WriteLine("Location: " + location.Id);
+        // }
+
+
+        // Assert
+        int expectedCount = Math.Min(limit, Math.Max(0, shipments.Count - offset));
+        Assert.AreEqual(expectedCount, result.Count, "Returned result count is incorrect.");
+
+        for (int i = 0; i < result.Count; i++)
+        {
+            Assert.AreEqual(shipments[offset + i].Id, result[i].Id, "Shipment ID does not match at index " + i);
+        }
+    }
+
 
     // Unique Shipment Types:
     // { 'O', 'I'}

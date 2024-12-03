@@ -18,6 +18,17 @@ public class LocationStorage : ILocationStorage
         // retun first 100 locations
         return await DB.Locations.Take(100).ToListAsync();
     }
+
+    public async Task<IEnumerable<Location>> GetLocations(int offset, int limit)
+    {
+        // Fetch locations with pagination
+        return await DB.Locations
+            .OrderBy(o => o.Id)
+            .Skip(offset) // Skip the first 'offset' items
+            .Take(limit)  // Take the next 'limit' items
+            .ToListAsync();
+    }
+
     public async Task<Location?> GetLocation(int locationId)
     {
         // return location by id
