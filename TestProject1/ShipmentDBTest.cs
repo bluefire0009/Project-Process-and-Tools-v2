@@ -250,7 +250,7 @@ public class ShipmentDBTest
         ShipmentStorage storage = new(db);
 
         // Act
-        IEnumerable<Shipment> x = await storage.GetShipments(offset, limit);
+        IEnumerable<Shipment> x = await storage.GetShipments(offset, limit, true);
         List<Shipment> result = x.ToList();
 
         // Console.WriteLine($"offset: {offset}  limit:{limit}  count in db:{shipments.Count()}  result count:{result.Count()}");

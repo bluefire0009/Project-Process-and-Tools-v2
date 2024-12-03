@@ -21,14 +21,21 @@ public class OrderStorage : IOrderStorage
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Order>> GetOrders(int offset, int limit)
+    public async Task<IEnumerable<Order>> GetOrders(int offset, int limit, bool orderbyId = false)
     {
         // Fetch orders with pagination
+        if (orderbyId)
+        {
+            return await DB.Orders
+                .OrderBy(o => o.Id)
+                .Skip(offset) // Skip the first 'offset' items
+                .Take(limit)  // Take the next 'limit' items
+                .ToListAsync();
+        }
         return await DB.Orders
-            .OrderBy(o => o.Id)
             .Skip(offset) // Skip the first 'offset' items
             .Take(limit)  // Take the next 'limit' items
-            .ToListAsync();
+            .ToListAsync(); ;
     }
 
     public async Task<Order?> GetOrder(int orderId)

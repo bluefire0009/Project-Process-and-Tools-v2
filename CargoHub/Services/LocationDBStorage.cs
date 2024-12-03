@@ -19,14 +19,21 @@ public class LocationStorage : ILocationStorage
         return await DB.Locations.Take(100).ToListAsync();
     }
 
-    public async Task<IEnumerable<Location>> GetLocations(int offset, int limit)
+    public async Task<IEnumerable<Location>> GetLocations(int offset, int limit, bool orderbyId = false)
     {
-        // Fetch locations with pagination
+        // Fetch Shipments with pagination
+        if (orderbyId)
+        {
+            return await DB.Locations
+                .OrderBy(o => o.Id)
+                .Skip(offset) // Skip the first 'offset' items
+                .Take(limit)  // Take the next 'limit' items
+                .ToListAsync();
+        }
         return await DB.Locations
-            .OrderBy(o => o.Id)
             .Skip(offset) // Skip the first 'offset' items
             .Take(limit)  // Take the next 'limit' items
-            .ToListAsync();
+            .ToListAsync(); ;
     }
 
     public async Task<Location?> GetLocation(int locationId)

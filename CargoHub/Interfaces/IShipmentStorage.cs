@@ -3,7 +3,7 @@ using CargoHub.Models;
 public interface IShipmentStorage
 {
     Task<IEnumerable<Shipment>> GetShipments();
-    Task<IEnumerable<Shipment>> GetShipments(int offset, int limit);
+    Task<IEnumerable<Shipment>> GetShipments(int offset, int limit, bool orderbyId = false);
     Task<Shipment?> GetShipment(int shipmentId);
     Task<List<ShipmentItems>> GetItemsInShipment(int shipmentId);
     Task<bool> AddShipment(Shipment shipment);
