@@ -38,7 +38,7 @@ public class ItemDBTest
         ItemsDBStorage storage = new(db);
 
         // Act
-        List<Item> result = storage.GetItems().Result.ToList();
+        List<Item> result = storage.GetItems(0, 100).Result.ToList();
 
         // Assert
         Assert.IsTrue(result.Count == items.Count);
@@ -74,7 +74,7 @@ public class ItemDBTest
         ItemsDBStorage storage = new(db);
 
         // Act
-        List<Item> result = storage.GetItemsInPagination(offset, limit).Result.ToList();
+        List<Item> result = storage.GetItems(offset, limit).Result.ToList();
 
         // Assert
         Assert.IsTrue(result.Count == expectedAmount);
