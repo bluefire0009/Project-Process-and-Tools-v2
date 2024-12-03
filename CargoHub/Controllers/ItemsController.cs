@@ -19,6 +19,13 @@ public class ItemsController : Controller {
         return Ok(items);
     }
 
+    [HttpGet("pagination")]
+    public async Task<IActionResult> GetItemsInPagination([FromQuery] int offset = 0, [FromQuery] int limit = 100)
+    {
+        List<Item> items = await ItemStorage.GetItemsInPagination(offset, limit);
+        return Ok(items);
+    }
+
     [HttpGet("get/{uid}")]
     public async Task<IActionResult> GetItem(string uid) {
         if (uid == "") return BadRequest("invalid uid");

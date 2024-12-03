@@ -6,4 +6,5 @@ public interface IItemStorage {
     Task<bool> AddItem(Item item);
     Task<bool> DeleteItem(string uid);
     Task<bool> UpdateItem(string uid, Item item);
+    Task<List<Item>> GetItemsInPagination(int offset, int limit);
 }

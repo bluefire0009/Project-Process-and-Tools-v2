@@ -69,4 +69,13 @@ public class ItemsDBStorage : IItemStorage
 
         return true;
     }
+
+    public async Task<List<Item>> GetItemsInPagination(int offset, int limit)
+    {
+        // Fetch locations with pagination
+        return await db.Items
+            .Skip(offset) // Skip the first 'offset' items
+            .Take(limit)  // Take the next 'limit' items
+            .ToListAsync();
+    }
 }
