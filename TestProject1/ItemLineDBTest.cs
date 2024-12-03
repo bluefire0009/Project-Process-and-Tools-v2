@@ -38,7 +38,7 @@ public class ItemLineDBTest
         ItemLinesDBStorage storage = new(db);
 
         // Act
-        List<ItemLine> result = storage.GetItemLines().Result.ToList();
+        List<ItemLine> result = storage.GetItemLines(0, 100).Result.ToList();
 
         // Assert
         Assert.IsTrue(result.Count == itemlines.Count);
@@ -240,4 +240,37 @@ public class ItemLineDBTest
             Assert.IsTrue(items == null);
         }
     }
+
+    public static IEnumerable<object[]> PaginationTestData => new List<object[]>
+    {
+        new object[] { 0, 0, 10, 0},
+        new object[] { 10, 0, 100, 10},
+        new object[] { 10, 5, 10, 5},
+        new object[] { 10, 10, 10, 0},
+        new object[] { 10, 0, 0, 0},
+        new object[] { 10, -1, 5, 5},
+        new object[] { 30, 10, 10, 10},
+        new object[] { 10, 10, -1, 0}
+    };
+    [TestMethod]
+    [DynamicData(nameof(PaginationTestData), DynamicDataSourceType.Property)]
+    public void TestGetPagination(int AmountItemLines, int offset, int limit, int expectedAmount)
+    {
+        // Arrange
+        for (int i = 0; i < AmountItemLines; i++)
+        {
+            ItemLine itemLine = new() {Id = i+1};
+            db.ItemLines.Add(itemLine);
+            db.SaveChanges();
+        }
+
+        ItemLinesDBStorage storage = new(db);
+
+        // Act
+        List<ItemLine> result = storage.GetItemLines(offset, limit).Result.ToList();
+
+        // Assert
+        Assert.IsTrue(result.Count == expectedAmount);
+    }
+
 }
