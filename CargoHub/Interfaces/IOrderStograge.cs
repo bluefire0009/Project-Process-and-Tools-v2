@@ -13,5 +13,5 @@ public interface IOrderStorage
     Task<bool> UpdateOrder(int orderId, Order order);
     Task<bool> UpdateItemsInOrder(int orderId, List<OrderItems> orderItems, string settings = "");
     Task<bool> UpdateOrdersInShipment(int shipmentId, List<int> orders);
-    Task<bool> DelteOrder(int orderId);
+    Task<bool> DeleteOrder(int orderId);
 }

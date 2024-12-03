@@ -159,7 +159,7 @@ public class OrderStorage : IOrderStorage
         return true;
     }
 
-    public async Task<bool> DelteOrder(int orderId)
+    public async Task<bool> DeleteOrder(int orderId)
     {
         // delete order by id
         Order? FoundOrder = await DB.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
@@ -167,9 +167,20 @@ public class OrderStorage : IOrderStorage
 
         // first remove the items from the order
         await UpdateItemsInOrder(FoundOrder.Id, []);
+        foreach (var item in FoundOrder.Items)
+        {
+            item.IsDeleted = true;
+        }
+
+        foreach (var ShipmentId in FoundOrder.ShipmentIds)
+        {
+            ShipmentId.IsDeleted = true;
+        }
 
         // then remove the order
-        DB.Orders.Remove(FoundOrder);
+        FoundOrder.IsDeleted = true;
+        DB.Orders.Update(FoundOrder);
+
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;
     }

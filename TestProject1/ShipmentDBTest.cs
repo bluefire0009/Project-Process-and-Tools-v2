@@ -180,6 +180,88 @@ public class ShipmentDBTest
         }
     }
 
+    [TestMethod]
+    public async Task TestSoftDeleteShipments()
+    {
+        // arrange
+        var Test_shipments = Enumerable.Range(1, 10).Select(id => new Shipment { Id = id }).ToList();
+        await db.Shipments.AddRangeAsync(Test_shipments); // Add the test data
+        await db.SaveChangesAsync();
+
+        ShipmentStorage storage = new(db);
+
+        // Act: Perform soft deletes
+        await storage.DeleteShipment(1);
+        await storage.DeleteShipment(1); // Deleting the same shipment twice should have no effect
+        await storage.DeleteShipment(2);
+        await storage.DeleteShipment(3);
+        await storage.DeleteShipment(4);
+        await storage.DeleteShipment(5);
+
+        // Get all shipments (should exclude soft-deleted ones)
+        List<Shipment> shipmentsGetAll = (await storage.GetShipments()).ToList();
+        Shipment? shipmentGet1 = await storage.GetShipment(1); // Should return null, as shipment 1 is soft-deleted
+        Shipment? shipmentGet2 = await storage.GetShipment(7); // Should return the shipment with ID 7
+
+        // Assert
+        Assert.IsTrue(shipmentGet1 == null); // Shipment 1 should be null as it's soft-deleted
+        Assert.IsTrue(shipmentGet2?.Id == 7); // Shipment 7 should still be present
+
+        Assert.IsTrue(shipmentsGetAll.Count == 5); // Only shipments with IDs 6, 7, 8, 9, 10 should remain
+
+        // Assert that the shipmentsGetAll list contains shipments with ids 6, 7, 8, 9, and 10
+        var expectedIds = new[] { 6, 7, 8, 9, 10 };
+        foreach (var id in expectedIds)
+        {
+            Assert.IsTrue(shipmentsGetAll.Any(s => s.Id == id), $"Shipment with ID {id} should be in the list.");
+        }
+
+        // Assert that the shipmentsGetAll list does NOT contain shipments with ids 1, 2, 3, 4, and 5
+        var deletedIds = new[] { 1, 2, 3, 4, 5 };
+        foreach (var id in deletedIds)
+        {
+            Assert.IsFalse(shipmentsGetAll.Any(s => s.Id == id), $"Shipment with ID {id} should NOT be in the list.");
+        }
+    }
+
+    [TestMethod]
+    public async Task TestSoftDelteItemsAndOrderIDs()
+    {
+        // Arrange
+        Shipment test_shipment = new Shipment()
+        {
+            Id = 1,
+            OrderIds = new List<OrdersInShipment> { new OrdersInShipment(1, 1) },
+            Items = new List<ShipmentItems>
+                    {
+                        new ShipmentItems("P000001", 20, 1),
+                        new ShipmentItems("P000002", 10, 1)
+                    }
+        };
+
+        db.Shipments.Add(test_shipment);
+        ShipmentStorage storage = new(db);
+
+        // Act
+        await storage.DeleteShipment(test_shipment.Id);
+
+        Shipment? foundshipment = await storage.GetShipment(test_shipment.Id);
+        List<ShipmentItems> Items = await db.ShipmentItems.Where(_ => _.ShipmentId == 1).ToListAsync();
+        List<OrdersInShipment> orders = await db.OrdersInShipment.Where(_ => _.ShipmentId == 1).ToListAsync();
+
+        // Assert
+
+        // Assert that the shipment is null after deletion
+        Assert.IsNull(foundshipment, "Shipment should be null after soft delete.");
+
+        // Assert that the related items are soft deleted (empty)
+        Assert.IsTrue(!Items.Any(), "ShipmentItems list should be empty after soft delete.");
+
+        // Assert that the related orders are soft deleted (empty)
+        Assert.IsTrue(!orders.Any(), "OrdersInShipment list should be empty after soft delete.");
+
+    }
+
 
     [TestMethod]
     public async Task TestOrderIds()
