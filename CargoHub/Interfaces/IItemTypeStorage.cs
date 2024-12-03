@@ -1,6 +1,6 @@
 using CargoHub.Models;
 public interface IItemTypeStorage {
-    Task<List<ItemType>> GetItemTypes();
+    Task<List<ItemType>> GetItemTypes(int offset, int limit);
     Task<ItemType?> GetItemType(int id);
     Task<List<Item>> GetItemTypeItems(int id);
     Task<bool> AddItemType(ItemType itemType);
