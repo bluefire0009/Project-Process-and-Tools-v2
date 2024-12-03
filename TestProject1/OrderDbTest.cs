@@ -98,7 +98,7 @@ public class OrderDBTest
         var FoundOrders = await storage.GetOrders();
         Assert.IsTrue(FoundOrders.Count() == orders.Count());
 
-        List<Inventory> inventories = GetTestInventories();        
+        List<Inventory> inventories = GetTestInventories();
 
         // Assert the amounts in the inventories
         AssertInventoryAmounts(expectedInventories, inventories);
@@ -177,6 +177,7 @@ public class OrderDBTest
     public async Task TestUpdateOrder(List<Order> orders, List<List<Tuple<int, int, int, int, int>>> ListOfexpectedInventories, List<string> NewOrderStatuses)
     {
         // an order can be: {'Pending', 'Packed', 'Shipped', 'Delivered'}
+        // tests if updating the order also updates the inventories correctly 
 
         OrderStorage storage = new(db);
 
@@ -226,6 +227,7 @@ public class OrderDBTest
     [TestMethod]
     public async Task TestShipmentIds()
     {
+        // test if adding an order with multiple shipment id's works
         OrderStorage storage = new(db);
 
         Order testOrder = new()
@@ -270,6 +272,45 @@ public class OrderDBTest
         Assert.IsNotNull(FoundOrder);
 
         Assert.AreEqual(3, FoundOrder.ShipmentIds.Count());
+    }
+
+    public static IEnumerable<object[]> TestGetOrdersTestDataPagination => new List<object[]>
+    {
+    new object[] { Enumerable.Range(1, 0).Select(id => new Order { Id = id }).ToList(), 0, 5 },  //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Order { Id = id }).ToList(), 0, 5 }, //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Order { Id = id }).ToList(), 5, 5 }, //   5 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Order { Id = id }).ToList(), 8, 5 }, //   8 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Order { Id = id }).ToList(), 10, 5 }  //  10 offset, limit 5
+    };
+
+    [TestMethod]
+    [DynamicData(nameof(TestGetOrdersTestDataPagination), DynamicDataSourceType.Property)]
+    public async Task TestGetOrdersWithPagination(List<Order> orders, int offset, int limit)
+    {
+        // Arrange
+        await db.Orders.AddRangeAsync(orders); // Add the test data
+        await db.SaveChangesAsync();
+
+        OrderStorage storage = new(db);
+
+        // Act
+        IEnumerable<Order> x = await storage.GetOrders(offset, limit);
+        List<Order> result = x.ToList();
+
+        // Console.WriteLine($"offset: {offset}  limit:{limit}  count in db:{orders.Count()}  result count:{result.Count()}");
+        // foreach (Order location in result)
+        // {
+        //     Console.WriteLine("Location: " + location.Id);
+        // }
+
+        // Assert
+        int expectedCount = Math.Min(limit, Math.Max(0, orders.Count - offset));
+        Assert.AreEqual(expectedCount, result.Count, "Returned result count is incorrect.");
+
+        for (int i = 0; i < result.Count; i++)
+        {
+            Assert.AreEqual(orders[offset + i].Id, result[i].Id, "Order ID does not match at index " + i);
+        }
     }
 
 
