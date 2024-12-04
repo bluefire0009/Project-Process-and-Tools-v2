@@ -14,8 +14,8 @@ public class ItemsController : Controller {
     }
 
     [HttpGet("get")]
-    public async Task<IActionResult> GetAllItems() {
-        List<Item> items = await ItemStorage.GetItems();
+    public async Task<IActionResult> GetAllItems([FromQuery] int offset = 0, [FromQuery] int limit = 100) {
+        List<Item> items = await ItemStorage.GetItems(offset, limit);
         return Ok(items);
     }
 

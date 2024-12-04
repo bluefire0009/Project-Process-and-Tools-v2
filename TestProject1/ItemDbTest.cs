@@ -38,7 +38,7 @@ public class ItemDBTest
         ItemsDBStorage storage = new(db);
 
         // Act
-        List<Item> result = storage.GetItems().Result.ToList();
+        List<Item> result = storage.GetItems(0, 100).Result.ToList();
 
         // Assert
         Assert.IsTrue(result.Count == items.Count);
@@ -46,6 +46,38 @@ public class ItemDBTest
         {
             Assert.IsTrue(result[itemIterator].Equals(items[itemIterator]));
         }
+    }
+
+    public static IEnumerable<object[]> PaginationTestData => new List<object[]>
+    {
+        new object[] { 0, 0, 10, 0},
+        new object[] { 10, 0, 100, 10},
+        new object[] { 10, 5, 10, 5},
+        new object[] { 10, 10, 10, 0},
+        new object[] { 10, 0, 0, 0},
+        new object[] { 10, -1, 5, 5},
+        new object[] { 30, 10, 10, 10},
+        new object[] { 10, 10, -1, 0}
+    };
+    [TestMethod]
+    [DynamicData(nameof(PaginationTestData), DynamicDataSourceType.Property)]
+    public void TestGetPagination(int AmountItems, int offset, int limit, int expectedAmount)
+    {
+        // Arrange
+        for (int i = 0; i < AmountItems; i++)
+        {
+            Item item = new() {Uid = "P"+i};
+            db.Items.Add(item);
+            db.SaveChanges();
+        }
+
+        ItemsDBStorage storage = new(db);
+
+        // Act
+        List<Item> result = storage.GetItems(offset, limit).Result.ToList();
+
+        // Assert
+        Assert.IsTrue(result.Count == expectedAmount);
     }
 
     public static IEnumerable<object[]> SpecificItemTestData => new List<object[]>
