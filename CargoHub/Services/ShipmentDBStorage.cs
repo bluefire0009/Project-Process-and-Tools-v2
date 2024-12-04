@@ -21,11 +21,18 @@ public class ShipmentStorage : IShipmentStorage
             .ToListAsync();
     }
 
-    public async Task<IEnumerable<Shipment>> GetShipments(int offset, int limit)
+    public async Task<IEnumerable<Shipment>> GetShipments(int offset, int limit, bool orderbyId = false)
     {
-        // Fetch shipments with pagination
+        // Fetch Shipments with pagination
+        if (orderbyId)
+        {
+            return await DB.Shipments
+                .OrderBy(o => o.Id)
+                .Skip(offset) // Skip the first 'offset' items
+                .Take(limit)  // Take the next 'limit' items
+                .ToListAsync();
+        }
         return await DB.Shipments
-            .OrderBy(o => o.Id)
             .Skip(offset) // Skip the first 'offset' items
             .Take(limit)  // Take the next 'limit' items
             .ToListAsync();

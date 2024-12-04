@@ -294,7 +294,7 @@ public class OrderDBTest
         OrderStorage storage = new(db);
 
         // Act
-        IEnumerable<Order> x = await storage.GetOrders(offset, limit);
+        IEnumerable<Order> x = await storage.GetOrders(offset, limit, true);
         List<Order> result = x.ToList();
 
         // Console.WriteLine($"offset: {offset}  limit:{limit}  count in db:{orders.Count()}  result count:{result.Count()}");
