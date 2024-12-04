@@ -43,7 +43,18 @@ public class WarehouseDBStorage : IWarehouseStorage
 
     public async Task<IEnumerable<Warehouse>> getWarehouses()
     {
-        IEnumerable<Warehouse> warehouses = await db.Warehouses.ToListAsync();
+        IEnumerable<Warehouse> warehouses = await db.Warehouses.Take(100).ToListAsync();
+        return warehouses;
+    }
+
+    // Starting from Id "offset" take "amountToReturn" warehouses
+    public async Task<IEnumerable<Warehouse>?> getWarehousesRange(int offset, int amountToReturn)
+    {
+        if (offset < 0 ) return null;
+        bool NotEnoughWarehouses = db.Warehouses.Count() < offset || db.Warehouses.Count() < offset - 1 + amountToReturn;
+        if (NotEnoughWarehouses)
+            return null;
+        IEnumerable<Warehouse> warehouses = await db.Warehouses.Where(w => w.Id >= offset && w.Id <= amountToReturn+offset).ToListAsync();
         return warehouses;
     }
 

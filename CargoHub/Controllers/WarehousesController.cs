@@ -21,6 +21,14 @@ public class WarehousesController : Controller
         return Ok(warehouses);
     }
 
+    [HttpGet("Range")]
+    public async Task<IActionResult> GetWarehousesRange([FromQuery]int firstIdToTake, [FromQuery]int amountToTake)
+    {
+        IEnumerable<Warehouse>? warehouses = await warehouseStorage.getWarehousesRange(firstIdToTake, amountToTake);
+        if (warehouses == null) return BadRequest("Invalid firstIdToTake or invalid amountToTake in the url");
+        return Ok(warehouses);
+    }
+
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSpecificWarehouse(int id)
     {
