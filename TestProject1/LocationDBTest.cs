@@ -228,4 +228,51 @@ public class LocationDBTest
         }
     }
 
+    [TestMethod]
+    public async Task TestSoftDeleteLocations()
+    {
+        // arrange
+        var Test_locations = Enumerable.Range(1, 10).Select(id => new Location { Id = id }).ToList();
+        await db.Locations.AddRangeAsync(Test_locations); // Add the test data
+        await db.SaveChangesAsync();
+
+        LocationStorage storage = new(db);
+        // Act
+
+        // try delteing location 1 twice
+        await storage.DeleteLocation(1);
+        await storage.DeleteLocation(1);
+
+        await storage.DeleteLocation(2);
+        await storage.DeleteLocation(3);
+        await storage.DeleteLocation(4);
+        await storage.DeleteLocation(5);
+
+        List<Location> locationsGetAll = (await storage.GetLocations()).ToList();
+        Location? locationGet1 = await storage.GetLocation(1);
+        Location? locationGet2 = await storage.GetLocation(7);
+
+        // Assert
+        Assert.IsTrue(locationGet1 == null);
+
+        Assert.IsTrue(locationGet2?.Id == 7);
+
+        Assert.IsTrue(locationsGetAll.Count == 5);
+
+        var expectedIds = new[] { 6, 7, 8, 9, 10 };
+        foreach (var id in expectedIds)
+        {
+            Assert.IsTrue(locationsGetAll.Any(l => l.Id == id), $"Location with ID {id} should be in the list.");
+        }
+
+        // Assert that the locationsGetAll list does NOT contain locations with ids 1, 2, 3, 4, and 5
+        var deletedIds = new[] { 1, 2, 3, 4, 5 };
+        foreach (var id in deletedIds)
+        {
+            Assert.IsFalse(locationsGetAll.Any(l => l.Id == id), $"Location with ID {id} should NOT be in the list.");
+        }
+    }
+
+
+
 }

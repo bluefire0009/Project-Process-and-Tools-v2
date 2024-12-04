@@ -67,7 +67,7 @@ public class ShipmentController : Controller
     [HttpDelete("{Id}")]
     public async Task<IActionResult> DelteShipment([FromRoute] int Id)
     {
-        if (await ShipmentStorage.DelteShipment(Id)) return Ok($"Shipment with Id:{Id} Delted");
+        if (await ShipmentStorage.DeleteShipment(Id)) return Ok($"Shipment with Id:{Id} Delted");
         return BadRequest();
     }
 }

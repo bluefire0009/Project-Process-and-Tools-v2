@@ -22,6 +22,9 @@ public class Location : IEquatable<Location>
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
 
+    // softdelte
+    public bool IsDeleted { get; set; } = false;
+
     public bool Equals(Location? other)
     {
         // If the other object is null, return false
