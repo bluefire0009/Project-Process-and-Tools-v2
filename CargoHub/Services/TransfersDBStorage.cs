@@ -9,12 +9,27 @@ public class TransferDBStorage : ITransferStorage
         this.db = db;
     }
 
-    public async Task<IEnumerable<Transfer>> getTransfers()
+    public async Task<IEnumerable<Transfer>> GetTransfers()
     {
-        List<Transfer> transfers = await db.Transfers.ToListAsync();
+        List<Transfer> transfers = await db.Transfers.Take(100).ToListAsync();
         return transfers;
     }
 
+    public async Task<IEnumerable<Transfer>> GetTransfers(int offset, int limit, bool orderbyId = false)
+    {
+        if (orderbyId)
+        {
+            return await db.Transfers
+                .OrderBy(o => o.Id)
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+        }
+        return await db.Transfers
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+    }
     public async Task<Transfer?> getTransfer(int id)
     {
         Transfer? transfer = await db.Transfers.Where(t => t.Id == id).FirstOrDefaultAsync();
