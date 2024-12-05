@@ -15,9 +15,10 @@ public class SuppliersController : Controller
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> GetAllSuppliers()
+    public async Task<IActionResult> GetSuppliers([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool orderById = false)
     {
-        List<Supplier> suppliers = (await supplierStorage.getSuppliers()).ToList();
+        if (offset <= 0) return BadRequest("offset cannot be less than 0");
+        IEnumerable<Supplier> suppliers = await supplierStorage.getSuppliers(offset, limit, orderById);
         return Ok(suppliers);
     }
 
