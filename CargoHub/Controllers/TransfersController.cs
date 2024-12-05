@@ -15,9 +15,9 @@ public class TransferController : Controller
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> GetAllTransfers()
+    public async Task<IActionResult> GetTransfers([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool orderById = false)
     {
-        List<Transfer> transfers = (await transferStorage.getTransfers()).ToList();
+        IEnumerable<Transfer> transfers = await transferStorage.GetTransfers(offset, limit, orderById);
         return Ok(transfers);
     }
 
