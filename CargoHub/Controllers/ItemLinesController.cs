@@ -14,9 +14,9 @@ public class ItemLinesController : Controller {
     }
 
     [HttpGet]
-    public async Task<IActionResult> GetAllItemLines() {
-        List<ItemLine> items = await ItemLineStorage.GetItemLines();
-        return Ok(items);
+    public async Task<IActionResult> GetAllItemLines([FromQuery] int offset = 0, [FromQuery] int limit = 100) {
+        List<ItemLine> itemLines = await ItemLineStorage.GetItemLines(offset, limit);
+        return Ok(itemLines);
     }
 
     [HttpGet("{id}")]

@@ -48,10 +48,13 @@ public class ItemTypesDBStorage : IItemTypeStorage
         return items;
     }
 
-    public async Task<List<ItemType>> GetItemTypes()
+    public async Task<List<ItemType>> GetItemTypes(int offset, int limit)
     {
-        List<ItemType> itemTypes = await db.ItemTypes.ToListAsync();
-        return itemTypes;
+        // Fetch locations with pagination
+        return await db.ItemTypes
+            .Skip(offset) // Skip the first 'offset' items
+            .Take(limit)  // Take the next 'limit' items
+            .ToListAsync();
     }
 
     public async Task<bool> UpdateItemType(int id, ItemType itemType)

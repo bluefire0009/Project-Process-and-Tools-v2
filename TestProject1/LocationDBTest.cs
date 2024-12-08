@@ -209,7 +209,7 @@ public class LocationDBTest
         LocationStorage storage = new(db);
 
         // Act
-        IEnumerable<Location> x = await storage.GetLocations(offset, limit);
+        IEnumerable<Location> x = await storage.GetLocations(offset, limit, true);
         List<Location> result = x.ToList();
 
         // Console.WriteLine($"offset: {offset}  limit:{limit}  count in db:{locations.Count()}  result count:{result.Count()}");

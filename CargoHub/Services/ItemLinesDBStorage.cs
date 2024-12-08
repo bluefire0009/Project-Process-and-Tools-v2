@@ -48,10 +48,13 @@ public class ItemLinesDBStorage : IItemLineStorage
         return items;
     }
 
-    public async Task<List<ItemLine>> GetItemLines()
+    public async Task<List<ItemLine>> GetItemLines(int offset, int limit)
     {
-        List<ItemLine> itemLines = await db.ItemLines.ToListAsync();
-        return itemLines;
+        // Fetch locations with pagination
+        return await db.ItemLines
+            .Skip(offset) // Skip the first 'offset' items
+            .Take(limit)  // Take the next 'limit' items
+            .ToListAsync();
     }
 
     public async Task<bool> UpdateItemLine(int id, ItemLine itemLine)

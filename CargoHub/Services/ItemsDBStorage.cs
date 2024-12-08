@@ -48,10 +48,13 @@ public class ItemsDBStorage : IItemStorage
         return inventory;
     }
 
-    public async Task<List<Item>> GetItems()
+    public async Task<List<Item>> GetItems(int offset, int limit)
     {
-        List<Item> items = await db.Items.ToListAsync();
-        return items;
+        // Fetch locations with pagination
+        return await db.Items
+            .Skip(offset) // Skip the first 'offset' items
+            .Take(limit)  // Take the next 'limit' items
+            .ToListAsync();
     }
 
     public async Task<bool> UpdateItem(string uid, Item item)
