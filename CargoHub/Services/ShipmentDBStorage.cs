@@ -279,7 +279,7 @@ public class ShipmentStorage : IShipmentStorage
         return true;
     }
 
-    public async Task<bool> DelteShipment(int shipmentId)
+    public async Task<bool> DeleteShipment(int shipmentId)
     {
         // delete shipment by id
         Shipment? FoundShipment = await DB.Shipments.FirstOrDefaultAsync(x => x.Id == shipmentId);
@@ -287,6 +287,16 @@ public class ShipmentStorage : IShipmentStorage
 
         // first remove the items from the shipment
         await UpdateItemsInShipment(FoundShipment.Id, []);
+
+        foreach (var item in FoundShipment.Items)
+        {
+            item.IsDeleted = true;
+        }
+
+        foreach (var orderId in FoundShipment.OrderIds)
+        {
+            orderId.IsDeleted = true;
+        }
 
         // then remove the shipment
         DB.Shipments.Remove(FoundShipment);

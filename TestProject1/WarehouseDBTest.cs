@@ -22,7 +22,8 @@ public class WarehouseDBTest
         {
             new object[] { new List<Warehouse> {}},
             new object[] { new List<Warehouse> { new Warehouse()}},
-            new object[] { new List<Warehouse> { new Warehouse(), new Warehouse() }}
+            new object[] { new List<Warehouse> { new Warehouse(), new Warehouse() }},
+            new object[] { new List<Warehouse> { new Warehouse(), new Warehouse(){IsDeleted = true} }}
         };
     [TestMethod]
     [DynamicData(nameof(WarehousesTestData), DynamicDataSourceType.Property)]
@@ -40,7 +41,7 @@ public class WarehouseDBTest
         List<Warehouse> result = storage.getWarehouses().Result.ToList();
 
         // Assert
-        Assert.IsTrue(result.Count == warehouses.Count);
+        Assert.IsTrue(result.Count == warehouses.Where(w=>w.IsDeleted==false).Count());
         for (int warehouseIterator = 0; warehouseIterator < result.Count; warehouseIterator++)
         {
             Assert.IsTrue(result[warehouseIterator].Equals(warehouses[warehouseIterator]));
@@ -94,6 +95,7 @@ public class WarehouseDBTest
         {
             new object[] { new List<Warehouse> {}, 1, false},
             new object[] { new List<Warehouse> { new Warehouse(){Id = 1}}, 2, false},
+            new object[] { new List<Warehouse> { new Warehouse(){Id = 2, IsDeleted = true}}, 2, false},
             new object[] { new List<Warehouse> { new Warehouse(){Id = 1}}, 1, true},
             new object[] { new List<Warehouse> { new Warehouse(){Id = 1}, new Warehouse(){Id = 2}}, 2, true}
         };
@@ -164,6 +166,7 @@ public class WarehouseDBTest
             new object[] { new List<Warehouse> { new Warehouse(){Id = 1}}, 0, false},
             new object[] { new List<Warehouse> { new Warehouse(){Id = 1}}, -1, false},
             new object[] { new List<Warehouse> { new Warehouse(){Id = 1}}, 2, false},
+            new object[] { new List<Warehouse> { new Warehouse(){Id = 2, IsDeleted = true}}, 2, false},
             new object[] { new List<Warehouse> { new Warehouse(){Id = 1}}, 1, true},
             new object[] { new List<Warehouse> { new Warehouse(){Id = 1}, new Warehouse(){Id = 2}}, 2, true}
         };
@@ -187,7 +190,7 @@ public class WarehouseDBTest
         if (expectedResult == true)
             Assert.IsTrue(db.Warehouses.Count() == warehouses.Count -1);
         if (expectedResult == false)
-            Assert.IsTrue(db.Warehouses.Count() == warehouses.Count);
+            Assert.IsTrue(db.Warehouses.Count() == warehouses.Where(w=>w.IsDeleted==false).Count());
     }
 
     [TestMethod]
@@ -216,6 +219,7 @@ public class WarehouseDBTest
             new object[] { new List<Warehouse> {}, 0, new Warehouse(){Id = 1},false},
             new object[] { new List<Warehouse> {}, -1, new Warehouse(){Id = 1},false},
             new object[] { new List<Warehouse> {new Warehouse(){Id = 1}}, 1, new Warehouse(){Id = 2}, false},
+            new object[] { new List<Warehouse> {new Warehouse(){Id = 1, IsDeleted = true}}, 1, new Warehouse(){Id = 1, Code = "ABC"}, false},
             new object[] { new List<Warehouse> {new Warehouse(){Id = 1}}, 1, new Warehouse(){Id = 1, Code = "ABC"}, true},
         };
     [TestMethod]
