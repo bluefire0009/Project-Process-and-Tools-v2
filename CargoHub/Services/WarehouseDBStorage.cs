@@ -29,7 +29,8 @@ public class WarehouseDBStorage : IWarehouseStorage
         Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == id).FirstOrDefaultAsync();
         if (warehouseInDatabase == null) return false;
 
-        db.Warehouses.Remove(warehouseInDatabase);
+        warehouseInDatabase.IsDeleted = true;
+        db.Warehouses.Update(warehouseInDatabase);
 
         await db.SaveChangesAsync();
         return true;
