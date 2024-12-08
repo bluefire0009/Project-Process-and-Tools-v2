@@ -22,7 +22,8 @@ public class SupplierDBTest
         {
             new object[] { new List<Supplier> {}},
             new object[] { new List<Supplier> { new Supplier()}},
-            new object[] { new List<Supplier> { new Supplier(), new Supplier() }}
+            new object[] { new List<Supplier> { new Supplier(), new Supplier() }},
+            new object[] { new List<Supplier> { new Supplier(), new Supplier() {IsDeleted = true} }}
         };
     [TestMethod]
     [DynamicData(nameof(SuppliersTestData), DynamicDataSourceType.Property)]
@@ -40,7 +41,7 @@ public class SupplierDBTest
         List<Supplier> result = storage.getSuppliers().Result.ToList();
 
         // Assert
-        Assert.IsTrue(result.Count == suppliers.Count);
+        Assert.IsTrue(result.Count == suppliers.Where(s=>s.IsDeleted==false).Count());
         for (int supplierIterator = 0; supplierIterator < result.Count; supplierIterator++)
         {
             Assert.IsTrue(result[supplierIterator].Equals(suppliers[supplierIterator]));
@@ -51,6 +52,7 @@ public class SupplierDBTest
         {
             new object[] { new List<Supplier> {}, 1, false},
             new object[] { new List<Supplier> { new Supplier(){Id = 1}}, 2, false},
+            new object[] { new List<Supplier> { new Supplier(){Id = 2, IsDeleted = true}}, 2, false},
             new object[] { new List<Supplier> { new Supplier(){Id = 1}}, 1, true},
             new object[] { new List<Supplier> { new Supplier(){Id = 1}, new Supplier(){Id = 2}}, 2, true}
         };
@@ -122,6 +124,7 @@ public class SupplierDBTest
             new object[] { new List<Supplier> { new Supplier(){Id = 1}}, 0, false},
             new object[] { new List<Supplier> { new Supplier(){Id = 1}}, -1, false},
             new object[] { new List<Supplier> { new Supplier(){Id = 1}}, 2, false},
+            new object[] { new List<Supplier> { new Supplier(){Id = 2, IsDeleted = true}}, 2, false},
             new object[] { new List<Supplier> { new Supplier(){Id = 1}}, 1, true},
             new object[] { new List<Supplier> { new Supplier(){Id = 1}, new Supplier(){Id = 2}}, 2, true}
         };
@@ -145,7 +148,7 @@ public class SupplierDBTest
         if (expectedResult == true)
             Assert.IsTrue(db.Suppliers.Count() == suppliers.Count -1);
         if (expectedResult == false)
-            Assert.IsTrue(db.Suppliers.Count() == suppliers.Count);
+            Assert.IsTrue(db.Suppliers.Count() == suppliers.Where(s=>s.IsDeleted==false).Count());
     }
 
     [TestMethod]
@@ -174,6 +177,7 @@ public class SupplierDBTest
             new object[] { new List<Supplier> {}, 0, new Supplier(){Id = 1},false},
             new object[] { new List<Supplier> {}, -1, new Supplier(){Id = 1},false},
             new object[] { new List<Supplier> {new Supplier(){Id = 1}}, 1, new Supplier(){Id = 2}, false},
+            new object[] { new List<Supplier> {new Supplier(){Id = 1, IsDeleted = true}}, 1, new Supplier(){Id = 1, Code = "ABC"}, false},
             new object[] { new List<Supplier> {new Supplier(){Id = 1}}, 1, new Supplier(){Id = 1, Code = "ABC"}, true},
         };
     [TestMethod]

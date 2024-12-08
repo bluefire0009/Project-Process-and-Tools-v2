@@ -24,6 +24,7 @@ public class Supplier : IEquatable<Supplier>
 
     [DataType(DataType.DateTime)]
     public DateTime UpdatedAt { get; set; }
+    public bool IsDeleted { get; set;} = false;
 
     public bool Equals(Supplier? other)
     {
