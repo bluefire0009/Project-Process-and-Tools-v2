@@ -35,6 +35,9 @@ public class Shipment : IEquatable<Shipment>
     public DateTime? UpdatedAt { get; set; } = null;
 
     public ICollection<ShipmentItems> Items { get; set; } = new List<ShipmentItems>();
+
+    // softdelte
+    public bool IsDeleted { get; set; } = false;
     public bool Equals(Shipment? other)
     {
         if (other == null) return false;
@@ -76,6 +79,9 @@ public class ShipmentItems
 
     public int Amount { get; set; }
 
+    // softdelte
+    public bool IsDeleted { get; set; } = false;
+
     public ShipmentItems(string ItemUid, int amount, int shipmentId)
     {
         this.ItemUid = ItemUid;
@@ -97,6 +103,9 @@ public class OrdersInShipment
     [ForeignKey("ShipmentId")]
     public Shipment? shipment { get; set; }
     public int ShipmentId { get; set; }
+
+    // softdelte
+    public bool IsDeleted { get; set; } = false;
 
     public OrdersInShipment(int orderId, int shipmentId)
     {

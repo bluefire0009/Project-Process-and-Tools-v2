@@ -59,7 +59,7 @@ public class OrderController : Controller
     [HttpDelete("{Id}")]
     public async Task<IActionResult> DelteOrder([FromRoute] int Id)
     {
-        if (await Storage.DelteOrder(Id)) return Ok($"Order with Id:{Id} Delted");
+        if (await Storage.DeleteOrder(Id)) return Ok($"Order with Id:{Id} Delted");
         return BadRequest();
     }
 

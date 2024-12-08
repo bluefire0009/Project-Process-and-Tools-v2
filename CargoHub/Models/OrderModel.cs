@@ -47,6 +47,9 @@ public class Order : IEquatable<Order>
 
     public ICollection<OrderItems> Items { get; set; } = new List<OrderItems>();
 
+    // softdelte
+    public bool IsDeleted { get; set; } = false;
+
     public bool Equals(Order? other)
     {
         if (other is null) return false;
@@ -111,6 +114,9 @@ public class OrderItems : IEquatable<OrderItems>
 
     public int Amount { get; set; }
 
+    // softdelte
+    public bool IsDeleted { get; set; } = false;
+
     public OrderItems(string ItemUid, int amount, int OrderId)
     {
         this.ItemUid = ItemUid;
@@ -144,6 +150,9 @@ public class ShipmentsInOrders
     [ForeignKey("ShipmentId")]
     public Shipment? shipment { get; set; }
     public int ShipmentId { get; set; }
+
+    // softdelte
+    public bool IsDeleted { get; set; } = false;
 
     public ShipmentsInOrders(int orderId, int shipmentId)
     {
