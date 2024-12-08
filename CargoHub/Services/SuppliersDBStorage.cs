@@ -50,7 +50,8 @@ public class SupplierDBStorage : ISupplierStorage
         Supplier? supplierInDatabase = await db.Suppliers.Where(s => s.Id == id).FirstOrDefaultAsync();
         if (supplierInDatabase == null) return false;
 
-        db.Suppliers.Remove(supplierInDatabase);
+        supplierInDatabase.IsDeleted = true;
+        db.Suppliers.Update(supplierInDatabase);
 
         await db.SaveChangesAsync();
         return true;
