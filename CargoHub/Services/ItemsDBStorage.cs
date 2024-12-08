@@ -28,7 +28,7 @@ public class ItemsDBStorage : IItemStorage
     {
         if (uid == "") return false;
 
-        Item? itemInDb = await db.Items.Where(_ => !_.IsDeleted).FirstOrDefaultAsync(_ => _.Uid == uid);
+        Item? itemInDb = await db.Items.FirstOrDefaultAsync(_ => _.Uid == uid);
         if (itemInDb == null) return false;
 
         itemInDb.IsDeleted = true;
@@ -39,7 +39,7 @@ public class ItemsDBStorage : IItemStorage
 
     public async Task<Item?> GetItem(string uid)
     {
-        Item? item = await db.Items.Where(_ => !_.IsDeleted).FirstOrDefaultAsync(_ => _.Uid == uid);
+        Item? item = await db.Items.FirstOrDefaultAsync(_ => _.Uid == uid);
         return item;
     }
 
@@ -53,7 +53,6 @@ public class ItemsDBStorage : IItemStorage
     {
         // Fetch locations with pagination
         return await db.Items
-            .Where(_ => !_.IsDeleted)
             .Skip(offset) // Skip the first 'offset' items
             .Take(limit)  // Take the next 'limit' items
             .ToListAsync();
@@ -64,7 +63,7 @@ public class ItemsDBStorage : IItemStorage
         if (item == null) return false;
         if (uid == "" || item.Uid == "" || uid != item.Uid) return false;
 
-        Item? itemInDatabase = await db.Items.Where(_ => !_.IsDeleted).Where(i => i.Uid == uid).FirstOrDefaultAsync();
+        Item? itemInDatabase = await db.Items.Where(i => i.Uid == uid).FirstOrDefaultAsync();
         if (itemInDatabase == null) return false;
 
         item.UpdatedAt = DateTime.Now;
