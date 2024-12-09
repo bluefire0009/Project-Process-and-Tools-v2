@@ -155,12 +155,15 @@ public class ItemDBTest
             new object[] { new List<Item> { new Item(){Uid = "P00001"}}, "P00000", false},
             new object[] { new List<Item> { new Item(){Uid = "P00001"}}, "P00003", false},
             new object[] { new List<Item> { new Item(){Uid = "P00001"}}, "P00001", true},
-            new object[] { new List<Item> { new Item(){Uid = "P00001"}, new Item(){Uid = "P00002"}}, "P00002", true}
+            new object[] { new List<Item> { new Item(){Uid = "P00001"}, new Item(){Uid = "P00002"}}, "P00002", true},
+            new object[] { new List<Item> { new Item(){Uid = "P00001"}, new Item(){Uid = "P00002", IsDeleted=true}}, "P00003", false},
+            new object[] { new List<Item> { new Item(){Uid = "P00001"}, new Item(){Uid = "P00002", IsDeleted=true}}, "P00001", true}
         };
     [TestMethod]
     [DynamicData(nameof(RemoveItemTestData), DynamicDataSourceType.Property)]
     public void TestRemove(List<Item> items, string idToRemove, bool expectedResult)
     {
+        int oldCount = items.Where(_ => !_.IsDeleted).Count();
         // Arrange
         foreach (Item item in items)
         {
@@ -175,9 +178,9 @@ public class ItemDBTest
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
         if (expectedResult == true)
-            Assert.IsTrue(db.Items.Count() == items.Count -1);
+            Assert.IsTrue(db.Items.Where(_ => !_.IsDeleted).Count() == oldCount-1);
         if (expectedResult == false)
-            Assert.IsTrue(db.Items.Count() == items.Count);
+            Assert.IsTrue(db.Items.Where(_ => !_.IsDeleted).Count() == oldCount);
     }
 
     [TestMethod]
