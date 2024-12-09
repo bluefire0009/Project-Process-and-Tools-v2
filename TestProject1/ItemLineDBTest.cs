@@ -124,8 +124,8 @@ public class ItemLineDBTest
             new object[] { new List<ItemLine> { new ItemLine(){Id = 1}}, 3, false},
             new object[] { new List<ItemLine> { new ItemLine(){Id = 1}}, 1, true},
             new object[] { new List<ItemLine> { new ItemLine(){Id = 1}, new ItemLine(){Id = 2}}, 2, true},
-            new object[] { new List<ItemLine> { new ItemLine(){Id = 1}, new ItemLine(){Id = 2, IsDeleted=true}}, "P00003", false},
-            new object[] { new List<ItemLine> { new ItemLine(){Id = 1}, new ItemLine(){Id = 2, IsDeleted=true}}, "P00001", true}
+            new object[] { new List<ItemLine> { new ItemLine(){Id = 1}, new ItemLine(){Id = 2, IsDeleted=true}}, 3, false},
+            new object[] { new List<ItemLine> { new ItemLine(){Id = 1}, new ItemLine(){Id = 2, IsDeleted=true}}, 1, true}
         };
     [TestMethod]
     [DynamicData(nameof(RemoveItemLineTestData), DynamicDataSourceType.Property)]
