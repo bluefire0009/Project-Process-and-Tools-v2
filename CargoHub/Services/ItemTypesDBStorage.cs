@@ -31,7 +31,8 @@ public class ItemTypesDBStorage : IItemTypeStorage
         ItemType? itemTypeInDb = await db.ItemTypes.FirstOrDefaultAsync(_ => _.Id == id);
         if (itemTypeInDb == null) return false;
 
-        db.ItemTypes.Remove(itemTypeInDb);
+        itemTypeInDb.IsDeleted = true;
+        db.ItemTypes.Update(itemTypeInDb);
         await db.SaveChangesAsync();
         return true;
     }

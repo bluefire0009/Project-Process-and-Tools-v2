@@ -124,12 +124,15 @@ public class ItemTypeDBTest
             new object[] { new List<ItemType> { new ItemType(){Id = 1}}, 0, false},
             new object[] { new List<ItemType> { new ItemType(){Id = 1}}, 3, false},
             new object[] { new List<ItemType> { new ItemType(){Id = 1}}, 1, true},
-            new object[] { new List<ItemType> { new ItemType(){Id = 1}, new ItemType(){Id = 2}}, 2, true}
+            new object[] { new List<ItemType> { new ItemType(){Id = 1}, new ItemType(){Id = 2}}, 2, true},
+            new object[] { new List<ItemType> { new ItemType(){Id = 1}, new ItemType(){Id = 2, IsDeleted=true}}, 3, false},
+            new object[] { new List<ItemType> { new ItemType(){Id = 1}, new ItemType(){Id = 2, IsDeleted=true}}, 1, true}
         };
     [TestMethod]
     [DynamicData(nameof(RemoveItemTypeTestData), DynamicDataSourceType.Property)]
     public void TestRemove(List<ItemType> itemtypes, int idToRemove, bool expectedResult)
     {
+        int oldCount = itemtypes.Where(_ => !_.IsDeleted).Count();
         // Arrange
         foreach (ItemType itemtype in itemtypes)
         {
@@ -144,9 +147,9 @@ public class ItemTypeDBTest
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
         if(expectedResult == true)
-            Assert.IsTrue(db.ItemTypes.Count() == itemtypes.Count -1);
+            Assert.IsTrue(db.ItemTypes.Where(_ => !_.IsDeleted).Count() == oldCount -1);
         if(expectedResult == false)
-            Assert.IsTrue(db.ItemTypes.Count() == itemtypes.Count);
+            Assert.IsTrue(db.ItemTypes.Where(_ => !_.IsDeleted).Count() == oldCount);
     }
 
     [TestMethod]

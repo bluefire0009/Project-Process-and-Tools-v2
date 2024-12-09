@@ -30,6 +30,7 @@ public class DatabaseContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<ItemType>().HasQueryFilter(i => !i.IsDeleted);
         modelBuilder.Entity<ApiKey>().ToTable("API_keys");
         modelBuilder.Entity<TransferItem>().HasKey(i => new { i.TransferId, i.ItemUid });
         modelBuilder.Entity<InventoryLocation>().HasKey(l => new { l.InventoryId, l.LocationId });
