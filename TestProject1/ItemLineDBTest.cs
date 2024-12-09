@@ -123,12 +123,15 @@ public class ItemLineDBTest
             new object[] { new List<ItemLine> { new ItemLine(){Id = 1}}, 0, false},
             new object[] { new List<ItemLine> { new ItemLine(){Id = 1}}, 3, false},
             new object[] { new List<ItemLine> { new ItemLine(){Id = 1}}, 1, true},
-            new object[] { new List<ItemLine> { new ItemLine(){Id = 1}, new ItemLine(){Id = 2}}, 2, true}
+            new object[] { new List<ItemLine> { new ItemLine(){Id = 1}, new ItemLine(){Id = 2}}, 2, true},
+            new object[] { new List<ItemLine> { new ItemLine(){Id = 1}, new ItemLine(){Id = 2, IsDeleted=true}}, "P00003", false},
+            new object[] { new List<ItemLine> { new ItemLine(){Id = 1}, new ItemLine(){Id = 2, IsDeleted=true}}, "P00001", true}
         };
     [TestMethod]
     [DynamicData(nameof(RemoveItemLineTestData), DynamicDataSourceType.Property)]
     public void TestRemove(List<ItemLine> itemlines, int idToRemove, bool expectedResult)
     {
+        int oldCount = itemlines.Where(_ => !_.IsDeleted).Count();
         // Arrange
         foreach (ItemLine itemline in itemlines)
         {
@@ -143,9 +146,9 @@ public class ItemLineDBTest
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
         if (expectedResult == true)
-            Assert.IsTrue(db.ItemLines.Count() == itemlines.Count -1);
+            Assert.IsTrue(db.ItemLines.Where(_ => !_.IsDeleted).Count() == oldCount -1);
         if (expectedResult == false)
-            Assert.IsTrue(db.ItemLines.Count() == itemlines.Count);
+            Assert.IsTrue(db.ItemLines.Where(_ => !_.IsDeleted).Count() == oldCount);
     }
 
     [TestMethod]
