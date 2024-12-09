@@ -125,8 +125,8 @@ public class ItemTypeDBTest
             new object[] { new List<ItemType> { new ItemType(){Id = 1}}, 3, false},
             new object[] { new List<ItemType> { new ItemType(){Id = 1}}, 1, true},
             new object[] { new List<ItemType> { new ItemType(){Id = 1}, new ItemType(){Id = 2}}, 2, true},
-            new object[] { new List<ItemType> { new ItemType(){Id = 1}, new ItemType(){Id = 2, IsDeleted=true}}, "P00003", false},
-            new object[] { new List<ItemType> { new ItemType(){Id = 1}, new ItemType(){Id = 2, IsDeleted=true}}, "P00001", true}
+            new object[] { new List<ItemType> { new ItemType(){Id = 1}, new ItemType(){Id = 2, IsDeleted=true}}, 3, false},
+            new object[] { new List<ItemType> { new ItemType(){Id = 1}, new ItemType(){Id = 2, IsDeleted=true}}, 1, true}
         };
     [TestMethod]
     [DynamicData(nameof(RemoveItemTypeTestData), DynamicDataSourceType.Property)]
