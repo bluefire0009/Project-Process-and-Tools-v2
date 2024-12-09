@@ -9,6 +9,8 @@ public class ItemLine : IEquatable<ItemLine>
     public string? Name { get; set; }
     public string? Description { get; set; }
 
+    public bool IsDeleted { get; set; } = false;
+
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 

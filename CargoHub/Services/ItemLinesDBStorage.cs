@@ -31,7 +31,8 @@ public class ItemLinesDBStorage : IItemLineStorage
         ItemLine? itemLineInDb = await db.ItemLines.FirstOrDefaultAsync(_ => _.Id == id);
         if (itemLineInDb == null) return false;
 
-        db.ItemLines.Remove(itemLineInDb);
+        itemLineInDb.IsDeleted = true;
+        db.ItemLines.Update(itemLineInDb);
         await db.SaveChangesAsync();
         return true;
     }
