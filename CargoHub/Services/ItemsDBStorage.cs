@@ -31,7 +31,8 @@ public class ItemsDBStorage : IItemStorage
         Item? itemInDb = await db.Items.FirstOrDefaultAsync(_ => _.Uid == uid);
         if (itemInDb == null) return false;
 
-        db.Items.Remove(itemInDb);
+        itemInDb.IsDeleted = true;
+        db.Items.Update(itemInDb);
         await db.SaveChangesAsync();
         return true;
     }
