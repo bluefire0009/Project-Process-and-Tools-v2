@@ -1,3 +1,4 @@
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -29,12 +30,12 @@ public class ClientDBStorage : IClientStorage
     public async Task<bool> addClient(Client client)
     {
         if (client == null) return false;
-        if (client.Id <= 0) return false;
+        if (client.Id < 0) return false;
 
         Client? clientInDatabase = await db.Clients.Where(c => c.Id == client.Id).FirstOrDefaultAsync();
         if (clientInDatabase != null) return false;
 
-        client.CreatedAt = DateTime.Now;
+        client.CreatedAt = CETDateTime.Now();
         await db.Clients.AddAsync(client);
 
         await db.SaveChangesAsync();
@@ -77,5 +78,5 @@ public class ClientDBStorage : IClientStorage
 
         IEnumerable<Order> orders = db.Orders.Where(o => o.BillTo == clientId || o.ShipTo == clientId);
         return orders;
-    }    
+    }
 }
