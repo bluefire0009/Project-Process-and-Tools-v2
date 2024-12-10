@@ -31,6 +31,7 @@ public class DatabaseContext : DbContext
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.Entity<Item>().HasQueryFilter(i => !i.IsDeleted);
+        modelBuilder.Entity<ItemType>().HasQueryFilter(i => !i.IsDeleted);
         modelBuilder.Entity<Location>().HasQueryFilter(l => !l.IsDeleted);
         modelBuilder.Entity<Order>().HasQueryFilter(o => !o.IsDeleted);
         modelBuilder.Entity<Shipment>().HasQueryFilter(s => !s.IsDeleted);
