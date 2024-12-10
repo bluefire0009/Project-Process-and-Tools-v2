@@ -30,8 +30,8 @@ namespace CargoHub
             app.MapGet("/", () => "Hello World!");
 
             app.Use(async (context, next) => {
-                await System.IO.File.AppendAllTextAsync("log.txt", $"{context.Request.Path} - {context.Response.StatusCode} \n");
                 await next.Invoke();
+                await System.IO.File.AppendAllTextAsync("log.txt", $"{context.Request.Path} - {context.Response.StatusCode} \n");
             });
 
 
