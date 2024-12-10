@@ -98,7 +98,7 @@ public class OrderDBTest
         var FoundOrders = await storage.GetOrders();
         Assert.IsTrue(FoundOrders.Count() == orders.Count());
 
-        List<Inventory> inventories = GetTestInventories();        
+        List<Inventory> inventories = GetTestInventories();
 
         // Assert the amounts in the inventories
         AssertInventoryAmounts(expectedInventories, inventories);
@@ -177,6 +177,7 @@ public class OrderDBTest
     public async Task TestUpdateOrder(List<Order> orders, List<List<Tuple<int, int, int, int, int>>> ListOfexpectedInventories, List<string> NewOrderStatuses)
     {
         // an order can be: {'Pending', 'Packed', 'Shipped', 'Delivered'}
+        // tests if updating the order also updates the inventories correctly 
 
         OrderStorage storage = new(db);
 
@@ -219,13 +220,14 @@ public class OrderDBTest
         foreach (var order in orders)
         {
             // add each order and assert that the order has been added
-            Assert.IsTrue(await storage.DelteOrder(order.Id));
+            Assert.IsTrue(await storage.DeleteOrder(order.Id));
         }
     }
 
     [TestMethod]
     public async Task TestShipmentIds()
     {
+        // test if adding an order with multiple shipment id's works
         OrderStorage storage = new(db);
 
         Order testOrder = new()
@@ -271,6 +273,129 @@ public class OrderDBTest
 
         Assert.AreEqual(3, FoundOrder.ShipmentIds.Count());
     }
+
+    public static IEnumerable<object[]> TestGetOrdersTestDataPagination => new List<object[]>
+    {
+    new object[] { Enumerable.Range(1, 0).Select(id => new Order { Id = id }).ToList(), 0, 5 },  //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Order { Id = id }).ToList(), 0, 5 }, //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Order { Id = id }).ToList(), 5, 5 }, //   5 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Order { Id = id }).ToList(), 8, 5 }, //   8 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Order { Id = id }).ToList(), 10, 5 }  //  10 offset, limit 5
+    };
+
+    [TestMethod]
+    [DynamicData(nameof(TestGetOrdersTestDataPagination), DynamicDataSourceType.Property)]
+    public async Task TestGetOrdersWithPagination(List<Order> orders, int offset, int limit)
+    {
+        // Arrange
+        await db.Orders.AddRangeAsync(orders); // Add the test data
+        await db.SaveChangesAsync();
+
+        OrderStorage storage = new(db);
+
+        // Act
+        IEnumerable<Order> x = await storage.GetOrders(offset, limit, true);
+        List<Order> result = x.ToList();
+
+        // Console.WriteLine($"offset: {offset}  limit:{limit}  count in db:{orders.Count()}  result count:{result.Count()}");
+        // foreach (Order location in result)
+        // {
+        //     Console.WriteLine("Location: " + location.Id);
+        // }
+
+        // Assert
+        int expectedCount = Math.Min(limit, Math.Max(0, orders.Count - offset));
+        Assert.AreEqual(expectedCount, result.Count, "Returned result count is incorrect.");
+
+        for (int i = 0; i < result.Count; i++)
+        {
+            Assert.AreEqual(orders[offset + i].Id, result[i].Id, "Order ID does not match at index " + i);
+        }
+    }
+
+    [TestMethod]
+    public async Task TestSoftDeleteOrders()
+    {
+        // arrange
+        var Test_orders = Enumerable.Range(1, 10).Select(id => new Order { Id = id }).ToList();
+        await db.Orders.AddRangeAsync(Test_orders); // Add the test data
+        await db.SaveChangesAsync();
+
+        OrderStorage storage = new(db);
+        // Act
+
+        // try delteing location 1 twice
+        await storage.DeleteOrder(1);
+        await storage.DeleteOrder(1);
+
+        await storage.DeleteOrder(2);
+        await storage.DeleteOrder(3);
+        await storage.DeleteOrder(4);
+        await storage.DeleteOrder(5);
+
+        List<Order> ordersGetAll = (await storage.GetOrders()).ToList();
+        Order? OrderGet1 = await storage.GetOrder(1);
+        Order? OrderGet2 = await storage.GetOrder(7);
+
+        // Assert
+        Assert.IsTrue(OrderGet1 == null);
+
+        Assert.IsTrue(OrderGet2?.Id == 7);
+
+        Assert.IsTrue(ordersGetAll.Count == 5);
+
+        var expectedIds = new[] { 6, 7, 8, 9, 10 };
+        foreach (var id in expectedIds)
+        {
+            Assert.IsTrue(ordersGetAll.Any(l => l.Id == id), $"Location with ID {id} should be in the list.");
+        }
+
+        // Assert that the locationsGetAll list does NOT contain locations with ids 1, 2, 3, 4, and 5
+        var deletedIds = new[] { 1, 2, 3, 4, 5 };
+        foreach (var id in deletedIds)
+        {
+            Assert.IsFalse(ordersGetAll.Any(l => l.Id == id), $"Location with ID {id} should NOT be in the list.");
+        }
+    }
+
+    [TestMethod]
+    public async Task TestSoftDeleteOrderAndRelatedItemsAndShipments()
+    {
+        // Arrange
+        Order test_order = new Order()
+        {
+            Id = 1,
+            ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(1, 1) },
+            Items = new List<OrderItems>
+                {
+                    new OrderItems("P000001", 20, 1),
+                    new OrderItems("P000002", 10, 1)
+                }
+        };
+
+        db.Orders.Add(test_order);  // Add the order to the database
+        await db.SaveChangesAsync();  // Save changes to the database
+
+        OrderStorage storage = new(db);  // Instantiate storage to interact with the database
+
+        // Act
+        await storage.DeleteOrder(test_order.Id);  // Soft delete the order
+
+        // Retrieve the soft-deleted order and related entities
+        Order? foundOrder = await storage.GetOrder(test_order.Id);  // Should be null after soft delete
+        List<OrderItems> items = await db.OrderItems.Where(_ => _.OrderId == 1).ToListAsync();  // Should be soft-deleted or empty
+        List<ShipmentsInOrders> shipments = await db.ShipmentsInOrders.Where(_ => _.OrderId == 1).ToListAsync();  // Should be soft-deleted or empty
+
+        // Assert that the order is null after soft delete
+        Assert.IsNull(foundOrder, "Order should be null after soft delete.");
+
+        // Assert that the related order items are soft deleted (empty)
+        Assert.IsTrue(!items.Any(), "OrderItems list should be empty after soft delete.");
+
+        // Assert that the related shipments in the order are soft deleted (empty)
+        Assert.IsTrue(!shipments.Any(), "ShipmentsInOrder list should be empty after soft delete.");
+    }
+
 
 
 

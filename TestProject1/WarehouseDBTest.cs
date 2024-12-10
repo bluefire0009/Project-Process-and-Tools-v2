@@ -46,6 +46,49 @@ public class WarehouseDBTest
             Assert.IsTrue(result[warehouseIterator].Equals(warehouses[warehouseIterator]));
         }
     }
+    public static IEnumerable<object[]> WarehousesTestDataGetRange => new List<object[]>
+        {
+            new object[] { new List<Warehouse> { new Warehouse()}, 1, 2, true},
+            new object[] { new List<Warehouse> { new Warehouse()}, -1, 1, true},
+            new object[] { new List<Warehouse> {}, 1, 1, true},
+            
+            new object[] { new List<Warehouse> { new Warehouse()}, 1, 1, false},
+            new object[] { new List<Warehouse> { new Warehouse(), new Warehouse() }, 1, 1, false},
+            new object[] { new List<Warehouse> { new Warehouse(), new Warehouse(), new Warehouse() }, 2, 2, false}
+        };
+    [TestMethod]
+    [DynamicData(nameof(WarehousesTestDataGetRange), DynamicDataSourceType.Property)]
+    public void TestGetRange(List<Warehouse> warehouses, int offset, int amountToTake, bool nullExpected)
+    {
+        // Arrange
+        foreach (Warehouse warehouse in warehouses)
+        {
+            db.Warehouses.Add(warehouse);
+            db.SaveChanges();
+        }
+        WarehouseDBStorage storage = new(db);
+
+        // Act
+        IEnumerable<Warehouse>? resultOrNull = storage.getWarehousesRange(offset, amountToTake).Result;
+        List<Warehouse> result = new();
+        if (!(resultOrNull == null)) 
+            result = resultOrNull.ToList();
+
+        // Assert
+        if (nullExpected == false)
+        {
+            Assert.IsTrue(result.Count >= offset && result.Count <= amountToTake+offset);
+            Assert.IsTrue(result.All(w => w.Id >= offset && w.Id <= amountToTake+offset));
+        }
+        
+        if (nullExpected == true)
+        {
+            if (offset > 0)
+                Assert.IsTrue(warehouses.Count <= offset);
+            Assert.IsTrue(offset+amountToTake >= result.Count);
+            Assert.IsTrue(resultOrNull == null);
+        } 
+    }
 
     public static IEnumerable<object[]> SpecificWarehousesTestData => new List<object[]>
         {

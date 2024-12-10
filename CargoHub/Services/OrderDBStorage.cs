@@ -21,6 +21,23 @@ public class OrderStorage : IOrderStorage
             .ToListAsync();
     }
 
+    public async Task<IEnumerable<Order>> GetOrders(int offset, int limit, bool orderbyId = false)
+    {
+        // Fetch orders with pagination
+        if (orderbyId)
+        {
+            return await DB.Orders
+                .OrderBy(o => o.Id)
+                .Skip(offset) // Skip the first 'offset' items
+                .Take(limit)  // Take the next 'limit' items
+                .ToListAsync();
+        }
+        return await DB.Orders
+            .Skip(offset) // Skip the first 'offset' items
+            .Take(limit)  // Take the next 'limit' items
+            .ToListAsync();
+    }
+
     public async Task<Order?> GetOrder(int orderId)
     {
         // return order by id
@@ -52,7 +69,7 @@ public class OrderStorage : IOrderStorage
         List<OrderItems> orderItems = order.Items.ToList();
 
         // give it the correct CreatedAt field
-        order.CreatedAt = DateTime.Now;
+        order.CreatedAt = CETDateTime.Now();
         // add the order
         await DB.Orders.AddAsync(order);
 
@@ -87,7 +104,7 @@ public class OrderStorage : IOrderStorage
         await UpdateItemsInOrder(order.Id, order.Items.ToList(), settings: "add");
 
         // update updated at
-        FoundOrder.UpdatedAt = DateTime.Now;
+        FoundOrder.UpdatedAt = CETDateTime.Now();
 
         // update rest of exsting order
         // DB.Orders.Update(FoundOrder);
@@ -149,7 +166,7 @@ public class OrderStorage : IOrderStorage
         return true;
     }
 
-    public async Task<bool> DelteOrder(int orderId)
+    public async Task<bool> DeleteOrder(int orderId)
     {
         // delete order by id
         Order? FoundOrder = await DB.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
@@ -157,9 +174,20 @@ public class OrderStorage : IOrderStorage
 
         // first remove the items from the order
         await UpdateItemsInOrder(FoundOrder.Id, []);
+        foreach (var item in FoundOrder.Items)
+        {
+            item.IsDeleted = true;
+        }
+
+        foreach (var ShipmentId in FoundOrder.ShipmentIds)
+        {
+            ShipmentId.IsDeleted = true;
+        }
 
         // then remove the order
-        DB.Orders.Remove(FoundOrder);
+        FoundOrder.IsDeleted = true;
+        DB.Orders.Update(FoundOrder);
+
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;
     }

@@ -17,9 +17,9 @@ public class ShipmentController : Controller
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> GetShipments()
+    public async Task<IActionResult> GetShipments([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool orderById = false)
     {
-        IEnumerable<Shipment> shipments = await ShipmentStorage.GetShipments();
+        IEnumerable<Shipment> shipments = await ShipmentStorage.GetShipments(offset, limit, orderById);
         return Ok(shipments);
     }
 
@@ -67,7 +67,7 @@ public class ShipmentController : Controller
     [HttpDelete("{Id}")]
     public async Task<IActionResult> DelteShipment([FromRoute] int Id)
     {
-        if (await ShipmentStorage.DelteShipment(Id)) return Ok($"Shipment with Id:{Id} Delted");
+        if (await ShipmentStorage.DeleteShipment(Id)) return Ok($"Shipment with Id:{Id} Delted");
         return BadRequest();
     }
 }

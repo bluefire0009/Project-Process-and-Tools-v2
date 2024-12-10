@@ -15,9 +15,9 @@ public class OrderController : Controller
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> GetOrders()
+    public async Task<IActionResult> GetOrders([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool orderById = false)
     {
-        IEnumerable<Order> orders = await Storage.GetOrders();
+        IEnumerable<Order> orders = await Storage.GetOrders(offset, limit, orderById);
         return Ok(orders);
     }
 
@@ -59,7 +59,7 @@ public class OrderController : Controller
     [HttpDelete("{Id}")]
     public async Task<IActionResult> DelteOrder([FromRoute] int Id)
     {
-        if (await Storage.DelteOrder(Id)) return Ok($"Order with Id:{Id} Delted");
+        if (await Storage.DeleteOrder(Id)) return Ok($"Order with Id:{Id} Delted");
         return BadRequest();
     }
 

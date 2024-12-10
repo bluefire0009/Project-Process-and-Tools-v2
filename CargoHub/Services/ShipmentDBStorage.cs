@@ -1,4 +1,5 @@
 using CargoHub;
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -17,6 +18,23 @@ public class ShipmentStorage : IShipmentStorage
         return await DB.Shipments
             .Include(s => s.Items)
             .Take(100)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Shipment>> GetShipments(int offset, int limit, bool orderbyId = false)
+    {
+        // Fetch Shipments with pagination
+        if (orderbyId)
+        {
+            return await DB.Shipments
+                .OrderBy(o => o.Id)
+                .Skip(offset) // Skip the first 'offset' items
+                .Take(limit)  // Take the next 'limit' items
+                .ToListAsync();
+        }
+        return await DB.Shipments
+            .Skip(offset) // Skip the first 'offset' items
+            .Take(limit)  // Take the next 'limit' items
             .ToListAsync();
     }
 
@@ -46,7 +64,7 @@ public class ShipmentStorage : IShipmentStorage
         List<ShipmentItems> shipmentItems = shipment.Items.ToList();
 
         // give it the correct CreatedAt field
-        shipment.CreatedAt = DateTime.Now;
+        shipment.CreatedAt = CETDateTime.Now();
         // add the shipment
         await DB.Shipments.AddAsync(shipment);
 
@@ -80,7 +98,7 @@ public class ShipmentStorage : IShipmentStorage
         await UpdateItemsInShipment(shipment.Id, shipment.Items.ToList(), settings: "add");
 
         // update updated at
-        shipment.UpdatedAt = DateTime.Now;
+        shipment.UpdatedAt = CETDateTime.Now();
 
         // Update the rest of the existing shipment
         FoundShipment.SourceId = shipment.SourceId;
@@ -261,7 +279,7 @@ public class ShipmentStorage : IShipmentStorage
         return true;
     }
 
-    public async Task<bool> DelteShipment(int shipmentId)
+    public async Task<bool> DeleteShipment(int shipmentId)
     {
         // delete shipment by id
         Shipment? FoundShipment = await DB.Shipments.FirstOrDefaultAsync(x => x.Id == shipmentId);
@@ -269,6 +287,16 @@ public class ShipmentStorage : IShipmentStorage
 
         // first remove the items from the shipment
         await UpdateItemsInShipment(FoundShipment.Id, []);
+
+        foreach (var item in FoundShipment.Items)
+        {
+            item.IsDeleted = true;
+        }
+
+        foreach (var orderId in FoundShipment.OrderIds)
+        {
+            orderId.IsDeleted = true;
+        }
 
         // then remove the shipment
         DB.Shipments.Remove(FoundShipment);
