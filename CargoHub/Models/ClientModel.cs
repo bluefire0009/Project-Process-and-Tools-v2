@@ -1,14 +1,10 @@
 using System.ComponentModel.DataAnnotations;
-using System.ComponentModel.DataAnnotations.Schema;
-using System.Text.Json.Serialization;
 
 namespace CargoHub.Models;
 
 public class Client
 {
     [Key]
-    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [JsonIgnore]
     public int Id { get; set; }
 
     public string Name { get; set; } = string.Empty;
@@ -30,11 +26,9 @@ public class Client
     [EmailAddress]
     public string ContactEmail { get; set; } = string.Empty;
 
-    [JsonIgnore]
     [DataType(DataType.DateTime)]
-    public DateTime? CreatedAt { get; set; } = null;
+    public DateTime CreatedAt { get; set; } = DateTime.Now;
 
-    [JsonIgnore]
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
 }
