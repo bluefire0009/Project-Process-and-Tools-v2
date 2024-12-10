@@ -30,6 +30,7 @@ public class DatabaseContext : DbContext
     }
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
+        modelBuilder.Entity<Warehouse>().HasQueryFilter(w => !w.IsDeleted);
         modelBuilder.Entity<Item>().HasQueryFilter(i => !i.IsDeleted);
         modelBuilder.Entity<ItemType>().HasQueryFilter(i => !i.IsDeleted);
         modelBuilder.Entity<Location>().HasQueryFilter(l => !l.IsDeleted);
@@ -40,6 +41,7 @@ public class DatabaseContext : DbContext
         modelBuilder.Entity<OrderItems>().HasQueryFilter(s => !s.IsDeleted);
         modelBuilder.Entity<ShipmentItems>().HasQueryFilter(s => !s.IsDeleted);
         modelBuilder.Entity<ItemLine>().HasQueryFilter(i => !i.IsDeleted);
+
         modelBuilder.Entity<ApiKey>().ToTable("API_keys");
         modelBuilder.Entity<TransferItem>().HasKey(i => new { i.TransferId, i.ItemUid });
         modelBuilder.Entity<InventoryLocation>().HasKey(l => new { l.InventoryId, l.LocationId });
