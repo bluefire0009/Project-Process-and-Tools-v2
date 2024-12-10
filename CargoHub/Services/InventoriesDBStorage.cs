@@ -1,3 +1,4 @@
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -36,6 +37,9 @@ public class InventoriesDBStorage : IInventoryStorage
 
         Inventory? inventoryInDatabase = await db.Inventories.Where(w => w.Id == inventory.Id).FirstOrDefaultAsync();
         if (inventoryInDatabase != null) return false;
+
+        inventory.CreatedAt = CETDateTime.Now();
+        inventory.UpdatedAt = CETDateTime.Now();
 
         await db.Inventories.AddAsync(inventory);
 

@@ -56,6 +56,7 @@ public class LocationStorage : ILocationStorage
         if (location == null) return false;
 
         location.CreatedAt = CETDateTime.Now();
+        location.UpdatedAt = CETDateTime.Now();
 
         await DB.Locations.AddAsync(location);
         if (await DB.SaveChangesAsync() < 1) return false;
