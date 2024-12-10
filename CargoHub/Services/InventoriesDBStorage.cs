@@ -50,7 +50,8 @@ public class InventoriesDBStorage : IInventoryStorage
         Inventory? inventoryInDatabase = await db.Inventories.Where(i => i.Id == id).FirstOrDefaultAsync();
         if (inventoryInDatabase == null) return false;
 
-        db.Inventories.Remove(inventoryInDatabase);
+        inventoryInDatabase.IsDeleted = true;
+        db.Inventories.Update(inventoryInDatabase);
 
         await db.SaveChangesAsync();
         return true;

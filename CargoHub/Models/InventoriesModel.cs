@@ -26,6 +26,7 @@ public class Inventory
 
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
+    public bool IsDeleted { get; set; } = false;
 }
 
 public class InventoryLocation

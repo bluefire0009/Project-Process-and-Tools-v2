@@ -31,4 +31,5 @@ public class Client
 
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
+    public bool IsDeleted { get; set; } = false;
 }

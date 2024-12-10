@@ -71,7 +71,8 @@ public class ItemGroupDBStorage : IItemGroupStorage
         ItemGroup? itemGroupInDatabase = await db.ItemGroups.Where(i => i.Id == id).FirstOrDefaultAsync();
         if (itemGroupInDatabase == null) return false;
 
-        db.ItemGroups.Remove(itemGroupInDatabase);
+        itemGroupInDatabase.IsDeleted = true;
+        db.ItemGroups.Update(itemGroupInDatabase);
 
         await db.SaveChangesAsync();
         return true;
