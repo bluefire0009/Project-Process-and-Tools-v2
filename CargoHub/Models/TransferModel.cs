@@ -9,11 +9,11 @@ public class Transfer : IEquatable<Transfer>
     public int Id { get; set; }
 
     public string? Reference { get; set; }
-    
+
     public int TransferFrom { get; set; }
     public Location? LocationFrom;
     public int TransferTo { get; set; }
-    
+
     public Location? LocationTo;
     public string? TransferStatus { get; set; }
 
@@ -24,6 +24,7 @@ public class Transfer : IEquatable<Transfer>
     public DateTime UpdatedAt { get; set; }
 
     public List<TransferItem> Items { get; set; } = new();
+    public bool IsDeleted { get; set; } = false;
 
     public bool Equals(Transfer? other)
     {
@@ -37,7 +38,7 @@ public class Transfer : IEquatable<Transfer>
                 this.TransferTo == other.TransferTo &&
                 this.TransferStatus == other.TransferStatus &&
                 this.CreatedAt == other.CreatedAt &&
-                this.Items.SequenceEqual(other.Items);            
+                this.Items.SequenceEqual(other.Items);
     }
 }
 
@@ -55,12 +56,12 @@ public class TransferItem : IEquatable<TransferItem>
 
     public bool Equals(TransferItem? other)
     {
-    if (other is null)
-        return false;
+        if (other is null)
+            return false;
 
-    // Compare all relevant properties except foreign keys
-    return this.TransferId == other.TransferId &&
-            this.ItemUid == other.ItemUid &&
-            this.Amount == other.Amount;                    
+        // Compare all relevant properties except foreign keys
+        return this.TransferId == other.TransferId &&
+                this.ItemUid == other.ItemUid &&
+                this.Amount == other.Amount;
     }
 }
