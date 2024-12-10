@@ -1,3 +1,4 @@
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,6 +38,9 @@ public class SupplierDBStorage : ISupplierStorage
         Supplier? supplierInDatabase = await db.Suppliers.Where(s => s.Id == supplier.Id).FirstOrDefaultAsync();
         if (supplierInDatabase != null) return false;
 
+        supplier.CreatedAt = CETDateTime.Now();
+        supplier.UpdatedAt = CETDateTime.Now();
+
         await db.Suppliers.AddAsync(supplier);
 
         await db.SaveChangesAsync();
@@ -67,6 +71,8 @@ public class SupplierDBStorage : ISupplierStorage
 
         db.Remove(supplierInDatabase);
         await db.SaveChangesAsync();
+
+        updatedSupplier.UpdatedAt = CETDateTime.Now();
 
         db.Add(updatedSupplier);
         await db.SaveChangesAsync();

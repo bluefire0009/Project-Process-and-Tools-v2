@@ -1,3 +1,4 @@
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -5,7 +6,8 @@ public class ItemLinesDBStorage : IItemLineStorage
 {
     DatabaseContext db;
 
-    public ItemLinesDBStorage(DatabaseContext db) {
+    public ItemLinesDBStorage(DatabaseContext db)
+    {
         this.db = db;
     }
 
@@ -17,8 +19,8 @@ public class ItemLinesDBStorage : IItemLineStorage
         ItemLine? itemLineInDb = await db.ItemLines.FirstOrDefaultAsync(_ => _.Id == itemLine.Id);
         if (itemLineInDb != null) return false;
 
-        itemLine.CreatedAt = DateTime.Now;
-        itemLine.UpdatedAt = DateTime.Now;
+        itemLine.CreatedAt = CETDateTime.Now();
+        itemLine.UpdatedAt = CETDateTime.Now();
         await db.ItemLines.AddAsync(itemLine);
         await db.SaveChangesAsync();
         return true;

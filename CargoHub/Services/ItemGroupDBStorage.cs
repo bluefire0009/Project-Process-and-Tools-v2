@@ -1,3 +1,4 @@
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -37,7 +38,8 @@ public class ItemGroupDBStorage : IItemGroupStorage
         ItemGroup? itemGroupInDatabase = await db.ItemGroups.Where(i => i.Id == itemGroup.Id).FirstOrDefaultAsync();
         if (itemGroupInDatabase != null) return false;
 
-        itemGroup.CreatedAt = DateTime.Now;
+        itemGroup.CreatedAt = CETDateTime.Now();
+        itemGroup.UpdatedAt = CETDateTime.Now();
 
         await db.ItemGroups.AddAsync(itemGroup);
 
