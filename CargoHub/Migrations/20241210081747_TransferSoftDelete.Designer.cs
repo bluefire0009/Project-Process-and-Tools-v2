@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CargoHub.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20241126090846_m1")]
-    partial class m1
+    [Migration("20241210081747_TransferSoftDelete")]
+    partial class TransferSoftDelete
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -143,10 +143,6 @@ namespace CargoHub.Migrations
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("LocationId")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
 
                     b.HasKey("InventoryId", "LocationId");
@@ -306,6 +302,9 @@ namespace CargoHub.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
@@ -333,6 +332,9 @@ namespace CargoHub.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Notes")
                         .HasColumnType("TEXT");
@@ -399,6 +401,9 @@ namespace CargoHub.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ItemUid")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -419,6 +424,9 @@ namespace CargoHub.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("OrderId")
@@ -450,6 +458,9 @@ namespace CargoHub.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Notes")
                         .HasColumnType("TEXT");
@@ -504,6 +515,9 @@ namespace CargoHub.Migrations
                     b.Property<int>("Amount")
                         .HasColumnType("INTEGER");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("ItemUid")
                         .IsRequired()
                         .HasColumnType("TEXT");
@@ -524,6 +538,9 @@ namespace CargoHub.Migrations
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
+                        .HasColumnType("INTEGER");
+
+                    b.Property<bool>("IsDeleted")
                         .HasColumnType("INTEGER");
 
                     b.Property<int>("OrderId")
@@ -599,6 +616,9 @@ namespace CargoHub.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Reference")
                         .HasColumnType("TEXT");
