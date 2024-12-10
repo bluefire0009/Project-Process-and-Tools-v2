@@ -29,9 +29,25 @@ namespace CargoHub
 
             app.MapGet("/", () => "Hello World!");
 
-            app.Use(async (context, next) => {
+            app.Use(async (context, next) =>
+            {
+                // Ensure the request body can be read multiple times (e.g., for logging or processing).
+                context.Request.EnableBuffering();
+                using (var reader = new StreamReader(
+                context.Request.Body,
+                encoding: System.Text.Encoding.UTF8,
+                detectEncodingFromByteOrderMarks: false,
+                bufferSize: 1024,
+                leaveOpen: true))
+                {
+                    string body = await reader.ReadToEndAsync();
+
+                    // Reset the stream position to allow subsequent reads by the framework or other middleware.
+                    context.Request.Body.Position = 0;
+                    await System.IO.File.AppendAllTextAsync("log.txt", $"{context.Request.Path} - {body} - {context.Response.StatusCode} \n");
+                }
+
                 await next.Invoke();
-                await System.IO.File.AppendAllTextAsync("log.txt", $"{context.Request.Path} - {context.Response.StatusCode} \n");
             });
 
 
