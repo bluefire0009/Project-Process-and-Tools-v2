@@ -11,8 +11,25 @@ public class SupplierDBStorage : ISupplierStorage
 
     public async Task<IEnumerable<Supplier>> getSuppliers()
     {
-        List<Supplier> supplier = await db.Suppliers.ToListAsync();
+        List<Supplier> supplier = await db.Suppliers.Take(100).ToListAsync();
         return supplier;
+    }
+
+    public async Task<IEnumerable<Supplier>> getSuppliers(int offset, int limit, bool orderbyId = false)
+    {
+        // Fetch orders with pagination
+        if (orderbyId)
+        {
+            return await db.Suppliers
+                .OrderBy(o => o.Id)
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+        }
+        return await db.Suppliers
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
     }
 
     public async Task<Supplier?> getSupplier(int id)
@@ -50,7 +67,8 @@ public class SupplierDBStorage : ISupplierStorage
         Supplier? supplierInDatabase = await db.Suppliers.Where(s => s.Id == id).FirstOrDefaultAsync();
         if (supplierInDatabase == null) return false;
 
-        db.Suppliers.Remove(supplierInDatabase);
+        supplierInDatabase.IsDeleted = true;
+        db.Suppliers.Update(supplierInDatabase);
 
         await db.SaveChangesAsync();
         return true;

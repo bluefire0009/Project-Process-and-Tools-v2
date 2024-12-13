@@ -36,7 +36,7 @@ public class TransferDBTest
         TransferDBStorage storage = new(db);
 
         // Act
-        List<Transfer> result = storage.getTransfers().Result.ToList();
+        List<Transfer> result = storage.GetTransfers().Result.ToList();
 
         // Assert
         Assert.IsTrue(result.Count == transfers.Where(t => t.IsDeleted == false).Count());
@@ -55,6 +55,39 @@ public class TransferDBTest
             }
             Assert.IsTrue(result[transferIterator].CreatedAt == transfers[transferIterator].CreatedAt);
             Assert.IsTrue(result[transferIterator].UpdatedAt == transfers[transferIterator].UpdatedAt);
+        }
+    }
+
+    public static IEnumerable<object[]> TestGetTransferTestDataPagination => new List<object[]>
+    {
+    new object[] { Enumerable.Range(1, 0).Select(id => new Transfer { Id = id }).ToList(), 0, 5 },  //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Transfer { Id = id }).ToList(), 0, 5 }, //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Transfer { Id = id }).ToList(), 5, 5 }, //   5 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Transfer { Id = id }).ToList(), 8, 5 }, //   8 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Transfer { Id = id }).ToList(), 10, 5 }  //  10 offset, limit 5
+    };
+
+    [TestMethod]
+    [DynamicData(nameof(TestGetTransferTestDataPagination), DynamicDataSourceType.Property)]
+    public async Task TestGetTransfersWithPagination(List<Transfer> transfers, int offset, int limit)
+    {
+        // Arrange
+        await db.Transfers.AddRangeAsync(transfers); // Add the test data
+        await db.SaveChangesAsync();
+
+        TransferDBStorage storage = new(db);
+
+        // Act
+        IEnumerable<Transfer> actualTransfers = await storage.GetTransfers(offset, limit, true);
+        List<Transfer> result = actualTransfers.ToList();
+
+        // Assert
+        int expectedCount = Math.Min(limit, Math.Max(0, transfers.Count - offset));
+        Assert.AreEqual(expectedCount, result.Count, "Returned result count is incorrect.");
+
+        for (int i = 0; i < result.Count; i++)
+        {
+            Assert.AreEqual(transfers[offset + i].Id, result[i].Id, "Transfer ID does not match at index " + i);
         }
     }
 
