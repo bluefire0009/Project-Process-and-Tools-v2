@@ -6,7 +6,8 @@ public class ItemsDBStorage : IItemStorage
 {
     DatabaseContext db;
 
-    public ItemsDBStorage(DatabaseContext db) {
+    public ItemsDBStorage(DatabaseContext db)
+    {
         this.db = db;
     }
 
@@ -17,7 +18,6 @@ public class ItemsDBStorage : IItemStorage
 
         Item? itemInDb = await db.Items.FirstOrDefaultAsync(_ => _.Uid == item.Uid);
         if (itemInDb != null) return false;
-        
         item.CreatedAt = CETDateTime.Now();
         item.UpdatedAt = CETDateTime.Now();
         await db.Items.AddAsync(item);

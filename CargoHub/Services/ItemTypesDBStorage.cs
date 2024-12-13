@@ -6,7 +6,8 @@ public class ItemTypesDBStorage : IItemTypeStorage
 {
     DatabaseContext db;
 
-    public ItemTypesDBStorage(DatabaseContext db) {
+    public ItemTypesDBStorage(DatabaseContext db)
+    {
         this.db = db;
     }
 

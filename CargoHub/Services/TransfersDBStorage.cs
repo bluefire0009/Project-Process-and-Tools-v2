@@ -1,3 +1,4 @@
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -70,8 +71,8 @@ public class TransferDBStorage : ITransferStorage
         {
             await db.TransferItems.AddAsync(item);
         }
-        transfer.CreatedAt = DateTime.Now;
-        transfer.UpdatedAt = DateTime.Now;
+        transfer.CreatedAt = CETDateTime.Now();
+        transfer.UpdatedAt = CETDateTime.Now();
         transfer.TransferStatus = "Scheduled";
         await db.Transfers.AddAsync(transfer);
 
@@ -140,7 +141,7 @@ public class TransferDBStorage : ITransferStorage
         db.Remove(transferInDatabase);
         await db.SaveChangesAsync();
 
-        updatedTransfer.UpdatedAt = DateTime.Now;
+        updatedTransfer.UpdatedAt = CETDateTime.Now();
 
         db.Add(updatedTransfer);
         await db.SaveChangesAsync();
@@ -196,6 +197,7 @@ public class TransferDBStorage : ITransferStorage
             await db.SaveChangesAsync();
         }
         transferInDatabase.TransferStatus = "Processed";
+        transferInDatabase.UpdatedAt = CETDateTime.Now();
         await db.SaveChangesAsync();
         return (true, TransferResult.possible);
     }

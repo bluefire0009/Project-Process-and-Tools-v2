@@ -6,7 +6,8 @@ public class ItemLinesDBStorage : IItemLineStorage
 {
     DatabaseContext db;
 
-    public ItemLinesDBStorage(DatabaseContext db) {
+    public ItemLinesDBStorage(DatabaseContext db)
+    {
         this.db = db;
     }
 
