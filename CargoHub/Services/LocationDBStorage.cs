@@ -56,6 +56,7 @@ public class LocationStorage : ILocationStorage
         if (location == null) return false;
 
         location.CreatedAt = CETDateTime.Now();
+        location.UpdatedAt = CETDateTime.Now();
 
         await DB.Locations.AddAsync(location);
         if (await DB.SaveChangesAsync() < 1) return false;
@@ -88,7 +89,8 @@ public class LocationStorage : ILocationStorage
         Location? Foundlocation = await DB.Locations.FirstOrDefaultAsync(x => x.Id == locationId);
         if (Foundlocation == null) return false;
 
-        DB.Locations.Remove(Foundlocation);
+        Foundlocation.IsDeleted = true;
+        DB.Locations.Update(Foundlocation);
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;
     }

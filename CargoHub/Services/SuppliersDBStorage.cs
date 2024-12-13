@@ -1,3 +1,4 @@
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -11,8 +12,25 @@ public class SupplierDBStorage : ISupplierStorage
 
     public async Task<IEnumerable<Supplier>> getSuppliers()
     {
-        List<Supplier> supplier = await db.Suppliers.ToListAsync();
+        List<Supplier> supplier = await db.Suppliers.Take(100).ToListAsync();
         return supplier;
+    }
+
+    public async Task<IEnumerable<Supplier>> getSuppliers(int offset, int limit, bool orderbyId = false)
+    {
+        // Fetch orders with pagination
+        if (orderbyId)
+        {
+            return await db.Suppliers
+                .OrderBy(o => o.Id)
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+        }
+        return await db.Suppliers
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
     }
 
     public async Task<Supplier?> getSupplier(int id)
@@ -37,6 +55,9 @@ public class SupplierDBStorage : ISupplierStorage
         Supplier? supplierInDatabase = await db.Suppliers.Where(s => s.Id == supplier.Id).FirstOrDefaultAsync();
         if (supplierInDatabase != null) return false;
 
+        supplier.CreatedAt = CETDateTime.Now();
+        supplier.UpdatedAt = CETDateTime.Now();
+
         await db.Suppliers.AddAsync(supplier);
 
         await db.SaveChangesAsync();
@@ -50,7 +71,8 @@ public class SupplierDBStorage : ISupplierStorage
         Supplier? supplierInDatabase = await db.Suppliers.Where(s => s.Id == id).FirstOrDefaultAsync();
         if (supplierInDatabase == null) return false;
 
-        db.Suppliers.Remove(supplierInDatabase);
+        supplierInDatabase.IsDeleted = true;
+        db.Suppliers.Update(supplierInDatabase);
 
         await db.SaveChangesAsync();
         return true;
@@ -67,6 +89,8 @@ public class SupplierDBStorage : ISupplierStorage
 
         db.Remove(supplierInDatabase);
         await db.SaveChangesAsync();
+
+        updatedSupplier.UpdatedAt = CETDateTime.Now();
 
         db.Add(updatedSupplier);
         await db.SaveChangesAsync();

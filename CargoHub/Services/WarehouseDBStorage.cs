@@ -1,3 +1,4 @@
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -16,6 +17,9 @@ public class WarehouseDBStorage : IWarehouseStorage
         Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == warehouse.Id).FirstOrDefaultAsync();
         if (warehouseInDatabase != null) return false;
 
+        warehouse.CreatedAt = CETDateTime.Now();
+        warehouse.UpdatedAt = CETDateTime.Now();
+
         await db.Warehouses.AddAsync(warehouse);
 
         await db.SaveChangesAsync();
@@ -29,7 +33,8 @@ public class WarehouseDBStorage : IWarehouseStorage
         Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == id).FirstOrDefaultAsync();
         if (warehouseInDatabase == null) return false;
 
-        db.Warehouses.Remove(warehouseInDatabase);
+        warehouseInDatabase.IsDeleted = true;
+        db.Warehouses.Update(warehouseInDatabase);
 
         await db.SaveChangesAsync();
         return true;
@@ -50,11 +55,11 @@ public class WarehouseDBStorage : IWarehouseStorage
     // Starting from Id "offset" take "amountToReturn" warehouses
     public async Task<IEnumerable<Warehouse>?> getWarehousesRange(int offset, int amountToReturn)
     {
-        if (offset < 0 ) return null;
+        if (offset < 0) return null;
         bool NotEnoughWarehouses = db.Warehouses.Count() < offset || db.Warehouses.Count() < offset - 1 + amountToReturn;
         if (NotEnoughWarehouses)
             return null;
-        IEnumerable<Warehouse> warehouses = await db.Warehouses.Where(w => w.Id >= offset && w.Id <= amountToReturn+offset).ToListAsync();
+        IEnumerable<Warehouse> warehouses = await db.Warehouses.Where(w => w.Id >= offset && w.Id <= amountToReturn + offset).ToListAsync();
         return warehouses;
     }
 
@@ -77,6 +82,8 @@ public class WarehouseDBStorage : IWarehouseStorage
 
         db.Remove(warehouseInDatabase);
         await db.SaveChangesAsync();
+
+        updatedWarehouse.UpdatedAt = CETDateTime.Now();
 
         db.Add(updatedWarehouse);
         await db.SaveChangesAsync();
