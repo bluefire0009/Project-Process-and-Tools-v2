@@ -34,6 +34,7 @@ public class DatabaseContext : DbContext
                 modelBuilder.Entity<Warehouse>().HasQueryFilter(w => !w.IsDeleted);
                 modelBuilder.Entity<Item>().HasQueryFilter(i => !i.IsDeleted);
                 modelBuilder.Entity<ItemType>().HasQueryFilter(i => !i.IsDeleted);
+                modelBuilder.Entity<Transfer>().HasQueryFilter(t => !t.IsDeleted);
                 modelBuilder.Entity<Location>().HasQueryFilter(l => !l.IsDeleted);
                 modelBuilder.Entity<Order>().HasQueryFilter(o => !o.IsDeleted);
                 modelBuilder.Entity<Shipment>().HasQueryFilter(s => !s.IsDeleted);

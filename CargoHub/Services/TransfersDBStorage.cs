@@ -86,13 +86,14 @@ public class TransferDBStorage : ITransferStorage
         Transfer? transferInDatabase = await db.Transfers.Where(s => s.Id == id).FirstOrDefaultAsync();
         if (transferInDatabase == null) return false;
 
-        // list of all transferItems which have to be deleted as well
-        List<TransferItem> transferItems = await db.TransferItems.Where(i => i.TransferId == id).ToListAsync();
-        foreach (TransferItem item in transferItems)
-        {
-            db.TransferItems.Remove(item);
-        }
-        db.Transfers.Remove(transferInDatabase);
+        // // list of all transferItems which have to be deleted as well
+        // List<TransferItem> transferItems = await db.TransferItems.Where(i => i.TransferId == id).ToListAsync();
+        // foreach (TransferItem item in transferItems)
+        // {
+        //     db.TransferItems.Remove(item);
+        // }
+        transferInDatabase.IsDeleted = true;
+        db.Transfers.Update(transferInDatabase);
 
         await db.SaveChangesAsync();
         return true;

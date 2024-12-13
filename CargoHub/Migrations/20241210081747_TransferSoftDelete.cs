@@ -7,14 +7,14 @@ namespace CargoHub.Migrations
 {
     [ExcludeFromCodeCoverage]
     /// <inheritdoc />
-    public partial class addIsDeletedWarehouse : Migration
+    public partial class TransferSoftDelete : Migration
     {
         /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.AddColumn<bool>(
                 name: "IsDeleted",
-                table: "Warehouses",
+                table: "Transfers",
                 type: "INTEGER",
                 nullable: false,
                 defaultValue: false);
@@ -74,7 +74,7 @@ namespace CargoHub.Migrations
         {
             migrationBuilder.DropColumn(
                 name: "IsDeleted",
-                table: "Warehouses");
+                table: "Transfers");
 
             migrationBuilder.DropColumn(
                 name: "IsDeleted",

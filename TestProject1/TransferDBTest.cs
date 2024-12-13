@@ -24,7 +24,8 @@ public class TransferDBTest
         {
             new object[] { new List<Transfer> {}},
             new object[] { new List<Transfer> { new Transfer()}},
-            new object[] { new List<Transfer> { new Transfer(), new Transfer() }}
+            new object[] { new List<Transfer> { new Transfer(), new Transfer(){IsDeleted = true} }},
+            new object[] { new List<Transfer> { new Transfer(), new Transfer() }},
         };
     [TestMethod]
     [DynamicData(nameof(TransfersTestData), DynamicDataSourceType.Property)]
@@ -38,7 +39,7 @@ public class TransferDBTest
         List<Transfer> result = storage.GetTransfers().Result.ToList();
 
         // Assert
-        Assert.IsTrue(result.Count == transfers.Count);
+        Assert.IsTrue(result.Count == transfers.Where(t => t.IsDeleted == false).Count());
         for (int transferIterator = 0; transferIterator < result.Count; transferIterator++)
         {
             Assert.IsTrue(result[transferIterator].Id == transfers[transferIterator].Id);
@@ -94,6 +95,7 @@ public class TransferDBTest
         {
             new object[] { new List<Transfer> {}, 1, false},
             new object[] { new List<Transfer> { new Transfer(){Id = 1}}, 2, false},
+            new object[] { new List<Transfer> { new Transfer(){Id = 2, IsDeleted = true}}, 2, false},
             new object[] { new List<Transfer> { new Transfer(){Id = 1}}, 1, true},
             new object[] { new List<Transfer> { new Transfer(){Id = 1}, new Transfer(){Id = 2}}, 2, true}
         };
@@ -234,7 +236,11 @@ public class TransferDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
-        Assert.IsTrue(!db.TransferItems.Select(t => t.TransferId).Contains(idToRemove));
+        if (expectedResult == true)
+        {
+            Assert.IsTrue(db.TransferItems.Select(t => t.TransferId).Contains(idToRemove));
+            Assert.IsTrue(db.Transfers.IgnoreQueryFilters().Where(t => t.Id == idToRemove).First().IsDeleted == true);
+        }
         foreach (TransferItem item in db.TransferItems)
         {
             Assert.IsTrue(!(item.TransferId != idToRemove));
@@ -271,6 +277,7 @@ public class TransferDBTest
             new object[] { null, new List<Transfer> {new Transfer(){Id = 1}}, 1, new Transfer(){Id = 2}, false},
 
             new object[] { new List<Item>{new(){Uid = "1"}, new(){Uid = "2"}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = "1"}}}}, 1, new Transfer(){Id = 1, Items = { new(){TransferId = 2, ItemUid = "1"}, new(){TransferId = 2, ItemUid = "2"}}}, false},
+            new object[] { null, new List<Transfer> {new Transfer(){Id = 1, IsDeleted = true}}, 1, new Transfer(){Id = 1}, false},
             new object[] { null, new List<Transfer> {new Transfer(){Id = 1}}, 1, new Transfer(){Id = 1}, true},
         };
     [TestMethod]
@@ -298,6 +305,22 @@ public class TransferDBTest
 
     public static IEnumerable<object[]> CommitTransferTestData => new List<object[]>
     {
+        // Expected false because transfer is soft delted
+        new object[] {
+            new List<Inventory> {
+                new(){Id = 1, ItemId = "1", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
+                new(){Id = 2, ItemId = "2", InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
+            new List<Location> {new(){Id = 1}, new(){Id = 2}},
+            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}},
+            new List<Transfer> {new(){
+                Id = 1, TransferFrom = 1, TransferTo = 2,
+                Items = {
+                    new(){ItemUid = "1", TransferId = 1, Amount = 110},
+                    new(){ItemUid = "2", TransferId = 1, Amount = 110} },
+                IsDeleted = true}},
+            1,
+            false,
+            TransferDBStorage.TransferResult.transferNotFound},
         // Expected false because transfer amount of both transferItems is 110 and amount in inventory is 100
         new object[] {
             new List<Inventory> {
@@ -445,10 +468,12 @@ public class TransferDBTest
         if (obj is string str)
         {
             copy = (T)(object)string.Copy(str); // Create a copy of the string
-        } else {
+        }
+        else
+        {
             copy = (T)Activator.CreateInstance(obj.GetType());
         }
-        
+
 
         // Add the current object to the visitedObjects dictionary
         visitedObjects[obj] = copy;
