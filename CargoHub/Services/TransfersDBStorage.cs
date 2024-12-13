@@ -10,12 +10,27 @@ public class TransferDBStorage : ITransferStorage
         this.db = db;
     }
 
-    public async Task<IEnumerable<Transfer>> getTransfers()
+    public async Task<IEnumerable<Transfer>> GetTransfers()
     {
-        List<Transfer> transfers = await db.Transfers.ToListAsync();
+        List<Transfer> transfers = await db.Transfers.Take(100).ToListAsync();
         return transfers;
     }
 
+    public async Task<IEnumerable<Transfer>> GetTransfers(int offset, int limit, bool orderbyId = false)
+    {
+        if (orderbyId)
+        {
+            return await db.Transfers
+                .OrderBy(o => o.Id)
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+        }
+        return await db.Transfers
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+    }
     public async Task<Transfer?> getTransfer(int id)
     {
         Transfer? transfer = await db.Transfers.Where(t => t.Id == id).FirstOrDefaultAsync();
@@ -72,13 +87,14 @@ public class TransferDBStorage : ITransferStorage
         Transfer? transferInDatabase = await db.Transfers.Where(s => s.Id == id).FirstOrDefaultAsync();
         if (transferInDatabase == null) return false;
 
-        // list of all transferItems which have to be deleted as well
-        List<TransferItem> transferItems = await db.TransferItems.Where(i => i.TransferId == id).ToListAsync();
-        foreach (TransferItem item in transferItems)
-        {
-            db.TransferItems.Remove(item);
-        }
-        db.Transfers.Remove(transferInDatabase);
+        // // list of all transferItems which have to be deleted as well
+        // List<TransferItem> transferItems = await db.TransferItems.Where(i => i.TransferId == id).ToListAsync();
+        // foreach (TransferItem item in transferItems)
+        // {
+        //     db.TransferItems.Remove(item);
+        // }
+        transferInDatabase.IsDeleted = true;
+        db.Transfers.Update(transferInDatabase);
 
         await db.SaveChangesAsync();
         return true;

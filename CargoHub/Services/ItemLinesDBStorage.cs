@@ -33,7 +33,8 @@ public class ItemLinesDBStorage : IItemLineStorage
         ItemLine? itemLineInDb = await db.ItemLines.FirstOrDefaultAsync(_ => _.Id == id);
         if (itemLineInDb == null) return false;
 
-        db.ItemLines.Remove(itemLineInDb);
+        itemLineInDb.IsDeleted = true;
+        db.ItemLines.Update(itemLineInDb);
         await db.SaveChangesAsync();
         return true;
     }
@@ -67,7 +68,7 @@ public class ItemLinesDBStorage : IItemLineStorage
         ItemLine? itemLineInDatabase = await db.ItemLines.Where(i => i.Id == id).FirstOrDefaultAsync();
         if (itemLineInDatabase == null) return false;
 
-        itemLine.UpdatedAt = DateTime.Now;
+        itemLine.UpdatedAt = CETDateTime.Now();
         db.ItemLines.Update(itemLineInDatabase);
         await db.SaveChangesAsync();
 
