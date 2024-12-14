@@ -157,7 +157,9 @@ public class WarehouseDBTest
 
         // Assert
         Assert.IsTrue(firstAdd == true);
-        Assert.IsTrue(secondAdd == false);
+        Assert.IsTrue(secondAdd == true);
+        // Assert that Id of w2 changed because it was auto assigned by storage
+        Assert.IsTrue(w1.Id != w2.Id);
     }
 
     public static IEnumerable<object[]> RemoveWarehouseTestData => new List<object[]>
