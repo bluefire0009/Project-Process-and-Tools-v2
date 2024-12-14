@@ -75,7 +75,7 @@ public class WarehousesController : Controller
     {
         if (idToUpdate <= 0) return BadRequest("Invalid id in the url");
         if (updatedWarehouse == null) return BadRequest("updatedWarehouse cannot be null");
-        if (!ModelValidator.ValidateWarehouse(updatedWarehouse)) return BadRequest("updatedWarehouse cannot has invalid fields");
+        if (!ModelValidator.ValidateWarehouse(updatedWarehouse)) return BadRequest("updatedWarehouse cannot have invalid fields");
 
         bool updated = await warehouseStorage.updateWarehouse(idToUpdate, updatedWarehouse);
 
