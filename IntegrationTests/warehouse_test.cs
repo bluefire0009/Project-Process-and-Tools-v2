@@ -19,8 +19,8 @@ namespace IntegrationTests
         private string WarehouseUrl = "/api/v2/warehouses";
         private string LocationUrl = "/api/v2/locations";
         private Warehouse[] testWarehouses = [
-                new Warehouse(){Id = 1000001, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363", CreatedAt = new(1983,04,13,4,59,55), UpdatedAt = new(2007,02,08,20,11,00)},
-                new Warehouse(){Id = 1000002, Code = "GIOMNL90", Name = "Petten longterm hub", Address = "Owenweg 731", Zip = "4615 RB", City = "Petten", Province = "Noord-Holland", Country = "NL", ContactEmail = "nickteunissen@example.com", ContactName = "Maud Adryaens", ContactPhone = "+31836 752702", CreatedAt = new(2008,02,22,19,55,39), UpdatedAt = new(2009,08,28,23,15,50)}
+                new Warehouse(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363", CreatedAt = new(1983,04,13,4,59,55), UpdatedAt = new(2007,02,08,20,11,00)},
+                new Warehouse(){Id = 2, Code = "GIOMNL90", Name = "Petten longterm hub", Address = "Owenweg 731", Zip = "4615 RB", City = "Petten", Province = "Noord-Holland", Country = "NL", ContactEmail = "nickteunissen@example.com", ContactName = "Maud Adryaens", ContactPhone = "+31836 752702", CreatedAt = new(2008,02,22,19,55,39), UpdatedAt = new(2009,08,28,23,15,50)}
             ];
         private HttpClient client;
 
@@ -64,6 +64,7 @@ namespace IntegrationTests
             //Clear the date fields so I can just assert using .equals function
             resultWarehouses.ToList().ForEach(w=>{w.CreatedAt = new(); w.UpdatedAt = new();});
             testWarehouses.ToList().ForEach(w=>{w.CreatedAt = new(); w.UpdatedAt = new();});
+
             for(int warehouseIterator = 0; warehouseIterator<resultWarehouses.Length; warehouseIterator++)
             {
                 Assert.AreEqual(testWarehouses[warehouseIterator], resultWarehouses[warehouseIterator]);
@@ -213,7 +214,7 @@ namespace IntegrationTests
         public void test_post_warehouse_wrong_format()
         {
             // Arrange
-            Dictionary<string, object> warehouseWrongFormat = new() { {"Id", 1000003}, {"Wcode", "LIGMAL90"}, {"Sname", "Petten shortterm hub"}, {"adress", "Owenweg 666"}, {"sip", "6420 RB"}, {"citty", "Patten"}, {"brovince", "Zuid-Holland"}, {"countri", "DE"}, {"created_,", "2021-02-22 19:55:39"}, {"updated_,", "2009-08-28 23:15:50"} };
+            Dictionary<string, object> warehouseWrongFormat = new() { {"Ad", 1000003}, {"Wcode", "LIGMAL90"}, {"Sname", "Petten shortterm hub"}, {"adress", "Owenweg 666"}, {"sip", "6420 RB"}, {"citty", "Patten"}, {"brovince", "Zuid-Holland"}, {"countri", "DE"}, {"created_,", "2021-02-22 19:55:39"}, {"updated_,", "2009-08-28 23:15:50"} };
             
             // Act
             string jsonData = JsonConvert.SerializeObject(warehouseWrongFormat);
@@ -227,7 +228,7 @@ namespace IntegrationTests
             // Assert
             Assert.AreEqual(HttpStatusCode.BadRequest, postStatus);
             Assert.IsTrue(resultWarehouses.Length == testWarehouses.Length);
-            Assert.IsTrue(resultWarehouses.Any(w=>w.Id != (int)warehouseWrongFormat["Id"]));
+            Assert.IsTrue(resultWarehouses.Any(w=>w.Id != (int)warehouseWrongFormat["Ad"]));
         }
 
         [TestMethod]
