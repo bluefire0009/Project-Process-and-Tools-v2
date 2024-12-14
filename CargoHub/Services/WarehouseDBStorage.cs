@@ -15,6 +15,7 @@ public class WarehouseDBStorage : IWarehouseStorage
         if (warehouse.Id <= 0) return false;
         if (!ModelValidator.ValidateWarehouse(warehouse)) return false;
 
+        warehouse.Id = 0;
         Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == warehouse.Id).FirstOrDefaultAsync();
         if (warehouseInDatabase != null) return false;
 
