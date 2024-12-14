@@ -51,6 +51,7 @@ public class SupplierDBStorage : ISupplierStorage
     {
         if (supplier == null) return false;
         if (supplier.Id <= 0) return false;
+        if (!ModelValidator.ValidateSupplier(supplier)) return false;
 
         Supplier? supplierInDatabase = await db.Suppliers.Where(s => s.Id == supplier.Id).FirstOrDefaultAsync();
         if (supplierInDatabase != null) return false;
@@ -83,6 +84,8 @@ public class SupplierDBStorage : ISupplierStorage
         if (updatedSupplier == null) return false;
         if (idToUpdate != updatedSupplier.Id) return false;
         if (idToUpdate <= 0 || updatedSupplier.Id <= 0) return false;
+        if (!ModelValidator.ValidateSupplier(updatedSupplier)) return false;
+        
 
         Supplier? supplierInDatabase = await db.Suppliers.Where(w => w.Id == idToUpdate).FirstOrDefaultAsync();
         if (supplierInDatabase == null) return false;
