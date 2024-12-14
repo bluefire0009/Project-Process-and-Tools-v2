@@ -30,7 +30,7 @@ public class LocationController : Controller
     }
 
     [HttpPost("")]
-    public async Task<IActionResult> AddLocation(Location location)
+    public async Task<IActionResult> AddLocation([FromBody]Location location)
     {
         if (await Storage.AddLocation(location)) return Ok("Loaction added");
         return BadRequest();
