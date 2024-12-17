@@ -35,6 +35,7 @@ public class Client
     public string ContactPhone { get; set; } = string.Empty;
 
     [EmailAddress]
+    [JsonRequired]
     public string ContactEmail { get; set; } = string.Empty;
 
     [DataType(DataType.DateTime)]
