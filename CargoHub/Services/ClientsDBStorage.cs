@@ -48,7 +48,8 @@ public class ClientDBStorage : IClientStorage
         Client? clientInDatabase = await db.Clients.Where(c => c.Id == id).FirstOrDefaultAsync();
         if (clientInDatabase == null) return false;
 
-        db.Clients.Remove(clientInDatabase);
+        clientInDatabase.IsDeleted = true;
+        db.Clients.Update(clientInDatabase);
 
         await db.SaveChangesAsync();
         return true;
@@ -64,7 +65,7 @@ public class ClientDBStorage : IClientStorage
         db.Clients.Remove(clientInDatabase);
         await db.SaveChangesAsync();
 
-        updatedClient.UpdatedAt = DateTime.Now;
+        updatedClient.UpdatedAt = CETDateTime.Now();
 
         db.Add(updatedClient);
         await db.SaveChangesAsync();
