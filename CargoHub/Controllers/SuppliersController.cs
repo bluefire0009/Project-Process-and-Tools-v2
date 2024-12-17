@@ -4,8 +4,6 @@ using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
 
 [Route("/api/v2/suppliers")]
-// Doesn't have to be covered because we have integration tests for that
-[ExcludeFromCodeCoverage]
 public class SuppliersController : Controller
 {
     private ISupplierStorage supplierStorage;
@@ -17,7 +15,7 @@ public class SuppliersController : Controller
     [HttpGet("")]
     public async Task<IActionResult> GetSuppliers([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool orderById = false)
     {
-        if (offset <= 0) return BadRequest("offset cannot be less than 0");
+        if (offset < 0) return BadRequest("offset cannot be less than 0");
         IEnumerable<Supplier> suppliers = await supplierStorage.getSuppliers(offset, limit, orderById);
         return Ok(suppliers);
     }
@@ -51,7 +49,7 @@ public class SuppliersController : Controller
         bool added = await supplierStorage.addSupplier(supplier);
 
         if (!added) return BadRequest($"Couldn't add supplier:{JsonConvert.SerializeObject(supplier)}");
-        return Ok($"Added supplier:{JsonConvert.SerializeObject(supplier)}");
+        return Created("",$"Added supplier:{JsonConvert.SerializeObject(supplier)}");
     }
 
     [HttpDelete("{id}")]
@@ -69,6 +67,7 @@ public class SuppliersController : Controller
     {
         if (idToUpdate <= 0) return BadRequest("Invalid id in the url");
         if (updatedSupplier == null) BadRequest("updatedSupplier cannot be null");
+        if (!ModelValidator.ValidateSupplier(updatedSupplier)) return BadRequest("updatedSupplier cannot have invalid fields");
 
         bool updated = await supplierStorage.updateSupplier(idToUpdate, updatedSupplier);
 
