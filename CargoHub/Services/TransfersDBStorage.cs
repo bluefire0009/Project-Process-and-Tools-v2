@@ -74,6 +74,7 @@ public class TransferDBStorage : ITransferStorage
         transfer.CreatedAt = CETDateTime.Now();
         transfer.UpdatedAt = CETDateTime.Now();
         transfer.TransferStatus = "Scheduled";
+        await System.IO.File.AppendAllTextAsync("log.txt", $"Scheduled batch transfer: {transfer.Id} \n");
         await db.Transfers.AddAsync(transfer);
 
         await db.SaveChangesAsync();
@@ -196,8 +197,11 @@ public class TransferDBStorage : ITransferStorage
             db.InventoryLocations.ToList().Add(ilToAdd);
             await db.SaveChangesAsync();
         }
+        
         transferInDatabase.TransferStatus = "Processed";
+        await System.IO.File.AppendAllTextAsync("log.txt", $"Processed batch transfer with id: {transferInDatabase.Id} \n");
         transferInDatabase.UpdatedAt = CETDateTime.Now();
+        
         await db.SaveChangesAsync();
         return (true, TransferResult.possible);
     }
