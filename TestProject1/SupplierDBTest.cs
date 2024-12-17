@@ -111,9 +111,9 @@ public class SupplierDBTest
     public static IEnumerable<object[]> AddSupplierTestData => new List<object[]>
         {
             new object[] { null, false},
-            new object[] { new Supplier(){Id = -1}, false},
-            new object[] { new Supplier(){Id = 0}, false},
-            new object[] { new Supplier(){Id = 1}, true}
+            new object[] { new Supplier(){Id = -1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"}, false},
+            new object[] { new Supplier(){Id = 0, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"}, false},
+            new object[] { new Supplier(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"}, true}
         };
     [TestMethod]
     [DynamicData(nameof(AddSupplierTestData), DynamicDataSourceType.Property)]
@@ -137,8 +137,8 @@ public class SupplierDBTest
     public void TestAddSameIdTwice()
     {
         // Arrange
-        Supplier s1 = new() { Id = 1 };
-        Supplier s2 = new() { Id = 1 };
+        Supplier s1 = new() {Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"};
+        Supplier s2 = new() {Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"};
         SupplierDBStorage storage = new(db);
 
         // Act
@@ -147,7 +147,9 @@ public class SupplierDBTest
 
         // Assert
         Assert.IsTrue(firstAdd == true);
-        Assert.IsTrue(secondAdd == false);
+        Assert.IsTrue(secondAdd == true);
+        // Assert that Id of s2 changed because it was auto assigned by storage
+        Assert.IsTrue(s1.Id != s2.Id);
     }
 
     public static IEnumerable<object[]> RemoveSupplierTestData => new List<object[]>
@@ -204,13 +206,46 @@ public class SupplierDBTest
 
     public static IEnumerable<object[]> UpdateSupplierTestData => new List<object[]>
         {
-            new object[] { new List<Supplier> {}, 2, new Supplier(){Id = 1},false},
+            new object[] 
+            { 
+                new List<Supplier> {}, 2, 
+                new Supplier(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "DE", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"},
+                false
+            },
             new object[] { new List<Supplier> {}, 1, null,false},
-            new object[] { new List<Supplier> {}, 0, new Supplier(){Id = 1},false},
-            new object[] { new List<Supplier> {}, -1, new Supplier(){Id = 1},false},
-            new object[] { new List<Supplier> {new Supplier(){Id = 1}}, 1, new Supplier(){Id = 2}, false},
-            new object[] { new List<Supplier> {new Supplier(){Id = 1, IsDeleted = true}}, 1, new Supplier(){Id = 1, Code = "ABC"}, false},
-            new object[] { new List<Supplier> {new Supplier(){Id = 1}}, 1, new Supplier(){Id = 1, Code = "ABC"}, true},
+            new object[] 
+            { 
+                new List<Supplier> {}, 0, 
+                new Supplier(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "DE", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"},
+                false
+            },
+            new object[] 
+            { 
+                new List<Supplier> {}, -1, 
+                new Supplier(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "DE", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"},
+                false
+            },
+            new object[] 
+            { 
+                new List<Supplier> {new Supplier(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"}}, 
+                1, 
+                new Supplier(){Id = 2, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "DE", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"}, 
+                false
+            },
+            new object[] 
+            { 
+                new List<Supplier> {new Supplier(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)", IsDeleted = true}}, 
+                1, 
+                new Supplier(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "DE", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"}, 
+                false
+            },
+            new object[] 
+            { 
+                new List<Supplier> {new Supplier(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"}}, 
+                1, 
+                new Supplier(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "DE", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"}, 
+                true
+            },
         };
     [TestMethod]
     [DynamicData(nameof(UpdateSupplierTestData), DynamicDataSourceType.Property)]
