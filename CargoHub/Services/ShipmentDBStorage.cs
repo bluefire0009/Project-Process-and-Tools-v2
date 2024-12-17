@@ -299,7 +299,10 @@ public class ShipmentStorage : IShipmentStorage
         }
 
         // then remove the shipment
-        DB.Shipments.Remove(FoundShipment);
+        // DB.Shipments.Remove(FoundShipment);
+        FoundShipment.IsDeleted = true;
+        DB.Shipments.Update(FoundShipment);
+
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;
     }
