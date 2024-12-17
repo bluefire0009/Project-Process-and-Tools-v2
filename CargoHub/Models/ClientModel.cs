@@ -7,24 +7,24 @@ public class Client
     [Key]
     public int Id { get; set; }
 
-    public required string Name { get; set; } = string.Empty;
+    public string Name { get; set; } = string.Empty;
 
-    public required string Address { get; set; } = string.Empty;
+    public string Address { get; set; } = string.Empty;
 
-    public required string City { get; set; } = string.Empty;
+    public string City { get; set; } = string.Empty;
 
-    public required string ZipCode { get; set; } = string.Empty;
+    public string ZipCode { get; set; } = string.Empty;
 
-    public required string Province { get; set; } = string.Empty;
+    public string Province { get; set; } = string.Empty;
 
-    public required string Country { get; set; } = string.Empty;
+    public string Country { get; set; } = string.Empty;
 
-    public required string ContactName { get; set; } = string.Empty;
+    public string ContactName { get; set; } = string.Empty;
 
-    public required string ContactPhone { get; set; } = string.Empty;
+    public string ContactPhone { get; set; } = string.Empty;
 
     [EmailAddress]
-    public required string ContactEmail { get; set; } = string.Empty;
+    public string ContactEmail { get; set; } = string.Empty;
 
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; } = DateTime.Now;

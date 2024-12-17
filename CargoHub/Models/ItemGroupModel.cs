@@ -6,8 +6,8 @@ public class ItemGroup
 {
     [Key]
     public int Id { get; set; }
-    public required string? Name { get; set; }
-    public required string? Description { get; set; }
+    public string? Name { get; set; }
+    public string? Description { get; set; }
 
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; } = DateTime.Now;
