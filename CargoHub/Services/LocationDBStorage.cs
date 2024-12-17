@@ -50,16 +50,17 @@ public class LocationStorage : ILocationStorage
         return await DB.Locations.Where(x => x.WareHouseId == GivenWarehouseId).ToListAsync();
     }
 
-    public async Task<bool> AddLocation(Location location)
+    public async Task<int> AddLocation(Location location)
     {
         // add location to Locations
-        if (location == null) return false;
+        if (location == null) return -1;
 
         location.CreatedAt = CETDateTime.Now();
 
         await DB.Locations.AddAsync(location);
-        if (await DB.SaveChangesAsync() < 1) return false;
-        return true;
+        if (await DB.SaveChangesAsync() < 1) return -1;
+
+        return location.Id;
     }
 
     public async Task<bool> UpdateLocation(int locationId, Location location)

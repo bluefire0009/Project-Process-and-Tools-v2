@@ -2,15 +2,19 @@ namespace CargoHub.Models;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 public class Order : IEquatable<Order>
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
+    [JsonIgnore]
     public int Id { get; set; }
     public int SourceId { get; set; }
 
     [DataType(DataType.DateTime)]
     public DateTime OrderDate { get; set; }
+
     [DataType(DataType.DateTime)]
     public DateTime RequestDate { get; set; }
 
@@ -39,15 +43,18 @@ public class Order : IEquatable<Order>
     public float TotalTax { get; set; }
     public float TotalSurcharge { get; set; }
 
+    [JsonIgnore]
     [DataType(DataType.DateTime)]
     public DateTime CreatedAt { get; set; } = DateTime.Now;
 
+    [JsonIgnore]
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
 
     public ICollection<OrderItems> Items { get; set; } = new List<OrderItems>();
 
     // softdelte
+    [JsonIgnore]
     public bool IsDeleted { get; set; } = false;
 
     public bool Equals(Order? other)

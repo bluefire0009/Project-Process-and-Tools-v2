@@ -1,5 +1,6 @@
 using System.Diagnostics.CodeAnalysis;
 using CargoHub.Models;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 
 
@@ -30,10 +31,12 @@ public class LocationController : Controller
     }
 
     [HttpPost("")]
-    public async Task<IActionResult> AddLocation(Location location)
+    public async Task<IActionResult> AddLocation([FromBody] Location location)
     {
-        if (await Storage.AddLocation(location)) return Ok("Loaction added");
-        return BadRequest();
+        if (location == null) return BadRequest("Location is null");
+        int id = await Storage.AddLocation(location);
+        if (id == -1) return BadRequest();
+        return Ok(new { id });
     }
 
     [HttpPut("{Id}")]

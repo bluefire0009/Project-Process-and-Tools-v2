@@ -2,11 +2,12 @@ namespace CargoHub.Models;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
-
+using System.Text.Json.Serialization;
 
 public class Location : IEquatable<Location>
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
     [ForeignKey("WareHouseId")]
@@ -17,7 +18,7 @@ public class Location : IEquatable<Location>
     public string? Name { get; set; }
 
     [DataType(DataType.DateTime)]
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime? CreatedAt { get; set; } = null;
 
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
