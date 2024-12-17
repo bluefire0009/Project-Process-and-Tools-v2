@@ -72,7 +72,7 @@ public class InventoriesDBStorage : IInventoryStorage
         db.Remove(inventoryInDatabase);
         await db.SaveChangesAsync();
 
-        updatedInventory.UpdatedAt = DateTime.Now;
+        updatedInventory.UpdatedAt = CETDateTime.Now();
 
         db.Add(updatedInventory);
         await db.SaveChangesAsync();

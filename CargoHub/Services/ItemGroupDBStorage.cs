@@ -58,7 +58,7 @@ public class ItemGroupDBStorage : IItemGroupStorage
         db.Remove(itemGroupInDatabase);
         await db.SaveChangesAsync();
 
-        updatedItemGroup.UpdatedAt = DateTime.Now;
+        updatedItemGroup.UpdatedAt = CETDateTime.Now();
 
         db.Add(updatedItemGroup);
         await db.SaveChangesAsync();

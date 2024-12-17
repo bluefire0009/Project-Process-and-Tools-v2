@@ -65,7 +65,7 @@ public class ClientDBStorage : IClientStorage
         db.Clients.Remove(clientInDatabase);
         await db.SaveChangesAsync();
 
-        updatedClient.UpdatedAt = DateTime.Now;
+        updatedClient.UpdatedAt = CETDateTime.Now();
 
         db.Add(updatedClient);
         await db.SaveChangesAsync();
