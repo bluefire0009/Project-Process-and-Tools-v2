@@ -7,6 +7,7 @@ using System.Text.Json.Serialization;
 public class Inventory
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
     [ForeignKey("ItemId")]
