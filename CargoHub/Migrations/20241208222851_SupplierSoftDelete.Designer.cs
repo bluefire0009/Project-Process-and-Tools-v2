@@ -10,13 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CargoHub.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-<<<<<<<< HEAD:CargoHub/Migrations/20241210142411_SoftDeleten.Designer.cs
-    [Migration("20241210142411_SoftDeleten")]
-    partial class SoftDeleten
-========
     [Migration("20241208222851_SupplierSoftDelete")]
     partial class SupplierSoftDelete
->>>>>>>> origin/development:CargoHub/Migrations/20241208222851_SupplierSoftDelete.Designer.cs
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
