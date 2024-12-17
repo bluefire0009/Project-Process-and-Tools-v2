@@ -1,3 +1,4 @@
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -12,9 +13,14 @@ public class WarehouseDBStorage : IWarehouseStorage
     {
         if (warehouse == null) return false;
         if (warehouse.Id <= 0) return false;
+        if (!ModelValidator.ValidateWarehouse(warehouse)) return false;
 
+        warehouse.Id = 0;
         Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == warehouse.Id).FirstOrDefaultAsync();
         if (warehouseInDatabase != null) return false;
+
+        warehouse.CreatedAt = CETDateTime.Now();
+        warehouse.UpdatedAt = CETDateTime.Now();
 
         await db.Warehouses.AddAsync(warehouse);
 
@@ -29,7 +35,9 @@ public class WarehouseDBStorage : IWarehouseStorage
         Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == id).FirstOrDefaultAsync();
         if (warehouseInDatabase == null) return false;
 
-        db.Warehouses.Remove(warehouseInDatabase);
+        warehouseInDatabase.UpdatedAt = CETDateTime.Now();
+        warehouseInDatabase.IsDeleted = true;
+        db.Warehouses.Update(warehouseInDatabase);
 
         await db.SaveChangesAsync();
         return true;
@@ -50,11 +58,11 @@ public class WarehouseDBStorage : IWarehouseStorage
     // Starting from Id "offset" take "amountToReturn" warehouses
     public async Task<IEnumerable<Warehouse>?> getWarehousesRange(int offset, int amountToReturn)
     {
-        if (offset < 0 ) return null;
-        bool NotEnoughWarehouses = db.Warehouses.Count() < offset || db.Warehouses.Count() < offset - 1 + amountToReturn;
+        if (offset < 0 || amountToReturn < 0) return null;
+        bool NotEnoughWarehouses = db.Warehouses.Count() < offset || db.Warehouses.Where(w=>w.Id >= offset).Count() < amountToReturn;
         if (NotEnoughWarehouses)
             return null;
-        IEnumerable<Warehouse> warehouses = await db.Warehouses.Where(w => w.Id >= offset && w.Id <= amountToReturn+offset).ToListAsync();
+        IEnumerable<Warehouse> warehouses = await db.Warehouses.Where(w => w.Id >= offset).Take(amountToReturn).ToListAsync();
         return warehouses;
     }
 
@@ -71,12 +79,15 @@ public class WarehouseDBStorage : IWarehouseStorage
         if (updatedWarehouse == null) return false;
         if (updatedWarehouse.Id != idToUpdate) return false;
         if (idToUpdate <= 0 || updatedWarehouse.Id <= 0) return false;
+        if (!ModelValidator.ValidateWarehouse(updatedWarehouse)) return false;
 
         Warehouse? warehouseInDatabase = await db.Warehouses.Where(w => w.Id == idToUpdate).FirstOrDefaultAsync();
         if (warehouseInDatabase == null) return false;
 
         db.Remove(warehouseInDatabase);
         await db.SaveChangesAsync();
+
+        updatedWarehouse.UpdatedAt = CETDateTime.Now();
 
         db.Add(updatedWarehouse);
         await db.SaveChangesAsync();

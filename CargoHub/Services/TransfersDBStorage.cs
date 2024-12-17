@@ -1,3 +1,4 @@
+using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -9,12 +10,27 @@ public class TransferDBStorage : ITransferStorage
         this.db = db;
     }
 
-    public async Task<IEnumerable<Transfer>> getTransfers()
+    public async Task<IEnumerable<Transfer>> GetTransfers()
     {
-        List<Transfer> transfers = await db.Transfers.ToListAsync();
+        List<Transfer> transfers = await db.Transfers.Take(100).ToListAsync();
         return transfers;
     }
 
+    public async Task<IEnumerable<Transfer>> GetTransfers(int offset, int limit, bool orderbyId = false)
+    {
+        if (orderbyId)
+        {
+            return await db.Transfers
+                .OrderBy(o => o.Id)
+                .Skip(offset)
+                .Take(limit)
+                .ToListAsync();
+        }
+        return await db.Transfers
+            .Skip(offset)
+            .Take(limit)
+            .ToListAsync();
+    }
     public async Task<Transfer?> getTransfer(int id)
     {
         Transfer? transfer = await db.Transfers.Where(t => t.Id == id).FirstOrDefaultAsync();
@@ -55,9 +71,10 @@ public class TransferDBStorage : ITransferStorage
         {
             await db.TransferItems.AddAsync(item);
         }
-        transfer.CreatedAt = DateTime.Now;
-        transfer.UpdatedAt = DateTime.Now;
+        transfer.CreatedAt = CETDateTime.Now();
+        transfer.UpdatedAt = CETDateTime.Now();
         transfer.TransferStatus = "Scheduled";
+        await System.IO.File.AppendAllTextAsync("log.txt", $"Scheduled batch transfer: {transfer.Id} \n");
         await db.Transfers.AddAsync(transfer);
 
         await db.SaveChangesAsync();
@@ -71,13 +88,14 @@ public class TransferDBStorage : ITransferStorage
         Transfer? transferInDatabase = await db.Transfers.Where(s => s.Id == id).FirstOrDefaultAsync();
         if (transferInDatabase == null) return false;
 
-        // list of all transferItems which have to be deleted as well
-        List<TransferItem> transferItems = await db.TransferItems.Where(i => i.TransferId == id).ToListAsync();
-        foreach (TransferItem item in transferItems)
-        {
-            db.TransferItems.Remove(item);
-        }
-        db.Transfers.Remove(transferInDatabase);
+        // // list of all transferItems which have to be deleted as well
+        // List<TransferItem> transferItems = await db.TransferItems.Where(i => i.TransferId == id).ToListAsync();
+        // foreach (TransferItem item in transferItems)
+        // {
+        //     db.TransferItems.Remove(item);
+        // }
+        transferInDatabase.IsDeleted = true;
+        db.Transfers.Update(transferInDatabase);
 
         await db.SaveChangesAsync();
         return true;
@@ -124,7 +142,7 @@ public class TransferDBStorage : ITransferStorage
         db.Remove(transferInDatabase);
         await db.SaveChangesAsync();
 
-        updatedTransfer.UpdatedAt = DateTime.Now;
+        updatedTransfer.UpdatedAt = CETDateTime.Now();
 
         db.Add(updatedTransfer);
         await db.SaveChangesAsync();
@@ -179,7 +197,11 @@ public class TransferDBStorage : ITransferStorage
             db.InventoryLocations.ToList().Add(ilToAdd);
             await db.SaveChangesAsync();
         }
+        
         transferInDatabase.TransferStatus = "Processed";
+        await System.IO.File.AppendAllTextAsync("log.txt", $"Processed batch transfer with id: {transferInDatabase.Id} \n");
+        transferInDatabase.UpdatedAt = CETDateTime.Now();
+        
         await db.SaveChangesAsync();
         return (true, TransferResult.possible);
     }
