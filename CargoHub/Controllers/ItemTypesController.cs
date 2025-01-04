@@ -15,25 +15,25 @@ public class ItemTypesController : Controller {
 
     [HttpGet]
     public async Task<IActionResult> GetAllItemTypes([FromQuery] int offset = 0, [FromQuery] int limit = 100) {
-        List<ItemType> items = await ItemTypeStorage.GetItemTypes(offset, limit);
-        return Ok(items);
+        List<ItemType> itemTypes = await ItemTypeStorage.GetItemTypes(offset, limit);
+        return Ok(itemTypes);
     }
 
     [HttpGet("{id}")]
     public async Task<IActionResult> GetItemType(int id) {
-        if (id < 0) return BadRequest("invalid uid");
+        if (id < 0) return BadRequest("invalid id");
         ItemType? itemType = await ItemTypeStorage.GetItemType(id);
 
-        if (itemType == null) return NotFound($"No item with id:{id} found");
+        if (itemType == null) return NotFound($"No itemType with id:{id} found");
         return Ok(itemType);
     }
 
     [HttpGet("{id}/items")]
     public async Task<IActionResult> GetItemTypeItems(int id) {
         if (id < 0) return BadRequest("invalid id");
-        List<Item> itemInventories = await ItemTypeStorage.GetItemTypeItems(id);
+        List<Item> items = await ItemTypeStorage.GetItemTypeItems(id);
 
-        return Ok(itemInventories);
+        return Ok(items);
     }
 
     [HttpPost()]
@@ -42,30 +42,30 @@ public class ItemTypesController : Controller {
 
         bool added = await ItemTypeStorage.AddItemType(itemType);
 
-        if (!added) return BadRequest($"Couldn't add item:{JsonConvert.SerializeObject(itemType)}");
-        return Ok("Item has been created");
+        if (!added) return BadRequest($"Couldn't add itemType :{JsonConvert.SerializeObject(itemType)}");
+        return Created("", "Item Type has been created");
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> RemoveItem(int id) {
+    public async Task<IActionResult> RemoveItemType(int id) {
         if (id < 0) return BadRequest("invalid id");
 
         bool removed = await ItemTypeStorage.DeleteItemType(id);
-        if (!removed) return BadRequest($"Couldn't remove item with id {id}");
-        return Ok("Item has been created");
+        if (!removed) return BadRequest($"Couldn't remove item type with id {id}");
+        return Ok("Item Type has been removed");
     }
 
     [HttpPut("{id}")]
     public async Task<IActionResult> UpdateItemType([FromRoute] int id, [FromBody] ItemType itemType) {
         if (id < 0) return BadRequest("invalid id");
-        if (itemType.Id != id) return BadRequest("id does not type up");
+        if (itemType.Id != id) return BadRequest("id does not match");
 
         ItemType? existingItemType = await ItemTypeStorage.GetItemType(id);
-        if (existingItemType is null) return NotFound($"Item with uid:{id} not found");
+        if (existingItemType is null) return NotFound($"Item with id:{id} not found");
 
         bool updated = await ItemTypeStorage.UpdateItemType(id, itemType);
-        if (!updated) return NotFound($"No item with uid:{id} in the database");
+        if (!updated) return NotFound($"No item type with id:{id} in the database");
 
-        return Ok($"Updated warhouse id:{id} to:{itemType}");
+        return Ok($"Updated ItemType id:{id} to:{itemType}");
     }
 }
