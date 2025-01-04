@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 
 [Route("/api/v2/items")]
 // Doesn't have to be covered because we have integration tests for that
-[ExcludeFromCodeCoverage]
 public class ItemsController : Controller {
     private IItemStorage ItemStorage;
 
@@ -13,13 +12,13 @@ public class ItemsController : Controller {
         ItemStorage = itemStorage;
     }
 
-    [HttpGet("get")]
+    [HttpGet()]
     public async Task<IActionResult> GetAllItems([FromQuery] int offset = 0, [FromQuery] int limit = 100) {
         List<Item> items = await ItemStorage.GetItems(offset, limit);
         return Ok(items);
     }
 
-    [HttpGet("get/{uid}")]
+    [HttpGet("{uid}")]
     public async Task<IActionResult> GetItem(string uid) {
         if (uid == "") return BadRequest("invalid uid");
         Item? item = await ItemStorage.GetItem(uid);
