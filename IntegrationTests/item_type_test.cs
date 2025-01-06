@@ -18,6 +18,7 @@ namespace IntegrationTests
         private string ItemLineUrl = "/api/v2/itemlines";
         private string ItemTypeUrl = "/api/v2/itemtypes";
         private string ItemGroupUrl = "/api/v2/item_groups";
+        private string SupplierUrl = "/api/v2/suppliers";
         private ItemType[] testItemTypes = [
                 new ItemType(){Id = 1, Name = "type 1", Description = "Description of itemType 1"},
                 new ItemType(){Id = 2, Name = "type 2", Description = "Description of itemType 2"}
@@ -31,8 +32,12 @@ namespace IntegrationTests
                 new ItemGroup(){Id = 1, Name = "group 1", Description = "Description of itemgroup 1"}
             ];
         
+        private Supplier[] testSuppliers = [
+                new Supplier(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"},
+            ];
+        
         private Item[] testItems = [
-                new Item(){Uid = "P00001", ItemType=1, ItemLine=1, ItemGroup=1}
+                new Item(){Uid = "P00001", ItemType=1, ItemLine=1, ItemGroup=1, SupplierId=1}
             ];
 
         
@@ -91,6 +96,17 @@ namespace IntegrationTests
                 string jsonData = JsonConvert.SerializeObject(itemGroup);
                 HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
                 client.PostAsync($"{ItemGroupUrl}", postContent).GetAwaiter().GetResult();
+            }
+        }
+
+        private void addTestSuppliersToDB(HttpClient client)
+        {
+            // Add both Suppliers to db
+            foreach(Supplier supplier in testSuppliers)
+            {
+                string jsonData = JsonConvert.SerializeObject(supplier);
+                HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                client.PostAsync($"{SupplierUrl}", postContent).GetAwaiter().GetResult();
             }
         }
 
@@ -228,6 +244,7 @@ namespace IntegrationTests
         [TestMethod]
         public void test_get_items_by_itemType() {
             // Arrange
+            // test Item Line creation
             bool itemLineCreation;
             try {
                 addTestItemLinesToDB(client);
@@ -238,6 +255,7 @@ namespace IntegrationTests
 
             Assert.IsTrue(itemLineCreation, "ItemLine creation failed, run itemline intergration tests for more information");
 
+            // test Item Group creation
             bool itemGroupCreation;
             try {
                 addTestItemGroupsToDB(client);
@@ -248,6 +266,18 @@ namespace IntegrationTests
 
             Assert.IsTrue(itemGroupCreation, "ItemGroup creation failed, run itemgroup intergration tests for more information");
 
+            // test Supplier creation
+            bool SupplierCreation;
+            try {
+                addTestSuppliersToDB(client);
+                SupplierCreation = true;
+            } catch {
+                SupplierCreation = false;
+            }
+
+            Assert.IsTrue(SupplierCreation, "Supplier creation failed, run Supplier intergration tests for more information");
+
+            // test item creation
             bool itemCreation;
             try {
                 addTestItemsToDB(client);
