@@ -42,7 +42,7 @@ namespace IntegrationTests
             ];
 
         private Inventory[] testInventories = [
-            new Inventory() {ItemId = "P00002", total_on_hand = 5, total_available = 4, total_allocated = 3, total_expected = 2, total_ordered = 1}
+            new Inventory() {Id = 1, ItemId = "P00002", total_on_hand = 5, total_available = 4, total_allocated = 3, total_expected = 2, total_ordered = 1}
         ];
 
         private HttpClient client;
@@ -319,8 +319,6 @@ namespace IntegrationTests
             }
 
             Assert.IsTrue(IventoryCreation, "Inventory creation failed, run Inventory intergration tests for more information");
-
-            testInventories[0].Id = 1;
 
             // Act
             var response = client.GetAsync(ItemUrl + "/inventory/" + testItems[1].Uid).Result;
