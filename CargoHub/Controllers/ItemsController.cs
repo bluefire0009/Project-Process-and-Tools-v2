@@ -27,7 +27,7 @@ public class ItemsController : Controller {
         return Ok(item);
     }
 
-    [HttpGet("{uid}/iventory")]
+    [HttpGet("inventory/{uid}")]
     public async Task<IActionResult> GetItemInventory(string uid) {
         if (uid == "") return BadRequest("invalid uid");
         List<Inventory> itemInventories = await ItemStorage.GetItemInventory(uid);
@@ -35,7 +35,7 @@ public class ItemsController : Controller {
         return Ok(itemInventories);
     }
 
-    [HttpGet("{uid}/inventory/totals")]
+    [HttpGet("inventory/totals/{uid}")]
     public async Task<IActionResult> GetItemInventoryTotals(string uid) {
         if (uid == "") return BadRequest("invalid uid");
         List<Inventory> itemInventories = await ItemStorage.GetItemInventory(uid);
