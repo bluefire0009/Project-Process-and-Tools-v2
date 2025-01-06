@@ -5,8 +5,6 @@ using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
 using Microsoft.Extensions.DependencyInjection;
-using Microsoft.VisualStudio.TestPlatform.TestHost;
-using Microsoft.VisualStudio.TestTools.UnitTesting;
 using Newtonsoft.Json;
 
 namespace IntegrationTests
@@ -21,6 +19,7 @@ namespace IntegrationTests
         private string ItemTypeUrl = "/api/v2/itemtypes";
         private string ItemGroupUrl = "/api/v2/item_groups";
         private string SupplierUrl = "/api/v2/suppliers";
+        private string InventoryUrl = "/api/v2/inventories";
         private ItemType[] testItemTypes = [
                 new ItemType(){Id = 1, Name = "type 1", Description = "Description of itemType 1"}
             ];
@@ -41,6 +40,11 @@ namespace IntegrationTests
                 new Item(){Uid = "P00001", ItemType=1, ItemLine=1, ItemGroup=1, SupplierId=1},
                 new Item(){Uid = "P00002", ItemType=1, ItemLine=1, ItemGroup=1, SupplierId=1}
             ];
+
+        private Inventory[] testInventories = [
+            new Inventory() {ItemId = "P00002", total_on_hand = 5, total_available = 4, total_allocated = 3, total_expected = 2, total_ordered = 1}
+        ];
+
         private HttpClient client;
 
         [TestInitialize]
@@ -114,7 +118,7 @@ namespace IntegrationTests
 
         private void addTestItemsToDB(HttpClient client)
         {
-            // Add both Suppliers to db
+            // Add items to db
             foreach(Item item in testItems)
             {
                 string jsonData = JsonConvert.SerializeObject(item);
@@ -126,7 +130,7 @@ namespace IntegrationTests
 
         private void addTestItemTypesToDB(HttpClient client)
         {
-            // Add both Suppliers to db
+            // Add item types to db
             foreach(ItemType itemType in testItemTypes)
             {
                 string jsonData = JsonConvert.SerializeObject(itemType);
@@ -137,7 +141,7 @@ namespace IntegrationTests
 
         private void addTestItemLinesToDB(HttpClient client)
         {
-            // Add both Suppliers to db
+            // Add itemlines to db
             foreach(ItemLine itemLine in testItemLines)
             {
                 string jsonData = JsonConvert.SerializeObject(itemLine);
@@ -148,7 +152,7 @@ namespace IntegrationTests
 
         private void addTestItemGroupsToDB(HttpClient client)
         {
-            // Add both Suppliers to db
+            // Add itemgroups to db
             foreach(ItemGroup itemGroup in testItemGroups)
             {
                 string jsonData = JsonConvert.SerializeObject(itemGroup);
@@ -159,12 +163,23 @@ namespace IntegrationTests
 
         private void addTestSuppliersToDB(HttpClient client)
         {
-            // Add both Suppliers to db
+            // Add Suppliers to db
             foreach(Supplier supplier in testSuppliers)
             {
                 string jsonData = JsonConvert.SerializeObject(supplier);
                 HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
                 client.PostAsync($"{SupplierUrl}", postContent).GetAwaiter().GetResult();
+            }
+        }
+
+        private void addTestInventoriesToDB(HttpClient client)
+        {
+            // Add both inventory to db
+            foreach(Inventory inventory in testInventories)
+            {
+                string jsonData = JsonConvert.SerializeObject(inventory);
+                HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
+                client.PostAsync($"{InventoryUrl}", postContent).GetAwaiter().GetResult();
             }
         }
 
@@ -290,5 +305,41 @@ namespace IntegrationTests
             Assert.IsTrue(resultItems.Length == testItems.Length - 1);
             Assert.IsFalse(resultItems.Any(s=>s.Equals(testItems[0])));
         }
+
+        [TestMethod]
+        public void test_get_inventory_by_item() {
+            // Arrange
+            // test Supplier creation
+            bool IventoryCreation;
+            try {
+                addTestInventoriesToDB(client);
+                IventoryCreation = true;
+            } catch {
+                IventoryCreation = false;
+            }
+
+            Assert.IsTrue(IventoryCreation, "Inventory creation failed, run Inventory intergration tests for more information");
+
+            testInventories[0].Id = 1;
+
+            // Act
+            var response = client.GetAsync(ItemUrl + "/inventory/" + testItems[1].Uid).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+            var resultInventories = JsonConvert.DeserializeObject<Inventory[]>(content);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            Assert.AreEqual(testInventories.Length, resultInventories.Length);
+            
+            //Clear the date fields so I can just assert using .equals function
+            resultInventories.ToList().ForEach(s=>{s.CreatedAt = new(); s.UpdatedAt = new();});
+            testInventories.ToList().ForEach(s=>{s.CreatedAt = new(); s.UpdatedAt = new();});
+
+            for(int inventoryIterator = 0; inventoryIterator<resultInventories.Length; inventoryIterator++)
+            {
+                Assert.IsTrue(testInventories[inventoryIterator].Equals(resultInventories[inventoryIterator]));
+            }
+        }
     }
 }
+
