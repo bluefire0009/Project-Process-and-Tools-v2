@@ -121,9 +121,9 @@ public class WarehouseDBTest
     public static IEnumerable<object[]> AddWarehouseTestData => new List<object[]>
         {
             new object[] { null, false},
-            new object[] { new Warehouse(){Id = -1}, false},
-            new object[] { new Warehouse(){Id = 0}, false},
-            new object[] { new Warehouse(){Id = 1}, true}
+            new object[] { new Warehouse(){Id = -1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363"}, false},
+            new object[] { new Warehouse(){Id = 0, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363"}, false},
+            new object[] { new Warehouse(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363"}, true}
         };
     [TestMethod]
     [DynamicData(nameof(AddWarehouseTestData), DynamicDataSourceType.Property)]
@@ -147,8 +147,8 @@ public class WarehouseDBTest
     public void TestAddSameIdTwice()
     {
         // Arrange
-        Warehouse w1 = new() { Id = 1 };
-        Warehouse w2 = new() { Id = 1 };
+        Warehouse w1 = new() { Id = 1 , Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363"};
+        Warehouse w2 = new() { Id = 1 , Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363"};
         WarehouseDBStorage storage = new(db);
 
         // Act
@@ -157,7 +157,9 @@ public class WarehouseDBTest
 
         // Assert
         Assert.IsTrue(firstAdd == true);
-        Assert.IsTrue(secondAdd == false);
+        Assert.IsTrue(secondAdd == true);
+        // Assert that Id of w2 changed because it was auto assigned by storage
+        Assert.IsTrue(w1.Id != w2.Id);
     }
 
     public static IEnumerable<object[]> RemoveWarehouseTestData => new List<object[]>
@@ -214,13 +216,43 @@ public class WarehouseDBTest
 
     public static IEnumerable<object[]> UpdateWarehouseTestData => new List<object[]>
         {
-            new object[] { new List<Warehouse> {}, 2, new Warehouse(){Id = 1},false},
+            new object[] 
+            { 
+                new List<Warehouse> {}, 2, 
+                new Warehouse(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363"},
+                false
+            },
             new object[] { new List<Warehouse> {}, 1, null,false},
-            new object[] { new List<Warehouse> {}, 0, new Warehouse(){Id = 1},false},
-            new object[] { new List<Warehouse> {}, -1, new Warehouse(){Id = 1},false},
-            new object[] { new List<Warehouse> {new Warehouse(){Id = 1}}, 1, new Warehouse(){Id = 2}, false},
-            new object[] { new List<Warehouse> {new Warehouse(){Id = 1, IsDeleted = true}}, 1, new Warehouse(){Id = 1, Code = "ABC"}, false},
-            new object[] { new List<Warehouse> {new Warehouse(){Id = 1}}, 1, new Warehouse(){Id = 1, Code = "ABC"}, true},
+            new object[] 
+            { 
+                new List<Warehouse> {}, 0, 
+                new Warehouse(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363"},
+                false
+            },
+            new object[] 
+            { 
+                new List<Warehouse> {}, -1, 
+                new Warehouse(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363"},
+                false
+                },
+            new object[] 
+            { 
+                new List<Warehouse> {new Warehouse(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363" }}, 1, 
+                new Warehouse(){Id = 2, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363"}, 
+                false
+            },
+            new object[] 
+            { 
+                new List<Warehouse> {new Warehouse(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363", IsDeleted = true}}, 1, 
+                new Warehouse(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363"}, 
+                false
+            },
+            new object[] 
+            { 
+                new List<Warehouse> {new Warehouse(){Id = 1}}, 1, 
+                new Warehouse(){Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", Zip = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactEmail = "blamore@example.net", ContactName = "Fem Keijzer", ContactPhone = "(078) 0013363"}, 
+                true
+            },
         };
     [TestMethod]
     [DynamicData(nameof(UpdateWarehouseTestData), DynamicDataSourceType.Property)]

@@ -4,8 +4,6 @@ using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
 
 [Route("/api/v2/warehouses")]
-// Doesn't have to be covered because we have integration tests for that
-[ExcludeFromCodeCoverage]
 public class WarehousesController : Controller
 {
     private IWarehouseStorage warehouseStorage;
@@ -21,7 +19,7 @@ public class WarehousesController : Controller
         return Ok(warehouses);
     }
 
-    [HttpGet("Range")]
+    [HttpGet("range")]
     public async Task<IActionResult> GetWarehousesRange([FromQuery]int firstIdToTake, [FromQuery]int amountToTake)
     {
         IEnumerable<Warehouse>? warehouses = await warehouseStorage.getWarehousesRange(firstIdToTake, amountToTake);
@@ -59,7 +57,7 @@ public class WarehousesController : Controller
         bool added = await warehouseStorage.addWarehouse(warehouse);
 
         if (!added) return BadRequest($"Couldn't add warehouse:{JsonConvert.SerializeObject(warehouse)}");
-        return Ok($"Added warehouse:{JsonConvert.SerializeObject(warehouse)}");
+        return Created("",$"Added warehouse:{JsonConvert.SerializeObject(warehouse)}");
     }
 
     [HttpDelete("{id}")]
@@ -76,7 +74,8 @@ public class WarehousesController : Controller
     public async Task<IActionResult> UpdateWarehouse(int idToUpdate, [FromBody] Warehouse updatedWarehouse)
     {
         if (idToUpdate <= 0) return BadRequest("Invalid id in the url");
-        if (updatedWarehouse == null) BadRequest("updatedWarehouse cannot be null");
+        if (updatedWarehouse == null) return BadRequest("updatedWarehouse cannot be null");
+        if (!ModelValidator.ValidateWarehouse(updatedWarehouse)) return BadRequest("updatedWarehouse cannot have invalid fields");
 
         bool updated = await warehouseStorage.updateWarehouse(idToUpdate, updatedWarehouse);
 
