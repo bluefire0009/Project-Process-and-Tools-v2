@@ -68,10 +68,12 @@ public class ItemLinesDBStorage : IItemLineStorage
         ItemLine? itemLineInDatabase = await db.ItemLines.Where(i => i.Id == id).FirstOrDefaultAsync();
         if (itemLineInDatabase == null) return false;
 
-        itemLine.UpdatedAt = CETDateTime.Now();
-        db.ItemLines.Update(itemLineInDatabase);
+        db.ItemLines.Remove(itemLineInDatabase);
         await db.SaveChangesAsync();
 
+        itemLine.UpdatedAt = CETDateTime.Now();
+        db.ItemLines.Add(itemLine);
+        await db.SaveChangesAsync();
         return true;
     }
 }
