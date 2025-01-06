@@ -65,7 +65,7 @@ public class ItemsController : Controller {
         bool added = await ItemStorage.AddItem(item);
 
         if (!added) return BadRequest($"Couldn't add item:{JsonConvert.SerializeObject(item)}");
-        return Ok("Item has been created");
+        return Created("", "Item has been created");
     }
 
     [HttpDelete("{uid}")]
