@@ -10,8 +10,8 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace CargoHub.Migrations
 {
     [DbContext(typeof(DatabaseContext))]
-    [Migration("20241210142411_SoftDeleten")]
-    partial class SoftDeleten
+    [Migration("20250107093759_current1")]
+    partial class current1
     {
         /// <inheritdoc />
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
@@ -19,14 +19,11 @@ namespace CargoHub.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
 
-            modelBuilder.Entity("CargoHub.Models.ApiKey", b =>
+            modelBuilder.Entity("ApiKey", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Key_type")
                         .IsRequired()
@@ -36,9 +33,13 @@ namespace CargoHub.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Salt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.ToTable("API_keys", (string)null);
+                    b.ToTable("ApiKeys");
                 });
 
             modelBuilder.Entity("CargoHub.Models.Client", b =>
@@ -175,6 +176,9 @@ namespace CargoHub.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<int>("ItemGroup")
                         .HasColumnType("INTEGER");
 
@@ -265,6 +269,9 @@ namespace CargoHub.Migrations
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
 
@@ -287,6 +294,9 @@ namespace CargoHub.Migrations
 
                     b.Property<string>("Description")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");
@@ -629,6 +639,9 @@ namespace CargoHub.Migrations
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
 
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
+
                     b.Property<string>("Reference")
                         .HasColumnType("TEXT");
 
@@ -700,6 +713,9 @@ namespace CargoHub.Migrations
 
                     b.Property<DateTime>("CreatedAt")
                         .HasColumnType("TEXT");
+
+                    b.Property<bool>("IsDeleted")
+                        .HasColumnType("INTEGER");
 
                     b.Property<string>("Name")
                         .HasColumnType("TEXT");

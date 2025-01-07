@@ -1,12 +1,12 @@
-using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using System.Linq;
+using System.Diagnostics.CodeAnalysis;
 
+[ExcludeFromCodeCoverage] // Method gets called in the filter. Filter gets tested.
 public class ApiKeyValidationService : IApiKeyValidationInterface
 {
     private readonly DatabaseContext _context;
@@ -16,41 +16,40 @@ public class ApiKeyValidationService : IApiKeyValidationInterface
         _context = context;
     }
 
-    // Hashing method using SHA-256
+    // Hash a key with a provided salt
     public static string HashKeyWithSalt(string key, string salt)
     {
-        using (SHA256 sha256 = SHA256.Create())
+        using (var sha256 = SHA256.Create())
         {
-            string combined = key + salt;  // Combine the key and salt before hashing
-            byte[] bytes = Encoding.UTF8.GetBytes(combined);
-            byte[] hash = sha256.ComputeHash(bytes);
-            return Convert.ToBase64String(hash);  // Convert the hash to a base64 string for storage
+            var combined = key + salt; // Combine key and salt
+            var bytes = Encoding.UTF8.GetBytes(combined);
+            var hash = sha256.ComputeHash(bytes);
+            return Convert.ToBase64String(hash);
         }
     }
 
-    // Method to verify the key by comparing the hash
-    public static bool VerifyKey(string inputKey, string storedHash, string salt)
-    {
-        // Hash the input key with the stored salt
-        var hashedInput = HashKeyWithSalt(inputKey, salt);
-        return hashedInput == storedHash;
-    }
-
-    // Asynchronous method to validate the API key
+    // Method to validate the API key
     public async Task<bool> IsValidApiKeyAsync(string apiKey)
     {
-        // List of valid key types (can add more if needed)
-        List<string> validKeyTypes = new List<string> { "warehouse_manager", "admin" };
+        // List of valid API key types
+        List<string> validKeyTypes = new List<string> { "floor_manager", "warehouse_manager", "admin" };
 
-        // Fetch the API keys from the database where the Key_type is valid and asynchronously get them
+        // Retrieve all API keys with valid types from the database
         var apiKeyRecords = await _context.ApiKeys
-            .Where(k => validKeyTypes.Contains(k.Key_type))  // Filter by valid key types
-            .ToListAsync();  // Execute the query to fetch the data asynchronously
+                                          .Where(k => validKeyTypes.Contains(k.Key_type))
+                                          .ToListAsync();
 
-        // Now verify the key on the client-side using the VerifyKey method
-        var validKey = apiKeyRecords
-            .FirstOrDefault(k => VerifyKey(apiKey, k.Key_value, k.Salt)) != null;
+        // Validate the provided API key against all records
+        foreach (var record in apiKeyRecords)
+        {
+            // Use the stored salt and hash to verify the API key
+            var hashedInput = HashKeyWithSalt(apiKey, record.Salt);
+            if (hashedInput == record.Key_value)
+            {
+                return true; // Valid key found
+            }
+        }
 
-        return validKey;  // Return true if the key was valid, false otherwise
+        return false; // No valid key matches
     }
 }
