@@ -34,14 +34,25 @@ public class LocationController : Controller
     public async Task<IActionResult> AddLocation([FromBody] Location location)
     {
         if (location == null) return BadRequest("Location is null");
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest("Invalid model");
+        }
+
         int id = await Storage.AddLocation(location);
         if (id == -1) return BadRequest();
-        return Ok(new { id });
+        return Created("", $"{id}");
     }
 
     [HttpPut("{Id}")]
     public async Task<IActionResult> UpdateLocation([FromRoute] int Id, [FromBody] Location location)
     {
+        if (!ModelState.IsValid)
+        {
+            return BadRequest("Invalid model");
+        }
+
         if (await Storage.UpdateLocation(Id, location)) return Ok($"Location with Id{Id} was updated successfully");
         return BadRequest();
     }

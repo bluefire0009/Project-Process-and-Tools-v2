@@ -12,9 +12,13 @@ public class Location : IEquatable<Location>
 
     [ForeignKey("WareHouseId")]
     public Warehouse? wareHouse { get; set; }
+
+    [JsonRequired]
     public int? WareHouseId { get; set; }
 
+    [JsonRequired]
     public string? Code { get; set; }
+    [JsonRequired]
     public string? Name { get; set; }
 
     [DataType(DataType.DateTime)]
@@ -32,12 +36,9 @@ public class Location : IEquatable<Location>
         if (other is null) return false;
 
         // Compare properties
-        return Id == other.Id &&
-               WareHouseId == other.WareHouseId &&
+        return WareHouseId == other.WareHouseId &&
                Code == other.Code &&
-               Name == other.Name &&
-               CreatedAt == other.CreatedAt &&
-               UpdatedAt == other.UpdatedAt;
+               Name == other.Name;
     }
 
     public static bool operator ==(Location? left, Location? right)

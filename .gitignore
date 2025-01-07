@@ -486,3 +486,4 @@ $RECYCLE.BIN/
 # My own
 *.sln
 *.vscode
+CargoHub/log.txt

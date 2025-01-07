@@ -1,11 +1,19 @@
-Get http://localhost:3000/api/v2/locations/maxRate
-
-####
 POST http://localhost:3000/api/v2/locations
 Content-Type: application/json
 
 {
         "WareHouseId": null,
-        "Code": "Test_code",
         "Name": "Test_name",
+        "Code": "1"  
+}
+
+####
+
+Put http://localhost:3000/api/v2/locations/51
+Content-Type: application/json
+
+{
+        "WareHouseId": null,
+        "Name": "Test_name",
+        "Code": "Changed123"  
 }

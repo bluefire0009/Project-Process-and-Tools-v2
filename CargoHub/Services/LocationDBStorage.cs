@@ -69,8 +69,8 @@ public class LocationStorage : ILocationStorage
         // update location by id
         if (location == null) return false;
 
-        Location? Foundlocation = await DB.Locations.FirstOrDefaultAsync(x => x.Id == locationId);
-        if (Foundlocation == null) return false;
+        bool locaitonExists = await DB.Locations.AnyAsync(x => x.Id == locationId);
+        if (locaitonExists == false) return false;
 
         // make sure the id doesnt get changed
         location.Id = locationId;
