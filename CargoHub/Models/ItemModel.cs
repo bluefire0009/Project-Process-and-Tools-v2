@@ -4,11 +4,11 @@ using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
 
-public class Item
+public class Item : IEquatable<Item>
 {
 
     [Key]
-    public int Uid { get; set; }
+    public string Uid { get; set; }
     public string? Code { get; set; }
     public string? Description { get; set; }
     public string? ShortDescription { get; set; }
@@ -43,4 +43,26 @@ public class Item
 
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
+
+    public bool Equals(Item? other)
+    {
+        if (other is null)
+            return false;
+
+        // Compare all relevant properties except foreign keys
+        return Uid == other.Uid &&
+               Code == other.Code &&
+               Description == other.Description &&
+               ShortDescription == other.ShortDescription &&
+               UpcCode == other.UpcCode &&
+               ModelNumber == other.ModelNumber &&
+               CommodityCode == other.CommodityCode &&
+               UnitPurchaseQuantity == other.UnitPurchaseQuantity &&
+               UnitOrderQuantity == other.UnitOrderQuantity &&
+               PackOrderQuantity == other.PackOrderQuantity &&
+               SupplierCode == other.SupplierCode &&
+               SupplierPartNumber == other.SupplierPartNumber &&
+               CreatedAt == other.CreatedAt &&
+               UpdatedAt == other.UpdatedAt;
+    }
 }

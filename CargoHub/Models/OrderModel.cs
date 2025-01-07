@@ -3,7 +3,7 @@ namespace CargoHub.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class Order
+public class Order : IEquatable<Order>
 {
     [Key]
     public int Id { get; set; }
@@ -47,11 +47,58 @@ public class Order
     public DateTime? UpdatedAt { get; set; } = null;
 
     public ICollection<OrderItems> Items { get; set; } = new List<OrderItems>();
+
+    public bool Equals(Order? other)
+    {
+        if (other is null) return false;
+
+        // Compare all fields
+        return
+               SourceId == other.SourceId &&
+               OrderDate == other.OrderDate &&
+               RequestDate == other.RequestDate &&
+               Reference == other.Reference &&
+               OrderStatus == other.OrderStatus &&
+               Notes == other.Notes &&
+               ShippingNotes == other.ShippingNotes &&
+               PickingNotes == other.PickingNotes &&
+               WareHouseId == other.WareHouseId &&
+               ShipTo == other.ShipTo &&
+               BillTo == other.BillTo &&
+               ShipmentId == other.ShipmentId &&
+               TotalAmount == other.TotalAmount &&
+               TotalDiscount == other.TotalDiscount &&
+               TotalTax == other.TotalTax &&
+               TotalSurcharge == other.TotalSurcharge &&
+               (Items == other.Items ||
+                (Items != null && other.Items != null && Items.SequenceEqual(other.Items)));
+    }
+
+    public static bool operator ==(Order? left, Order? right)
+    {
+        // If both are null, return true
+        if (ReferenceEquals(left, null) && ReferenceEquals(right, null))
+            return true;
+
+        // If one is null and the other isn't, return false
+        if (ReferenceEquals(left, null) || ReferenceEquals(right, null))
+            return false;
+
+        // Use the Equals method to compare the actual objects
+        return left.Equals(right);
+    }
+
+    // Implement inequality operator
+    public static bool operator !=(Order? left, Order? right)
+    {
+        return !(left == right);
+    }
 }
 
-public class OrderItems
+public class OrderItems : IEquatable<OrderItems>
 {
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
 
     [ForeignKey("OrderId")]
@@ -60,7 +107,24 @@ public class OrderItems
 
     [ForeignKey("ItemUid")]
     public Item? item { get; set; }
-    public int ItemUid { get; set; }
+    public string ItemUid { get; set; }
 
     public int Amount { get; set; }
+
+    public OrderItems(string ItemUid, int amount, int OrderId)
+    {
+        this.ItemUid = ItemUid;
+        this.Amount = amount;
+        this.OrderId = OrderId;
+    }
+
+    public bool Equals(OrderItems? other)
+    {
+        if (other is null) return false;
+
+        // Compare all fields
+        return this.OrderId == other.OrderId &&
+        this.ItemUid == other.ItemUid &&
+        this.Amount == other.Amount;
+    }
 }

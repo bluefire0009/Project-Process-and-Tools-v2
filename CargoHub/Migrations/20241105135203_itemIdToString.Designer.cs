@@ -2,19 +2,19 @@
 using System;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
-using System.Diagnostics.CodeAnalysis;
-
 
 #nullable disable
 
 namespace CargoHub.Migrations
 {
-    [ExcludeFromCodeCoverage]
     [DbContext(typeof(DatabaseContext))]
-    partial class DatabaseContextModelSnapshot : ModelSnapshot
+    [Migration("20241105135203_itemIdToString")]
+    partial class itemIdToString
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
@@ -88,21 +88,6 @@ namespace CargoHub.Migrations
                     b.Property<string>("ItemReference")
                         .HasColumnType("TEXT");
 
-                    b.Property<int>("total_allocated")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("total_available")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("total_expected")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("total_on_hand")
-                        .HasColumnType("INTEGER");
-
-                    b.Property<int>("total_ordered")
-                        .HasColumnType("INTEGER");
-
                     b.HasKey("Id");
 
                     b.HasIndex("ItemId");
@@ -122,7 +107,7 @@ namespace CargoHub.Migrations
 
                     b.HasIndex("LocationId");
 
-                    b.ToTable("InventoryLocations");
+                    b.ToTable("InventoryLocation");
                 });
 
             modelBuilder.Entity("CargoHub.Models.Item", b =>
@@ -629,7 +614,9 @@ namespace CargoHub.Migrations
                 {
                     b.HasOne("CargoHub.Models.Item", "item")
                         .WithMany()
-                        .HasForeignKey("ItemId");
+                        .HasForeignKey("ItemId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
 
                     b.Navigation("item");
                 });

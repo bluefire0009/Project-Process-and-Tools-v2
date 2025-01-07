@@ -3,7 +3,7 @@ namespace CargoHub.Models;
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
 
-public class Transfer
+public class Transfer : IEquatable<Transfer>
 {
     [Key]
     public int Id { get; set; }
@@ -24,9 +24,24 @@ public class Transfer
     public DateTime UpdatedAt { get; set; }
 
     public List<TransferItem> Items { get; set; } = new();
+
+    public bool Equals(Transfer? other)
+    {
+        if (other is null)
+            return false;
+
+        // Compare all relevant properties except foreign keys
+        return this.Id == other.Id &&
+                this.Reference == other.Reference &&
+                this.TransferFrom == other.TransferFrom &&
+                this.TransferTo == other.TransferTo &&
+                this.TransferStatus == other.TransferStatus &&
+                this.CreatedAt == other.CreatedAt &&
+                this.Items.SequenceEqual(other.Items);            
+    }
 }
 
-public class TransferItem
+public class TransferItem : IEquatable<TransferItem>
 {
     [ForeignKey("TransferId")]
     public Transfer? transfer { get; set; }
@@ -34,7 +49,18 @@ public class TransferItem
 
     [ForeignKey("ItemUid")]
     public Item? item { get; set; }
-    public int ItemUid { get; set; }
+    public string ItemUid { get; set; }
 
     public int Amount { get; set; }
+
+    public bool Equals(TransferItem? other)
+    {
+    if (other is null)
+        return false;
+
+    // Compare all relevant properties except foreign keys
+    return this.TransferId == other.TransferId &&
+            this.ItemUid == other.ItemUid &&
+            this.Amount == other.Amount;                    
+    }
 }
