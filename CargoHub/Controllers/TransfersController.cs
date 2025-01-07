@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 
 [Route("/api/v2/transfers")]
 // Doesn't have to be covered because we have integration tests for that
-[ExcludeFromCodeCoverage]
 public class TransferController : Controller
 {
     private ITransferStorage transferStorage;
