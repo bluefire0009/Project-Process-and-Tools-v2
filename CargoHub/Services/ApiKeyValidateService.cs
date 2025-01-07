@@ -32,7 +32,7 @@ public class ApiKeyValidationService : IApiKeyValidationInterface
     public async Task<bool> IsValidApiKeyAsync(string apiKey)
     {
         // List of valid API key types
-        List<string> validKeyTypes = new List<string> { "floor_manager", "warehouse_manager", "admin", "user" };
+        List<string> validKeyTypes = new List<string> { "floor_manager", "warehouse_manager", "admin" };
 
         // Retrieve all API keys with valid types from the database
         var apiKeyRecords = await _context.ApiKeys

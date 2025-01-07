@@ -130,16 +130,13 @@ namespace TestProject1
 
         // Check if the API key is valid and has the Manager type
         public async Task<bool> IsValidApiKeyAsync(string apiKey)
-        {// List of valid API key types
+        {
+            // List of valid API key types
             List<string> validKeyTypes = new List<string> { "floor_manager", "warehouse_manager", "admin" };
           
             await Task.CompletedTask;
 
             return _apiKeys.ContainsKey(apiKey) && validKeyTypes.Contains(_apiKeys[apiKey]);
-
-            
-
-           
         }
     }
 }
