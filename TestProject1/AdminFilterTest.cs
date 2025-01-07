@@ -13,13 +13,13 @@ namespace TestProject1
     [TestClass]
     public class AdminFilterTest
     {
-        private IApiKeyValidationInterface _apiKeyManagerValidationService;
+        private IApiKeyValidationInterface _apiKeyValidationService;
 
         [TestInitialize]
         public void SetUp()
         {
             // Initialize 
-            _apiKeyManagerValidationService = new InMemoryApiKeyValidationService();
+            _apiKeyValidationService = new InMemoryApiKeyValidationService();
         }
 
         [TestMethod]
@@ -28,7 +28,7 @@ namespace TestProject1
         {
             // Arrange
             var filterContext = CreateContextWithApiKey("admin_key");
-            var filter = new AdminOnlyFilter(_apiKeyManagerValidationService);
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
@@ -43,7 +43,7 @@ namespace TestProject1
         {
             // Arrange
             var filterContext = CreateContextWithApiKey("invalid_key");
-            var filter = new AdminOnlyFilter(_apiKeyManagerValidationService);
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
@@ -58,7 +58,7 @@ namespace TestProject1
         {
             // Arrange
             var filterContext = CreateContextWithApiKey("user_key");
-            var filter = new AdminOnlyFilter(_apiKeyManagerValidationService);
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
@@ -72,7 +72,7 @@ namespace TestProject1
         {
             // Arrange
             var filterContext = CreateContextWithApiKey("floor_manager_key");
-            var filter = new AdminOnlyFilter(_apiKeyManagerValidationService);
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
@@ -86,7 +86,7 @@ namespace TestProject1
         {
             // Arrange
             var filterContext = CreateContextWithApiKey("warehouse_manager_key");
-            var filter = new AdminOnlyFilter(_apiKeyManagerValidationService);
+            var filter = new AdminOnlyFilter(_apiKeyValidationService);
 
             // Act
             await filter.OnActionExecutionAsync(filterContext, () => Task.FromResult<ActionExecutedContext>(null));
@@ -111,11 +111,11 @@ namespace TestProject1
     }
 
     
-    public class InMemoryApiKeyManagerValidationService : IApiKeyValidationInterface
+    public class InMemoryApiKeyValidationService : IApiKeyValidationInterface
     {
         private readonly Dictionary<string, string> _apiKeys;
 
-        public InMemoryApiKeyManagerValidationService()
+        public InMemoryApiKeyValidationService()
         {
             // Api keys
             _apiKeys = new Dictionary<string, string>

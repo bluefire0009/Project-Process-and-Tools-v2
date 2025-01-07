@@ -19,7 +19,7 @@ namespace TestProject1
         public void SetUp()
         {
             // Initialize 
-            _apiKeyValidationService = new InMemoryApiKeyValidationService();
+            _apiKeyValidationService = new InMemoryApiKeyManagerValidationService();
         }
 
         [TestMethod]
@@ -112,11 +112,11 @@ namespace TestProject1
     }
 
     
-    public class InMemoryApiKeyValidationService : IApiKeyValidationInterface
+    public class InMemoryApiKeyManagerValidationService : IApiKeyValidationInterface
     {
         private readonly Dictionary<string, string> _apiKeys;
 
-        public InMemoryApiKeyValidationService()
+        public InMemoryApiKeyManagerValidationService()
         {
             // Api keys
             _apiKeys = new Dictionary<string, string>
@@ -130,13 +130,16 @@ namespace TestProject1
 
         // Check if the API key is valid and has the Manager type
         public async Task<bool> IsValidApiKeyAsync(string apiKey)
-        {
-            // List of valid API key types
+        {// List of valid API key types
             List<string> validKeyTypes = new List<string> { "floor_manager", "warehouse_manager", "admin" };
           
             await Task.CompletedTask;
 
             return _apiKeys.ContainsKey(apiKey) && validKeyTypes.Contains(_apiKeys[apiKey]);
+
+            
+
+           
         }
     }
 }
