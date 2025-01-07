@@ -19,7 +19,7 @@ namespace TestProject1
         public void SetUp()
         {
             // Initialize 
-            _apiKeyValidationService = new InMemoryApiKeyValidationService();
+            _apiKeyValidationService = new InMemoryApiKeyWarehouseValidationService();
         }
 
         [TestMethod]
@@ -112,11 +112,11 @@ namespace TestProject1
     }
 
     
-    public class InMemoryApiKeyValidationService : IApiKeyValidationInterface
+    public class InMemoryApiKeyWarehouseValidationService : IApiKeyValidationInterface
     {
         private readonly Dictionary<string, string> _apiKeys;
 
-        public InMemoryApiKeyValidationService()
+        public InMemoryApiKeyWarehouseValidationService()
         {
             // Api keys
             _apiKeys = new Dictionary<string, string>
