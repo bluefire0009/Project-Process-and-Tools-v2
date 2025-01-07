@@ -15,10 +15,10 @@ public class LocationController : Controller
     }
 
     [HttpGet("")]
-    public async Task<IActionResult> GetLocations()
+    public async Task<IActionResult> GetLocations([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool orderById = false)
     {
-        IEnumerable<Location> suppliers = await Storage.GetLocations();
-        return Ok(suppliers);
+        IEnumerable<Location> locations = await Storage.GetLocations(offset, limit, orderById);
+        return Ok(locations);
     }
 
     [HttpGet("{Id}")]
@@ -30,7 +30,7 @@ public class LocationController : Controller
     }
 
     [HttpPost("")]
-    public async Task<IActionResult> AddLocation(Location location)
+    public async Task<IActionResult> AddLocation([FromBody]Location location)
     {
         if (await Storage.AddLocation(location)) return Ok("Loaction added");
         return BadRequest();
@@ -43,5 +43,10 @@ public class LocationController : Controller
         return BadRequest();
     }
 
-
+    [HttpDelete("{Id}")]
+    public async Task<IActionResult> DelteLocation([FromRoute] int Id)
+    {
+        if (await Storage.DeleteLocation(Id)) return Ok($"Location with Id:{Id} Delted");
+        return BadRequest();
+    }
 }

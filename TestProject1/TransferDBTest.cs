@@ -24,7 +24,8 @@ public class TransferDBTest
         {
             new object[] { new List<Transfer> {}},
             new object[] { new List<Transfer> { new Transfer()}},
-            new object[] { new List<Transfer> { new Transfer(), new Transfer() }}
+            new object[] { new List<Transfer> { new Transfer(), new Transfer(){IsDeleted = true} }},
+            new object[] { new List<Transfer> { new Transfer(), new Transfer() }},
         };
     [TestMethod]
     [DynamicData(nameof(TransfersTestData), DynamicDataSourceType.Property)]
@@ -35,10 +36,10 @@ public class TransferDBTest
         TransferDBStorage storage = new(db);
 
         // Act
-        List<Transfer> result = storage.getTransfers().Result.ToList();
+        List<Transfer> result = storage.GetTransfers().Result.ToList();
 
         // Assert
-        Assert.IsTrue(result.Count == transfers.Count);
+        Assert.IsTrue(result.Count == transfers.Where(t => t.IsDeleted == false).Count());
         for (int transferIterator = 0; transferIterator < result.Count; transferIterator++)
         {
             Assert.IsTrue(result[transferIterator].Id == transfers[transferIterator].Id);
@@ -57,10 +58,44 @@ public class TransferDBTest
         }
     }
 
+    public static IEnumerable<object[]> TestGetTransferTestDataPagination => new List<object[]>
+    {
+    new object[] { Enumerable.Range(1, 0).Select(id => new Transfer { Id = id }).ToList(), 0, 5 },  //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Transfer { Id = id }).ToList(), 0, 5 }, //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Transfer { Id = id }).ToList(), 5, 5 }, //   5 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Transfer { Id = id }).ToList(), 8, 5 }, //   8 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Transfer { Id = id }).ToList(), 10, 5 }  //  10 offset, limit 5
+    };
+
+    [TestMethod]
+    [DynamicData(nameof(TestGetTransferTestDataPagination), DynamicDataSourceType.Property)]
+    public async Task TestGetTransfersWithPagination(List<Transfer> transfers, int offset, int limit)
+    {
+        // Arrange
+        await db.Transfers.AddRangeAsync(transfers); // Add the test data
+        await db.SaveChangesAsync();
+
+        TransferDBStorage storage = new(db);
+
+        // Act
+        IEnumerable<Transfer> actualTransfers = await storage.GetTransfers(offset, limit, true);
+        List<Transfer> result = actualTransfers.ToList();
+
+        // Assert
+        int expectedCount = Math.Min(limit, Math.Max(0, transfers.Count - offset));
+        Assert.AreEqual(expectedCount, result.Count, "Returned result count is incorrect.");
+
+        for (int i = 0; i < result.Count; i++)
+        {
+            Assert.AreEqual(transfers[offset + i].Id, result[i].Id, "Transfer ID does not match at index " + i);
+        }
+    }
+
     public static IEnumerable<object[]> SpecificTransfersTestData => new List<object[]>
         {
             new object[] { new List<Transfer> {}, 1, false},
             new object[] { new List<Transfer> { new Transfer(){Id = 1}}, 2, false},
+            new object[] { new List<Transfer> { new Transfer(){Id = 2, IsDeleted = true}}, 2, false},
             new object[] { new List<Transfer> { new Transfer(){Id = 1}}, 1, true},
             new object[] { new List<Transfer> { new Transfer(){Id = 1}, new Transfer(){Id = 2}}, 2, true}
         };
@@ -84,32 +119,32 @@ public class TransferDBTest
         {
             new object[] { null, null, null, false},
             new object[] { null, null, null, false},
-            new object[] { null, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = 1}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = 1}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = 1}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = 1}}}, false},
-            new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = 0}}}, false},
-            new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = 0}}}, false},
-            new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = 0}}}, false},
-            new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = 0}}}, false},
-            new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = -1}}}, false},
-            new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = -1}}}, false},
-            new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = -1}}}, false},
-            new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = -1}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, Items = {new() {TransferId = 1, ItemUid = 1}, new(){TransferId = 1, ItemUid = 1}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, Items = {new() {TransferId = 1, ItemUid = 1}, new(){TransferId = 1, ItemUid = 1}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, Items = {new(){TransferId = 2, ItemUid = 1}}}, false},
-            new object[] { null, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, Items = {new(){TransferId = 2, ItemUid = 1}}}, false},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, TransferFrom = 3, TransferTo = 4, Items = {new(){TransferId = 2, ItemUid = 1}}}, false},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, TransferFrom = 3, TransferTo = 4, Items = {new(){TransferId = 2, ItemUid = 1}}}, false},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, TransferFrom = 4, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = 1}}}, false},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, TransferFrom = 4, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = 1}}}, false},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 4, Items = {new(){TransferId = 2, ItemUid = 1}}}, false},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = 1}}}, false},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 1, Items = {new(){TransferId = 2, ItemUid = 1}}}, false},
+            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "1"}}}, false},
+            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "1"}}}, false},
+            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "1"}}}, false},
+            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "1"}}}, false},
+            new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "0"}}}, false},
+            new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "0"}}}, false},
+            new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "0"}}}, false},
+            new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "0"}}}, false},
+            new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "-1"}}}, false},
+            new object[] { null, null, new Transfer(){Id = -1, Items = {new() {TransferId = -1, ItemUid = "-1"}}}, false},
+            new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "-1"}}}, false},
+            new object[] { null, null, new Transfer(){Id = 0, Items = {new() {TransferId = 0, ItemUid = "-1"}}}, false},
+            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, Items = {new() {TransferId = 1, ItemUid = "1"}, new(){TransferId = 1, ItemUid = "1"}}}, false},
+            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, Items = {new() {TransferId = 1, ItemUid = "1"}, new(){TransferId = 1, ItemUid = "1"}}}, false},
+            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
+            new object[] { null, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
+            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 3, TransferTo = 4, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
+            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 3, TransferTo = 4, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
+            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 4, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
+            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 4, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
+            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 4, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
+            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
+            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 1, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
 
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = 1}}, new Transfer(){Id = 1, TransferFrom = 1, TransferTo = 2, Items = {new(){TransferId = 1, ItemUid = 1}}}, true},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = 1}, new(){Uid = 2}}, new Transfer(){Id = 1, TransferFrom = 1, TransferTo = 2, Items = {new(){TransferId = 1, ItemUid = 1}, new(){TransferId = 1, ItemUid = 2}}}, true}
+            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 1, TransferTo = 2, Items = {new(){TransferId = 1, ItemUid = "1"}}}, true},
+            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}, new(){Uid = "2"}}, new Transfer(){Id = 1, TransferFrom = 1, TransferTo = 2, Items = {new(){TransferId = 1, ItemUid = "1"}, new(){TransferId = 1, ItemUid = "2"}}}, true}
         };
     [TestMethod]
     [DynamicData(nameof(AddTransferTestData), DynamicDataSourceType.Property)]
@@ -119,6 +154,10 @@ public class TransferDBTest
         addTestResourceToDB(locations);
         addTestResourceToDB(items);
         TransferDBStorage storage = new(db);
+
+        DateTime dateAtStart = new();
+        if (transfer != null)
+            dateAtStart = transfer.CreatedAt;
 
         // Act
         bool actualResult = storage.addTransfer(transfer).Result;
@@ -139,6 +178,8 @@ public class TransferDBTest
                 }
                 Assert.IsTrue(db.Transfers.Select(t => t.Id).Contains(transfer.Id));
                 Assert.IsTrue(transfer.Items.Count == db.TransferItems.Count());
+                Assert.IsTrue(transfer.TransferStatus == "Scheduled");
+                Assert.IsTrue(transfer.CreatedAt != dateAtStart);
             }
         }
     }
@@ -171,8 +212,8 @@ public class TransferDBTest
             new object[] { null, new List<Transfer> { new Transfer(){Id = 1}}, 0, false},
             new object[] { null, new List<Transfer> { new Transfer(){Id = 1}}, -1, false},
             new object[] { null, new List<Transfer> { new Transfer(){Id = 1}}, 2, false},
-            new object[] { new List<Item> {new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> { new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = 1}, new(){TransferId = 1, ItemUid = 2}}}}, 1, true},
-            new object[] { new List<Item> {new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> { new Transfer(){Id = 1}, new Transfer(){Id = 2, Items = new(){ new(){TransferId = 2, ItemUid = 1}, new(){TransferId = 2, ItemUid = 2}}}}, 2, true}
+            new object[] { new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}}, new List<Transfer> { new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = "1"}, new(){TransferId = 1, ItemUid = "2"}}}}, 1, true},
+            new object[] { new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}}, new List<Transfer> { new Transfer(){Id = 1}, new Transfer(){Id = 2, Items = new(){ new(){TransferId = 2, ItemUid = "1"}, new(){TransferId = 2, ItemUid = "2"}}}}, 2, true}
         };
     [TestMethod]
     [DynamicData(nameof(RemoveTransferTestData), DynamicDataSourceType.Property)]
@@ -195,7 +236,11 @@ public class TransferDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
-        Assert.IsTrue(!db.TransferItems.Select(t => t.TransferId).Contains(idToRemove));
+        if (expectedResult == true)
+        {
+            Assert.IsTrue(db.TransferItems.Select(t => t.TransferId).Contains(idToRemove));
+            Assert.IsTrue(db.Transfers.IgnoreQueryFilters().Where(t => t.Id == idToRemove).First().IsDeleted == true);
+        }
         foreach (TransferItem item in db.TransferItems)
         {
             Assert.IsTrue(!(item.TransferId != idToRemove));
@@ -227,11 +272,12 @@ public class TransferDBTest
             new object[] { null, new List<Transfer> {}, 1, null,false},
             new object[] { null, new List<Transfer> {}, 0, new Transfer(){Id = 1},false},
             new object[] { null, new List<Transfer> {}, -1, new Transfer(){Id = 1},false},
-            new object[] { new List<Item>{new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = 1}}}}, 1, new Transfer(){Id = 2, Items = { new(){TransferId = 2, ItemUid = 3}, new(){TransferId = 2, ItemUid = 4}}}, false},
-            new object[] { new List<Item>{new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = 1}}}}, 1, new Transfer(){Id = 2, Items = { new(){TransferId = 3, ItemUid = 1}, new(){TransferId = 3, ItemUid = 2}}}, false},
+            new object[] { new List<Item>{new(){Uid = "1"}, new(){Uid = "2"}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = "1"}}}}, 1, new Transfer(){Id = 2, Items = { new(){TransferId = 2, ItemUid = "3"}, new(){TransferId = 2, ItemUid = "4"}}}, false},
+            new object[] { new List<Item>{new(){Uid = "1"}, new(){Uid = "2"}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = "1"}}}}, 1, new Transfer(){Id = 2, Items = { new(){TransferId = 3, ItemUid = "1"}, new(){TransferId = 3, ItemUid = "2"}}}, false},
             new object[] { null, new List<Transfer> {new Transfer(){Id = 1}}, 1, new Transfer(){Id = 2}, false},
 
-            new object[] { new List<Item>{new(){Uid = 1}, new(){Uid = 2}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = 1}}}}, 1, new Transfer(){Id = 1, Items = { new(){TransferId = 2, ItemUid = 1}, new(){TransferId = 2, ItemUid = 2}}}, false},
+            new object[] { new List<Item>{new(){Uid = "1"}, new(){Uid = "2"}}, new List<Transfer> {new Transfer(){Id = 1, Items = new(){ new(){TransferId = 1, ItemUid = "1"}}}}, 1, new Transfer(){Id = 1, Items = { new(){TransferId = 2, ItemUid = "1"}, new(){TransferId = 2, ItemUid = "2"}}}, false},
+            new object[] { null, new List<Transfer> {new Transfer(){Id = 1, IsDeleted = true}}, 1, new Transfer(){Id = 1}, false},
             new object[] { null, new List<Transfer> {new Transfer(){Id = 1}}, 1, new Transfer(){Id = 1}, true},
         };
     [TestMethod]
@@ -241,7 +287,11 @@ public class TransferDBTest
         // Arrange
         addTestResourceToDB(items);
         addTestResourceToDB(transfers);
-        
+
+        DateTime dateAtStart = new();
+        if (updatedTransfer != null)
+            dateAtStart = updatedTransfer.UpdatedAt;
+
         TransferDBStorage storage = new(db);
 
         // Act
@@ -249,67 +299,85 @@ public class TransferDBTest
 
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
+        if (expectedResult == true)
+            Assert.IsTrue(updatedTransfer.UpdatedAt != dateAtStart);
     }
 
     public static IEnumerable<object[]> CommitTransferTestData => new List<object[]>
     {
-        // Expected false because transfer amount of both transferItems is 110 and amount in inventory is 100
-        new object[] { 
+        // Expected false because transfer is soft delted
+        new object[] {
             new List<Inventory> {
-                new(){Id = 1, ItemId = 1, InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
-                new(){Id = 2, ItemId = 2, InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
-            new List<Location> {new(){Id = 1}, new(){Id = 2}}, 
-            new List<Item> {new(){Uid = 1}, new(){Uid = 2}}, 
+                new(){Id = 1, ItemId = "1", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
+                new(){Id = 2, ItemId = "2", InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
+            new List<Location> {new(){Id = 1}, new(){Id = 2}},
+            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}},
             new List<Transfer> {new(){
-                Id = 1, TransferFrom = 1, TransferTo = 2, 
+                Id = 1, TransferFrom = 1, TransferTo = 2,
                 Items = {
-                    new(){ItemUid = 1, TransferId = 1, Amount = 110}, 
-                    new(){ItemUid = 2, TransferId = 1, Amount = 110} }}}, 
+                    new(){ItemUid = "1", TransferId = 1, Amount = 110},
+                    new(){ItemUid = "2", TransferId = 1, Amount = 110} },
+                IsDeleted = true}},
+            1,
+            false,
+            TransferDBStorage.TransferResult.transferNotFound},
+        // Expected false because transfer amount of both transferItems is 110 and amount in inventory is 100
+        new object[] {
+            new List<Inventory> {
+                new(){Id = 1, ItemId = "1", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
+                new(){Id = 2, ItemId = "2", InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
+            new List<Location> {new(){Id = 1}, new(){Id = 2}},
+            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}},
+            new List<Transfer> {new(){
+                Id = 1, TransferFrom = 1, TransferTo = 2,
+                Items = {
+                    new(){ItemUid = "1", TransferId = 1, Amount = 110},
+                    new(){ItemUid = "2", TransferId = 1, Amount = 110} }}},
             1,
             false,
             TransferDBStorage.TransferResult.notEnoughItems},
         // Same as above but only one amount is bigger than allowed
-        new object[] { 
+        new object[] {
             new List<Inventory> {
-                new(){Id = 1, ItemId = 1, InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
-                new(){Id = 2, ItemId = 2, InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
-            new List<Location> {new(){Id = 1}, new(){Id = 2}}, 
-            new List<Item> {new(){Uid = 1}, new(){Uid = 2}}, 
+                new(){Id = 1, ItemId = "1", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
+                new(){Id = 2, ItemId = "2", InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
+            new List<Location> {new(){Id = 1}, new(){Id = 2}},
+            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}},
             new List<Transfer> {new(){
-                Id = 1, TransferFrom = 1, TransferTo = 2, 
+                Id = 1, TransferFrom = 1, TransferTo = 2,
                 Items = {
-                    new(){ItemUid = 1, TransferId = 1, Amount = 90}, 
-                    new(){ItemUid = 2, TransferId = 1, Amount = 110} }}}, 
+                    new(){ItemUid = "1", TransferId = 1, Amount = 90},
+                    new(){ItemUid = "2", TransferId = 1, Amount = 110} }}},
             1,
             false,
             TransferDBStorage.TransferResult.notEnoughItems},
         // Happy Flow test
-        new object[] { 
+        new object[] {
             new List<Inventory> {
-                new(){Id = 1, ItemId = 1, InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
-                new(){Id = 2, ItemId = 2, InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
-            new List<Location> {new(){Id = 1}, new(){Id = 2}}, 
-            new List<Item> {new(){Uid = 1}, new(){Uid = 2}}, 
+                new(){Id = 1, ItemId = "1", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
+                new(){Id = 2, ItemId = "2", InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
+            new List<Location> {new(){Id = 1}, new(){Id = 2}},
+            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}},
             new List<Transfer> {new(){
-                Id = 1, TransferFrom = 1, TransferTo = 2, 
+                Id = 1, TransferFrom = 1, TransferTo = 2,
                 Items = {
-                    new(){ItemUid = 1, TransferId = 1, Amount = 90}, 
-                    new(){ItemUid = 2, TransferId = 1, Amount = 90} }}}, 
+                    new(){ItemUid = "1", TransferId = 1, Amount = 90},
+                    new(){ItemUid = "2", TransferId = 1, Amount = 90} }}},
             1,
             true,
             TransferDBStorage.TransferResult.possible},
         // Happy Flow test but inventoryLocation should also be emptied from TransferFrom
-        new object[] { 
+        new object[] {
             new List<Inventory> {
-                new(){Id = 1, ItemId = 1, InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
-                new(){Id = 2, ItemId = 2, InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
-            new List<Location> {new(){Id = 1}, new(){Id = 2}}, 
-            new List<Item> {new(){Uid = 1}, new(){Uid = 2}}, 
+                new(){Id = 1, ItemId = "1", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}, total_on_hand = 100, total_available = 100},
+                new(){Id = 2, ItemId = "2", InventoryLocations = {new(){InventoryId = 2, LocationId = 1}}, total_on_hand = 100, total_available = 100}},
+            new List<Location> {new(){Id = 1}, new(){Id = 2}},
+            new List<Item> {new(){Uid = "1"}, new(){Uid = "2"}},
             new List<Transfer> {new(){
-                Id = 1, TransferFrom = 1, TransferTo = 2, 
+                Id = 1, TransferFrom = 1, TransferTo = 2,
                 Items = {
-                    new(){ItemUid = 1, TransferId = 1, Amount = 100}, 
-                    new(){ItemUid = 2, TransferId = 1, Amount = 100} }}}, 
+                    new(){ItemUid = "1", TransferId = 1, Amount = 100},
+                    new(){ItemUid = "2", TransferId = 1, Amount = 100} }}},
             1,
             true,
             TransferDBStorage.TransferResult.possible},
@@ -332,6 +400,10 @@ public class TransferDBTest
 
         TransferDBStorage storage = new(db);
 
+        DateTime dateAtStart = new();
+        if (db.Transfers.FirstOrDefault(t => t.Id == idToCommit) != null)
+            dateAtStart = db.Transfers.FirstOrDefault(t => t.Id == idToCommit).UpdatedAt;
+
         // Act
         List<Inventory> copiedInventories = DeepCopy(inventories);
         (bool succeded, TransferDBStorage.TransferResult message) actualResult = storage.commitTransfer(idToCommit).Result;
@@ -340,11 +412,11 @@ public class TransferDBTest
         Assert.IsTrue(actualResult.succeded == expectedResult);
         Assert.IsTrue(actualResult.message == expectedMessage);
         // check amount and location of each transferItem
-        foreach(Transfer transfer in db.Transfers)
+        foreach (Transfer transfer in db.Transfers)
         {
             if (expectedResult == true)
                 Assert.IsTrue(transfer.TransferStatus == "Processed");
-            foreach(TransferItem transferItem in transfer.Items)
+            foreach (TransferItem transferItem in transfer.Items)
             {
                 // false uses the actually original inventories because the original won't be changed if commit fails
                 if (expectedResult == false)
@@ -367,14 +439,14 @@ public class TransferDBTest
         if (resources != null)
         {
             var testTable = db.Set<T>();
-            foreach(T resource in resources)
+            foreach (T resource in resources)
             {
                 testTable.Add(resource);
                 db.SaveChanges();
             }
         }
     }
-    
+
 
     public T DeepCopy<T>(T obj, Dictionary<object, object> visitedObjects = null)
     {
@@ -387,8 +459,21 @@ public class TransferDBTest
         if (visitedObjects.ContainsKey(obj))
             return (T)visitedObjects[obj];
 
+        // If the type is string (or any other type that should not be deep-copied like primitives)
+        if (obj is string || obj.GetType().IsPrimitive)
+            return obj; // No need to copy, return as is
+
         // Create a new instance of the object type
-        T copy = (T)Activator.CreateInstance(obj.GetType());
+        T copy;
+        if (obj is string str)
+        {
+            copy = (T)(object)string.Copy(str); // Create a copy of the string
+        }
+        else
+        {
+            copy = (T)Activator.CreateInstance(obj.GetType());
+        }
+
 
         // Add the current object to the visitedObjects dictionary
         visitedObjects[obj] = copy;
