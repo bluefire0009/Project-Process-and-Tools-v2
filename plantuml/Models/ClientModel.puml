@@ -1,0 +1,17 @@
+@startuml
+class Client {
+    + Id : int <<get>> <<set>>
+    + Name : string <<get>> <<set>>
+    + Address : string <<get>> <<set>>
+    + City : string <<get>> <<set>>
+    + ZipCode : string <<get>> <<set>>
+    + Province : string <<get>> <<set>>
+    + Country : string <<get>> <<set>>
+    + ContactName : string <<get>> <<set>>
+    + ContactPhone : string <<get>> <<set>>
+    + ContactEmail : string <<get>> <<set>>
+    + IsDeleted : bool <<get>> <<set>> = false
+}
+Client o-> "CreatedAt" DateTime
+Client o-> "UpdatedAt" DateTime
+@enduml

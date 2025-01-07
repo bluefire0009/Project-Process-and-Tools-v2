@@ -1,0 +1,10 @@
+@startuml
+class ItemGroup {
+    + Id : int <<get>> <<set>>
+    + Name : string? <<get>> <<set>>
+    + Description : string? <<get>> <<set>>
+    + IsDeleted : bool <<get>> <<set>> = false
+}
+ItemGroup o-> "CreatedAt" DateTime
+ItemGroup o-> "UpdatedAt" DateTime
+@enduml

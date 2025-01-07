@@ -1,0 +1,14 @@
+@startuml
+class OrderController {
+    + OrderController(storage:IOrderStorage)
+    + <<async>> GetOrders(offset:int, limit:int, orderById:bool) : Task<IActionResult>
+    + <<async>> GetOrder(Id:int) : Task<IActionResult>
+    + <<async>> GetItemsFromOrder(Id:int) : Task<IActionResult>
+    + <<async>> AddOrder(order:Order) : Task<IActionResult>
+    + <<async>> UpdateOrder(Id:int, order:Order) : Task<IActionResult>
+    + <<async>> UpdateItemsInOrder(Id:int, items:List<OrderItems>) : Task<IActionResult>
+    + <<async>> DelteOrder(Id:int) : Task<IActionResult>
+}
+Controller <|-- OrderController
+OrderController --> "Storage" IOrderStorage
+@enduml

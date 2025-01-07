@@ -1,0 +1,14 @@
+@startuml
+class WarehousesController {
+    + WarehousesController(warehouseStorage:IWarehouseStorage)
+    + <<async>> GetAllWarehouses() : Task<IActionResult>
+    + <<async>> GetWarehousesRange(firstIdToTake:int, amountToTake:int) : Task<IActionResult>
+    + <<async>> GetSpecificWarehouse(id:int) : Task<IActionResult>
+    + <<async>> GetLocationsSpecificWarehouse(id:int) : Task<IActionResult>
+    + <<async>> PostWarehouse(warehouse:Warehouse) : Task<IActionResult>
+    + <<async>> RemoveWarehouse(id:int) : Task<IActionResult>
+    + <<async>> UpdateWarehouse(idToUpdate:int, updatedWarehouse:Warehouse) : Task<IActionResult>
+}
+Controller <|-- WarehousesController
+WarehousesController --> "warehouseStorage" IWarehouseStorage
+@enduml

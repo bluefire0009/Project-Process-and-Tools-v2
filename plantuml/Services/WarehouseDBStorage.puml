@@ -1,0 +1,14 @@
+@startuml
+class WarehouseDBStorage {
+    + WarehouseDBStorage(db:DatabaseContext)
+    + <<async>> addWarehouse(warehouse:Warehouse) : Task<bool>
+    + <<async>> deleteWarehouse(id:int) : Task<bool>
+    + <<async>> getWarehouse(id:int) : Task<Warehouse?>
+    + <<async>> getWarehouses() : Task<IEnumerable<Warehouse>>
+    + <<async>> getWarehousesRange(offset:int, amountToReturn:int) : Task<IEnumerable<Warehouse>?>
+    + getWarehouseLocations(warehouseId:int) : IEnumerable<Location>?
+    + <<async>> updateWarehouse(idToUpdate:int, updatedWarehouse:Warehouse?) : Task<bool>
+}
+IWarehouseStorage <|-- WarehouseDBStorage
+WarehouseDBStorage --> "db" DatabaseContext
+@enduml

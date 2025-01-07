@@ -1,0 +1,13 @@
+@startuml
+class ItemsDBStorage {
+    + ItemsDBStorage(db:DatabaseContext)
+    + <<async>> AddItem(item:Item) : Task<bool>
+    + <<async>> DeleteItem(uid:string) : Task<bool>
+    + <<async>> GetItem(uid:string) : Task<Item?>
+    + <<async>> GetItemInventory(uid:string) : Task<List<Inventory>>
+    + <<async>> GetItems(offset:int, limit:int) : Task<List<Item>>
+    + <<async>> UpdateItem(uid:string, item:Item) : Task<bool>
+}
+IItemStorage <|-- ItemsDBStorage
+ItemsDBStorage --> "db" DatabaseContext
+@enduml

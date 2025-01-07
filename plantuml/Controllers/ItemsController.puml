@@ -1,0 +1,14 @@
+@startuml
+class ItemsController {
+    + ItemsController(itemStorage:IItemStorage)
+    + <<async>> GetAllItems(offset:int, limit:int) : Task<IActionResult>
+    + <<async>> GetItem(uid:string) : Task<IActionResult>
+    + <<async>> GetItemInventory(uid:string) : Task<IActionResult>
+    + <<async>> GetItemInventoryTotals(uid:string) : Task<IActionResult>
+    + <<async>> AddItem(item:Item) : Task<IActionResult>
+    + <<async>> RemoveItem(uid:string) : Task<IActionResult>
+    + <<async>> UpdateItem(uid:string, item:Item) : Task<IActionResult>
+}
+Controller <|-- ItemsController
+ItemsController --> "ItemStorage" IItemStorage
+@enduml

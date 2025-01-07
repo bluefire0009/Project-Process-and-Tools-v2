@@ -1,0 +1,17 @@
+@startuml
+class OrderStorage {
+    + OrderStorage(db:DatabaseContext)
+    + <<async>> GetOrders() : Task<IEnumerable<Order>>
+    + <<async>> GetOrders(offset:int, limit:int, orderbyId:bool) : Task<IEnumerable<Order>>
+    + <<async>> GetOrder(orderId:int) : Task<Order?>
+    + <<async>> GetItemsInOrder(oderId:int) : Task<IEnumerable<OrderItems>>
+    + <<async>> GetOrdersInShipment(shipmentId:int) : Task<IEnumerable<int>>
+    + <<async>> AddOrder(order:Order) : Task<bool>
+    + <<async>> UpdateOrder(orderId:int, order:Order) : Task<bool>
+    + <<async>> DeleteOrder(orderId:int) : Task<bool>
+    + <<async>> UpdateItemsInOrder(orderId:int, list2:List<OrderItems>, settings:string) : Task<bool>
+    + <<async>> UpdateOrdersInShipment(shipmentId:int, orders:List<int>) : Task<bool>
+}
+IOrderStorage <|-- OrderStorage
+OrderStorage --> "DB" DatabaseContext
+@enduml

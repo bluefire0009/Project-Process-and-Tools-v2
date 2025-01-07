@@ -1,0 +1,55 @@
+@startuml
+class Order {
+    + Id : int <<get>> <<set>>
+    + SourceId : int <<get>> <<set>>
+    + Reference : string? <<get>> <<set>>
+    + OrderStatus : string? <<get>> <<set>>
+    + Notes : string? <<get>> <<set>>
+    + ShippingNotes : string? <<get>> <<set>>
+    + PickingNotes : string? <<get>> <<set>>
+    + WareHouseId : int? <<get>> <<set>>
+    + ShipTo : int? <<get>> <<set>>
+    + BillTo : int? <<get>> <<set>>
+    + TotalAmount : float <<get>> <<set>>
+    + TotalDiscount : float <<get>> <<set>>
+    + TotalTax : float <<get>> <<set>>
+    + TotalSurcharge : float <<get>> <<set>>
+    + IsDeleted : bool <<get>> <<set>> = false
+    + Equals(other:Order?) : bool
+}
+class OrderItems {
+    + Id : int <<get>> <<set>>
+    + OrderId : int <<get>> <<set>>
+    + ItemUid : string <<get>> <<set>>
+    + Amount : int <<get>> <<set>>
+    + IsDeleted : bool <<get>> <<set>> = false
+    + OrderItems(ItemUid:string, amount:int, OrderId:int)
+    + Equals(other:OrderItems?) : bool
+}
+class ShipmentsInOrders {
+    + Id : int <<get>> <<set>>
+    + OrderId : int <<get>> <<set>>
+    + ShipmentId : int <<get>> <<set>>
+    + IsDeleted : bool <<get>> <<set>> = false
+    + ShipmentsInOrders(orderId:int, shipmentId:int)
+}
+class "IEquatable`1"<T> {
+}
+class "ICollection`1"<T> {
+}
+"IEquatable`1" "<Order>" <|-- Order
+Order --> "OrderDate" DateTime
+Order --> "RequestDate" DateTime
+Order --> "wareHouse" Warehouse
+Order --> "location" Location
+Order --> "client" Client
+Order o-> "ShipmentIds<ShipmentsInOrders>" "ICollection`1"
+Order o-> "CreatedAt" DateTime
+Order o-> "UpdatedAt" DateTime
+Order o-> "Items<OrderItems>" "ICollection`1"
+"IEquatable`1" "<OrderItems>" <|-- OrderItems
+OrderItems --> "order" Order
+OrderItems --> "item" Item
+ShipmentsInOrders --> "order" Order
+ShipmentsInOrders --> "shipment" Shipment
+@enduml

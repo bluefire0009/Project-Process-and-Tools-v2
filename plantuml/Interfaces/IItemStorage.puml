@@ -1,0 +1,10 @@
+@startuml
+interface IItemStorage {
+    GetItems(offset:int, limit:int) : Task<List<Item>>
+    GetItem(uid:string) : Task<Item?>
+    GetItemInventory(uid:string) : Task<List<Inventory>>
+    AddItem(item:Item) : Task<bool>
+    DeleteItem(uid:string) : Task<bool>
+    UpdateItem(uid:string, item:Item) : Task<bool>
+}
+@enduml

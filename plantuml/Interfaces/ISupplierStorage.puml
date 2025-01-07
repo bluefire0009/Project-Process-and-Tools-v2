@@ -1,0 +1,11 @@
+@startuml
+interface ISupplierStorage {
+    getSuppliers() : Task<IEnumerable<Supplier>>
+    getSuppliers(offset:int, limit:int, orderbyId:bool) : Task<IEnumerable<Supplier>>
+    getSupplier(id:int) : Task<Supplier?>
+    addSupplier(supplier:Supplier) : Task<bool>
+    deleteSupplier(id:int) : Task<bool>
+    updateSupplier(id:int, supplier:Supplier?) : Task<bool>
+    getSupplierItems(id:int) : IEnumerable<Item>?
+}
+@enduml

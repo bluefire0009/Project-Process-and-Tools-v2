@@ -1,0 +1,8 @@
+@startuml
+class ApiKey {
+    + Id : int <<get>> <<set>>
+    + Key_type : string <<get>> <<set>>
+    + Key_value : string <<get>> <<set>>
+    + Salt : string <<get>> <<set>>
+}
+@enduml

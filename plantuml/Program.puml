@@ -1,0 +1,7 @@
+@startuml
+class Program {
+    {static} - Main(args:string[]) : void
+}
+class Program <<partial>> {
+}
+@enduml

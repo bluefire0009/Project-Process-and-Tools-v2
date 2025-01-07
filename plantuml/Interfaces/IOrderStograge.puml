@@ -1,0 +1,14 @@
+@startuml
+interface IOrderStorage {
+    GetOrders() : Task<IEnumerable<Order>>
+    GetOrders(offset:int, limit:int, orderbyId:bool) : Task<IEnumerable<Order>>
+    GetOrder(orderId:int) : Task<Order?>
+    GetItemsInOrder(oderId:int) : Task<IEnumerable<OrderItems>>
+    GetOrdersInShipment(shipmentId:int) : Task<IEnumerable<int>>
+    AddOrder(order:Order) : Task<bool>
+    UpdateOrder(orderId:int, order:Order) : Task<bool>
+    UpdateItemsInOrder(orderId:int, orderItems:List<OrderItems>, settings:string) : Task<bool>
+    UpdateOrdersInShipment(shipmentId:int, orders:List<int>) : Task<bool>
+    DeleteOrder(orderId:int) : Task<bool>
+}
+@enduml

@@ -1,0 +1,13 @@
+@startuml
+class InventoriesDBStorage {
+    + InventoriesDBStorage(db:DatabaseContext)
+    + <<async>> getInventories() : Task<IEnumerable<Inventory>>
+    + <<async>> GetInventoriesInPagination(offset:int, limit:int) : Task<IEnumerable<Inventory>>
+    + <<async>> getInventory(id:int) : Task<Inventory?>
+    + <<async>> addInventory(inventory:Inventory) : Task<bool>
+    + <<async>> deleteInventory(id:int) : Task<bool>
+    + <<async>> updateInventory(idToUpdate:int, updatedInventory:Inventory?) : Task<bool>
+}
+IInventoryStorage <|-- InventoriesDBStorage
+InventoriesDBStorage --> "db" DatabaseContext
+@enduml

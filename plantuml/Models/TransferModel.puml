@@ -1,0 +1,30 @@
+@startuml
+class Transfer {
+    + Id : int <<get>> <<set>>
+    + Reference : string? <<get>> <<set>>
+    + TransferFrom : int <<get>> <<set>>
+    + LocationFrom : Location?
+    + TransferTo : int <<get>> <<set>>
+    + LocationTo : Location?
+    + TransferStatus : string? <<get>> <<set>>
+    + IsDeleted : bool <<get>> <<set>> = false
+    + Equals(other:Transfer?) : bool
+}
+class TransferItem {
+    + TransferId : int <<get>> <<set>>
+    + ItemUid : string <<get>> <<set>>
+    + Amount : int <<get>> <<set>>
+    + Equals(other:TransferItem?) : bool
+}
+class "IEquatable`1"<T> {
+}
+class "List`1"<T> {
+}
+"IEquatable`1" "<Transfer>" <|-- Transfer
+Transfer --> "CreatedAt" DateTime
+Transfer --> "UpdatedAt" DateTime
+Transfer o-> "Items<TransferItem>" "List`1"
+"IEquatable`1" "<TransferItem>" <|-- TransferItem
+TransferItem --> "transfer" Transfer
+TransferItem --> "item" Item
+@enduml

@@ -1,0 +1,6 @@
+@startuml
+class CETDateTime <<static>> {
+    + {static} Now() : DateTime
+}
+CETDateTime o-> "cetTimeZone" TimeZoneInfo
+@enduml

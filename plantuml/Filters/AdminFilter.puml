@@ -1,0 +1,13 @@
+@startuml
+class AdminOnlyFilter {
+    - <<const>> ApiKeyHeader : string = "Api-Key"
+    + AdminOnlyFilter(apiKeyValidationService:IApiKeyValidationInterface)
+    + <<async>> OnActionExecutionAsync(context:ActionExecutingContext, next:ActionExecutionDelegate) : Task
+}
+class AdminOnlyAttribute {
+    + AdminOnlyAttribute()
+}
+IAsyncActionFilter <|-- AdminOnlyFilter
+AdminOnlyFilter --> "_apiKeyValidationService" IApiKeyValidationInterface
+TypeFilterAttribute <|-- AdminOnlyAttribute
+@enduml

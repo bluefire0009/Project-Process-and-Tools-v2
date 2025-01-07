@@ -1,0 +1,24 @@
+@startuml
+class TransferDBStorage {
+    + TransferDBStorage(db:DatabaseContext)
+    + <<async>> GetTransfers() : Task<IEnumerable<Transfer>>
+    + <<async>> GetTransfers(offset:int, limit:int, orderbyId:bool) : Task<IEnumerable<Transfer>>
+    + <<async>> getTransfer(id:int) : Task<Transfer?>
+    + <<async>> addTransfer(transfer:Transfer) : Task<bool>
+    + <<async>> deleteTransfer(id:int) : Task<bool>
+    + <<async>> updateTransfer(idToUpdate:int, updatedTransfer:Transfer?) : Task<bool>
+    + <<async>> commitTransfer(id:int) : Task<(bool succeded, TransferResult message)>
+    - <<async>> checkIfItemTransferPossible(itemId:string, locationTo:int, amountToTransfer:int) : Task<bool>
+}
+enum TransferResult {
+    notEnoughItems,
+    wrongId,
+    transferNotFound,
+    possible,
+    ToInventoryNotExsists,
+    FromInventoryNotExsists,
+}
+ITransferStorage <|-- TransferDBStorage
+TransferDBStorage --> "db" DatabaseContext
+TransferDBStorage +-- TransferResult
+@enduml

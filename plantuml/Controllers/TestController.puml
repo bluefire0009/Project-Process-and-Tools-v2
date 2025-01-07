@@ -1,0 +1,6 @@
+@startuml
+class TestController {
+    + TestEndpoint() : ActionResult
+}
+Controller <|-- TestController
+@enduml

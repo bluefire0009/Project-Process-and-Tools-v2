@@ -1,0 +1,14 @@
+@startuml
+class ItemLine {
+    + Id : int <<get>> <<set>>
+    + Name : string? <<get>> <<set>>
+    + Description : string? <<get>> <<set>>
+    + IsDeleted : bool <<get>> <<set>> = false
+    + Equals(other:ItemLine?) : bool
+}
+class "IEquatable`1"<T> {
+}
+"IEquatable`1" "<ItemLine>" <|-- ItemLine
+ItemLine o-> "CreatedAt" DateTime
+ItemLine o-> "UpdatedAt" DateTime
+@enduml

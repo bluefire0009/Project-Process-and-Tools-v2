@@ -1,0 +1,16 @@
+@startuml
+class ShipmentController {
+    + ShipmentController(ShipmentStorage:IShipmentStorage, OrderStorage:IOrderStorage)
+    + <<async>> GetShipments(offset:int, limit:int, orderById:bool) : Task<IActionResult>
+    + <<async>> GetShipment(Id:int) : Task<IActionResult>
+    + <<async>> GetorderIdsFromShipment(Id:int) : Task<IActionResult>
+    + <<async>> GetItemsInShipment(Id:int) : Task<IActionResult>
+    + <<async>> AddShipment(shipment:Shipment) : Task<IActionResult>
+    + <<async>> UpdateShipment(Id:int, shipment:Shipment) : Task<IActionResult>
+    + <<async>> UpdateItemsInShipment(Id:int, items:List<ShipmentItems>) : Task<IActionResult>
+    + <<async>> DelteShipment(Id:int) : Task<IActionResult>
+}
+Controller <|-- ShipmentController
+ShipmentController --> "ShipmentStorage" IShipmentStorage
+ShipmentController --> "OrderStorage" IOrderStorage
+@enduml

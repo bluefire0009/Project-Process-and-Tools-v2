@@ -1,0 +1,12 @@
+@startuml
+interface IShipmentStorage {
+    GetShipments() : Task<IEnumerable<Shipment>>
+    GetShipments(offset:int, limit:int, orderbyId:bool) : Task<IEnumerable<Shipment>>
+    GetShipment(shipmentId:int) : Task<Shipment?>
+    GetItemsInShipment(shipmentId:int) : Task<List<ShipmentItems>>
+    AddShipment(shipment:Shipment) : Task<bool>
+    UpdateShipment(shipmentId:int, shipment:Shipment) : Task<bool>
+    UpdateItemsInShipment(shipmentId:int, items:List<ShipmentItems>, settings:string) : Task<bool>
+    DeleteShipment(shipmentId:int) : Task<bool>
+}
+@enduml

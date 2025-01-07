@@ -1,0 +1,13 @@
+@startuml
+class InventoriesController {
+    + InventoriesController(inventoryStorage:IInventoryStorage)
+    + <<async>> GetAllInventories() : Task<IActionResult>
+    + <<async>> GetInventoriesInPagination(offset:int, limit:int) : Task<IActionResult>
+    + <<async>> GetSpecificInventory(id:int) : Task<IActionResult>
+    + <<async>> PostInventory(inventory:Inventory) : Task<IActionResult>
+    + <<async>> RemoveInventory(id:int) : Task<IActionResult>
+    + <<async>> UpdateInventory(idToUpdate:int, updatedInventory:Inventory) : Task<IActionResult>
+}
+Controller <|-- InventoriesController
+InventoriesController --> "inventoryStorage" IInventoryStorage
+@enduml

@@ -1,0 +1,30 @@
+@startuml
+class Inventory {
+    + Id : int <<get>> <<set>>
+    + ItemId : string? <<get>> <<set>>
+    + Description : string? <<get>> <<set>>
+    + ItemReference : string? <<get>> <<set>>
+    + total_on_hand : int <<get>> <<set>> = 0
+    + total_expected : int <<get>> <<set>> = 0
+    + total_ordered : int <<get>> <<set>> = 0
+    + total_allocated : int <<get>> <<set>> = 0
+    + total_available : int <<get>> <<set>> = 0
+    + IsDeleted : bool <<get>> <<set>> = false
+    + Equals(other:Inventory?) : bool
+}
+class InventoryLocation {
+    + InventoryId : int <<get>> <<set>>
+    + LocationId : int <<get>> <<set>>
+}
+class "IEquatable`1"<T> {
+}
+class "ICollection`1"<T> {
+}
+"IEquatable`1" "<Inventory>" <|-- Inventory
+Inventory o-> "item" Item
+Inventory o-> "InventoryLocations<InventoryLocation>" "ICollection`1"
+Inventory o-> "CreatedAt" DateTime
+Inventory o-> "UpdatedAt" DateTime
+InventoryLocation --> "inventory" Inventory
+InventoryLocation --> "location" Location
+@enduml

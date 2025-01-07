@@ -1,0 +1,49 @@
+@startuml
+class Shipment {
+    + Id : int <<get>> <<set>>
+    + SourceId : int <<get>> <<set>>
+    + ShipmentType : string? <<get>> <<set>>
+    + ShipmentStatus : string? <<get>> <<set>>
+    + Notes : string? <<get>> <<set>>
+    + CarrierCode : string? <<get>> <<set>>
+    + CarrierDescription : string? <<get>> <<set>>
+    + ServiceCode : string? <<get>> <<set>>
+    + PaymentType : string? <<get>> <<set>>
+    + TransferMode : string? <<get>> <<set>>
+    + TotalPackageCount : int <<get>> <<set>>
+    + TotalPackageWeight : float <<get>> <<set>>
+    + IsDeleted : bool <<get>> <<set>> = false
+    + Equals(other:Shipment?) : bool
+}
+class ShipmentItems {
+    + Id : int <<get>> <<set>>
+    + ShipmentId : int <<get>> <<set>>
+    + ItemUid : string <<get>> <<set>>
+    + Amount : int <<get>> <<set>>
+    + IsDeleted : bool <<get>> <<set>> = false
+    + ShipmentItems(ItemUid:string, amount:int, shipmentId:int)
+}
+class OrdersInShipment {
+    + Id : int <<get>> <<set>>
+    + OrderId : int <<get>> <<set>>
+    + ShipmentId : int <<get>> <<set>>
+    + IsDeleted : bool <<get>> <<set>> = false
+    + OrdersInShipment(orderId:int, shipmentId:int)
+}
+class "IEquatable`1"<T> {
+}
+class "ICollection`1"<T> {
+}
+"IEquatable`1" "<Shipment>" <|-- Shipment
+Shipment o-> "OrderIds<OrdersInShipment>" "ICollection`1"
+Shipment --> "OrderDate" DateTime
+Shipment --> "RequestDate" DateTime
+Shipment --> "ShipmentDate" DateTime
+Shipment o-> "CreatedAt" DateTime
+Shipment o-> "UpdatedAt" DateTime
+Shipment o-> "Items<ShipmentItems>" "ICollection`1"
+ShipmentItems --> "shipment" Shipment
+ShipmentItems --> "item" Item
+OrdersInShipment --> "order" Order
+OrdersInShipment --> "shipment" Shipment
+@enduml

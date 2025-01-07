@@ -1,0 +1,14 @@
+@startuml
+class SupplierDBStorage {
+    + SupplierDBStorage(db:DatabaseContext)
+    + <<async>> getSuppliers() : Task<IEnumerable<Supplier>>
+    + <<async>> getSuppliers(offset:int, limit:int, orderbyId:bool) : Task<IEnumerable<Supplier>>
+    + <<async>> getSupplier(id:int) : Task<Supplier?>
+    + getSupplierItems(supplierId:int) : IEnumerable<Item>?
+    + <<async>> addSupplier(supplier:Supplier) : Task<bool>
+    + <<async>> deleteSupplier(id:int) : Task<bool>
+    + <<async>> updateSupplier(idToUpdate:int, updatedSupplier:Supplier?) : Task<bool>
+}
+ISupplierStorage <|-- SupplierDBStorage
+SupplierDBStorage --> "db" DatabaseContext
+@enduml

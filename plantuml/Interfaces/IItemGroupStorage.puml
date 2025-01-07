@@ -1,0 +1,11 @@
+@startuml
+interface IItemGroupStorage {
+    getItemGroups() : Task<IEnumerable<ItemGroup>>
+    GetItemGroupsInPagination(offset:int, limit:int) : Task<IEnumerable<ItemGroup>>
+    getItemGroup(id:int) : Task<ItemGroup?>
+    addItemGroup(itemGroup:ItemGroup) : Task<bool>
+    deleteItemGroup(id:int) : Task<bool>
+    updateItemGroup(id:int, itemGroup:ItemGroup?) : Task<bool>
+    getItemGroupItems(itemGroupId:int) : IEnumerable<Item>?
+}
+@enduml

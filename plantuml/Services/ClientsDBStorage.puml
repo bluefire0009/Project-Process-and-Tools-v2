@@ -1,0 +1,14 @@
+@startuml
+class ClientDBStorage {
+    + ClientDBStorage(db:DatabaseContext)
+    + <<async>> getClients() : Task<IEnumerable<Client>>
+    + <<async>> GetClientsInPagination(offset:int, limit:int) : Task<IEnumerable<Client>>
+    + <<async>> getClient(id:int) : Task<Client?>
+    + <<async>> addClient(client:Client) : Task<bool>
+    + <<async>> deleteClient(id:int) : Task<bool>
+    + <<async>> updateClient(idToUpdate:int, updatedClient:Client?) : Task<bool>
+    + getClientOrders(clientId:int) : IEnumerable<Order>?
+}
+IClientStorage <|-- ClientDBStorage
+ClientDBStorage --> "db" DatabaseContext
+@enduml

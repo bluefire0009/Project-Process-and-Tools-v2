@@ -1,0 +1,11 @@
+@startuml
+interface ILocationStorage {
+    GetLocations() : Task<IEnumerable<Location>>
+    GetLocations(offset:int, limit:int, orderbyId:bool) : Task<IEnumerable<Location>>
+    GetLocation(locationId:int) : Task<Location?>
+    GetLocationsInWarehouses(warehouseId:int) : Task<IEnumerable<Location>>
+    AddLocation(location:Location) : Task<bool>
+    UpdateLocation(locationId:int, location:Location) : Task<bool>
+    DeleteLocation(locationId:int) : Task<bool>
+}
+@enduml

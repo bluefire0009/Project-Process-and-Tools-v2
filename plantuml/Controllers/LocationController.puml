@@ -1,0 +1,12 @@
+@startuml
+class LocationController {
+    + LocationController(storage:ILocationStorage)
+    + <<async>> GetLocations(offset:int, limit:int, orderById:bool) : Task<IActionResult>
+    + <<async>> GetLocation(Id:int) : Task<IActionResult>
+    + <<async>> AddLocation(location:Location) : Task<IActionResult>
+    + <<async>> UpdateLocation(Id:int, location:Location) : Task<IActionResult>
+    + <<async>> DelteLocation(Id:int) : Task<IActionResult>
+}
+Controller <|-- LocationController
+LocationController --> "Storage" ILocationStorage
+@enduml

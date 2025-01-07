@@ -1,0 +1,5 @@
+@startuml
+interface IApiKeyValidationInterface {
+    IsValidApiKeyAsync(apiKey:string) : Task<bool>
+}
+@enduml

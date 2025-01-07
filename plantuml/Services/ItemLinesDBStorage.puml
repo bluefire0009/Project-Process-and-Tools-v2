@@ -1,0 +1,13 @@
+@startuml
+class ItemLinesDBStorage {
+    + ItemLinesDBStorage(db:DatabaseContext)
+    + <<async>> AddItemLine(itemLine:ItemLine) : Task<bool>
+    + <<async>> DeleteItemLine(id:int) : Task<bool>
+    + <<async>> GetItemLine(id:int) : Task<ItemLine?>
+    + <<async>> GetItemLineItems(id:int) : Task<List<Item>>
+    + <<async>> GetItemLines(offset:int, limit:int) : Task<List<ItemLine>>
+    + <<async>> UpdateItemLine(id:int, itemLine:ItemLine) : Task<bool>
+}
+IItemLineStorage <|-- ItemLinesDBStorage
+ItemLinesDBStorage --> "db" DatabaseContext
+@enduml

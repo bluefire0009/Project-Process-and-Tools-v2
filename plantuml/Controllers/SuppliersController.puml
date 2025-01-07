@@ -1,0 +1,13 @@
+@startuml
+class SuppliersController {
+    + SuppliersController(supplierStorage:ISupplierStorage)
+    + <<async>> GetSuppliers(offset:int, limit:int, orderById:bool) : Task<IActionResult>
+    + <<async>> GetSpecificSupplier(id:int) : Task<IActionResult>
+    + <<async>> GetItemsSpecificSupplier(id:int) : Task<IActionResult>
+    + <<async>> PostSupplier(supplier:Supplier) : Task<IActionResult>
+    + <<async>> RemoveSupplier(id:int) : Task<IActionResult>
+    + <<async>> UpdateSupplier(idToUpdate:int, updatedSupplier:Supplier) : Task<IActionResult>
+}
+Controller <|-- SuppliersController
+SuppliersController --> "supplierStorage" ISupplierStorage
+@enduml

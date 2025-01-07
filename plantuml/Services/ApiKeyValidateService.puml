@@ -1,0 +1,9 @@
+@startuml
+class ApiKeyValidationService {
+    + ApiKeyValidationService(context:DatabaseContext)
+    + {static} HashKeyWithSalt(key:string, salt:string) : string
+    + <<async>> IsValidApiKeyAsync(apiKey:string) : Task<bool>
+}
+IApiKeyValidationInterface <|-- ApiKeyValidationService
+ApiKeyValidationService --> "_context" DatabaseContext
+@enduml

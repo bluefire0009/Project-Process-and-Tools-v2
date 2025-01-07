@@ -1,0 +1,13 @@
+@startuml
+class ItemTypesDBStorage {
+    + ItemTypesDBStorage(db:DatabaseContext)
+    + <<async>> AddItemType(itemType:ItemType) : Task<bool>
+    + <<async>> DeleteItemType(id:int) : Task<bool>
+    + <<async>> GetItemType(id:int) : Task<ItemType?>
+    + <<async>> GetItemTypeItems(id:int) : Task<List<Item>>
+    + <<async>> GetItemTypes(offset:int, limit:int) : Task<List<ItemType>>
+    + <<async>> UpdateItemType(id:int, itemType:ItemType) : Task<bool>
+}
+IItemTypeStorage <|-- ItemTypesDBStorage
+ItemTypesDBStorage --> "db" DatabaseContext
+@enduml

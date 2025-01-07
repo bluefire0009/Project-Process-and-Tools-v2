@@ -1,0 +1,14 @@
+@startuml
+class ItemGroupController {
+    + ItemGroupController(itemGroupStorage:IItemGroupStorage)
+    + <<async>> GetAllItemGroup() : Task<IActionResult>
+    + <<async>> GetItemGroupsInPagination(offset:int, limit:int) : Task<IActionResult>
+    + <<async>> GetSpecificItemGroup(id:int) : Task<IActionResult>
+    + <<async>> GetItemsSpecificItemGroup(id:int) : Task<IActionResult>
+    + <<async>> PostItemGroup(itemGroup:ItemGroup) : Task<IActionResult>
+    + <<async>> RemoveItemGroup(id:int) : Task<IActionResult>
+    + <<async>> UpdateItemGroup(idToUpdate:int, updatedItemGroup:ItemGroup) : Task<IActionResult>
+}
+Controller <|-- ItemGroupController
+ItemGroupController --> "itemGroupStorage" IItemGroupStorage
+@enduml

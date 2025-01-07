@@ -1,0 +1,13 @@
+@startuml
+class TransferController {
+    + TransferController(transferStorage:ITransferStorage)
+    + <<async>> GetTransfers(offset:int, limit:int, orderById:bool) : Task<IActionResult>
+    + <<async>> GetSpecificTransfer(id:int) : Task<IActionResult>
+    + <<async>> PostTransfer(transfer:Transfer) : Task<IActionResult>
+    + <<async>> RemoveTransfer(id:int) : Task<IActionResult>
+    + <<async>> UpdateTransfer(idToUpdate:int, updatedTransfer:Transfer) : Task<IActionResult>
+    + <<async>> CommitTransfer(idToUpdate:int) : Task<IActionResult>
+}
+Controller <|-- TransferController
+TransferController --> "transferStorage" ITransferStorage
+@enduml

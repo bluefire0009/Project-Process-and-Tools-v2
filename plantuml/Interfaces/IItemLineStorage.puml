@@ -1,0 +1,10 @@
+@startuml
+interface IItemLineStorage {
+    GetItemLines(offset:int, limit:int) : Task<List<ItemLine>>
+    GetItemLine(id:int) : Task<ItemLine?>
+    GetItemLineItems(id:int) : Task<List<Item>>
+    AddItemLine(itemLine:ItemLine) : Task<bool>
+    DeleteItemLine(id:int) : Task<bool>
+    UpdateItemLine(id:int, itemLine:ItemLine) : Task<bool>
+}
+@enduml

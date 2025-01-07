@@ -1,0 +1,11 @@
+@startuml
+interface IClientStorage {
+    getClients() : Task<IEnumerable<Client>>
+    GetClientsInPagination(offset:int, limit:int) : Task<IEnumerable<Client>>
+    getClient(id:int) : Task<Client?>
+    addClient(client:Client) : Task<bool>
+    deleteClient(id:int) : Task<bool>
+    updateClient(id:int, client:Client?) : Task<bool>
+    getClientOrders(id:int) : IEnumerable<Order>?
+}
+@enduml

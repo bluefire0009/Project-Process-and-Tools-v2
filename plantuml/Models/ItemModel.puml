@@ -1,0 +1,31 @@
+@startuml
+class Item {
+    + Uid : string <<get>> <<set>>
+    + Code : string? <<get>> <<set>>
+    + Description : string? <<get>> <<set>>
+    + ShortDescription : string? <<get>> <<set>>
+    + UpcCode : int <<get>> <<set>>
+    + ModelNumber : string? <<get>> <<set>>
+    + CommodityCode : string? <<get>> <<set>>
+    + ItemLine : int <<get>> <<set>>
+    + ItemGroup : int <<get>> <<set>>
+    + ItemType : int <<get>> <<set>>
+    + UnitPurchaseQuantity : int <<get>> <<set>>
+    + UnitOrderQuantity : int <<get>> <<set>>
+    + PackOrderQuantity : int <<get>> <<set>>
+    + SupplierId : int <<get>> <<set>>
+    + SupplierCode : int <<get>> <<set>>
+    + SupplierPartNumber : string? <<get>> <<set>>
+    + IsDeleted : bool <<get>> <<set>> = false
+    + Equals(other:Item?) : bool
+}
+class "IEquatable`1"<T> {
+}
+"IEquatable`1" "<Item>" <|-- Item
+Item --> "itemLineJson" ItemLine
+Item --> "itemGroupJson" ItemGroup
+Item --> "itemTypeJson" ItemType
+Item --> "SupplierById" Supplier
+Item o-> "CreatedAt" DateTime
+Item o-> "UpdatedAt" DateTime
+@enduml

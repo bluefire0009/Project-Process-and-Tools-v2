@@ -1,0 +1,13 @@
+@startuml
+class ItemLinesController {
+    + ItemLinesController(itemLineStorage:IItemLineStorage)
+    + <<async>> GetAllItemLines(offset:int, limit:int) : Task<IActionResult>
+    + <<async>> GetItemLine(id:int) : Task<IActionResult>
+    + <<async>> GetItemLineItems(id:int) : Task<IActionResult>
+    + <<async>> AddItemLine(itemLine:ItemLine) : Task<IActionResult>
+    + <<async>> RemoveItem(id:int) : Task<IActionResult>
+    + <<async>> UpdateItemLine(id:int, itemLine:ItemLine) : Task<IActionResult>
+}
+Controller <|-- ItemLinesController
+ItemLinesController --> "ItemLineStorage" IItemLineStorage
+@enduml

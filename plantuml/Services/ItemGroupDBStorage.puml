@@ -1,0 +1,14 @@
+@startuml
+class ItemGroupDBStorage {
+    + ItemGroupDBStorage(db:DatabaseContext)
+    + <<async>> getItemGroup(id:int) : Task<ItemGroup?>
+    + <<async>> GetItemGroupsInPagination(offset:int, limit:int) : Task<IEnumerable<ItemGroup>>
+    + <<async>> getItemGroups() : Task<IEnumerable<ItemGroup>>
+    + <<async>> addItemGroup(itemGroup:ItemGroup) : Task<bool>
+    + <<async>> updateItemGroup(idToUpdate:int, updatedItemGroup:ItemGroup?) : Task<bool>
+    + <<async>> deleteItemGroup(id:int) : Task<bool>
+    + getItemGroupItems(itemGroupId:int) : IEnumerable<Item>?
+}
+IItemGroupStorage <|-- ItemGroupDBStorage
+ItemGroupDBStorage --> "db" DatabaseContext
+@enduml

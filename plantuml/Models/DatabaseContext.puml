@@ -1,0 +1,28 @@
+@startuml
+class DatabaseContext {
+    + DatabaseContext(options:DbContextOptions<DatabaseContext>)
+    # <<override>> OnModelCreating(modelBuilder:ModelBuilder) : void
+}
+class "DbSet`1"<T> {
+}
+DbContext <|-- DatabaseContext
+DatabaseContext --> "Clients<Client>" "DbSet`1"
+DatabaseContext --> "Inventories<Inventory>" "DbSet`1"
+DatabaseContext --> "InventoryLocations<InventoryLocation>" "DbSet`1"
+DatabaseContext --> "ItemGroups<ItemGroup>" "DbSet`1"
+DatabaseContext --> "ItemLines<ItemLine>" "DbSet`1"
+DatabaseContext --> "Items<Item>" "DbSet`1"
+DatabaseContext --> "ItemTypes<ItemType>" "DbSet`1"
+DatabaseContext --> "Orders<Order>" "DbSet`1"
+DatabaseContext --> "OrderItems<OrderItems>" "DbSet`1"
+DatabaseContext --> "ShipmentsInOrders<ShipmentsInOrders>" "DbSet`1"
+DatabaseContext --> "Locations<Location>" "DbSet`1"
+DatabaseContext --> "Shipments<Shipment>" "DbSet`1"
+DatabaseContext --> "ShipmentItems<ShipmentItems>" "DbSet`1"
+DatabaseContext --> "OrdersInShipment<OrdersInShipment>" "DbSet`1"
+DatabaseContext --> "Suppliers<Supplier>" "DbSet`1"
+DatabaseContext --> "Transfers<Transfer>" "DbSet`1"
+DatabaseContext --> "TransferItems<TransferItem>" "DbSet`1"
+DatabaseContext --> "Warehouses<Warehouse>" "DbSet`1"
+DatabaseContext --> "ApiKeys<ApiKey>" "DbSet`1"
+@enduml

@@ -1,0 +1,11 @@
+@startuml
+interface ITransferStorage {
+    GetTransfers() : Task<IEnumerable<Transfer>>
+    GetTransfers(offset:int, limit:int, orderbyId:bool) : Task<IEnumerable<Transfer>>
+    getTransfer(id:int) : Task<Transfer?>
+    addTransfer(supplier:Transfer) : Task<bool>
+    deleteTransfer(id:int) : Task<bool>
+    updateTransfer(id:int, supplier:Transfer?) : Task<bool>
+    commitTransfer(id:int) : Task<(bool succeded, TransferDBStorage.TransferResult message)>
+}
+@enduml

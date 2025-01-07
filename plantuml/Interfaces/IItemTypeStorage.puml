@@ -1,0 +1,10 @@
+@startuml
+interface IItemTypeStorage {
+    GetItemTypes(offset:int, limit:int) : Task<List<ItemType>>
+    GetItemType(id:int) : Task<ItemType?>
+    GetItemTypeItems(id:int) : Task<List<Item>>
+    AddItemType(itemType:ItemType) : Task<bool>
+    DeleteItemType(id:int) : Task<bool>
+    UpdateItemType(id:int, itemType:ItemType) : Task<bool>
+}
+@enduml

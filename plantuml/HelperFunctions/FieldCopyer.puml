@@ -1,0 +1,5 @@
+@startuml
+class FieldCopier <<static>> {
+    + {static} CopyFields(source:T, target:T) : void
+}
+@enduml

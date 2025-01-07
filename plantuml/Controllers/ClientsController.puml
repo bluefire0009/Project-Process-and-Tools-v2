@@ -1,0 +1,14 @@
+@startuml
+class ClientsController {
+    + ClientsController(clientStorage:IClientStorage)
+    + <<async>> GetAllClients() : Task<IActionResult>
+    + <<async>> GetClientsInPagination(offset:int, limit:int) : Task<IActionResult>
+    + <<async>> GetSpecificClient(id:int) : Task<IActionResult>
+    + <<async>> GetOrdersSpecificClient(id:int) : Task<IActionResult>
+    + <<async>> PostClient(client:Client) : Task<IActionResult>
+    + <<async>> RemoveClient(id:int) : Task<IActionResult>
+    + <<async>> UpdateClient(idToUpdate:int, updatedClient:Client) : Task<IActionResult>
+}
+Controller <|-- ClientsController
+ClientsController --> "clientStorage" IClientStorage
+@enduml

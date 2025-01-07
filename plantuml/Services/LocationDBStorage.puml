@@ -1,0 +1,14 @@
+@startuml
+class LocationStorage {
+    + LocationStorage(db:DatabaseContext)
+    + <<async>> GetLocations() : Task<IEnumerable<Location>>
+    + <<async>> GetLocations(offset:int, limit:int, orderbyId:bool) : Task<IEnumerable<Location>>
+    + <<async>> GetLocation(locationId:int) : Task<Location?>
+    + <<async>> GetLocationsInWarehouses(GivenWarehouseId:int) : Task<IEnumerable<Location>>
+    + <<async>> AddLocation(location:Location) : Task<bool>
+    + <<async>> UpdateLocation(locationId:int, location:Location) : Task<bool>
+    + <<async>> DeleteLocation(locationId:int) : Task<bool>
+}
+ILocationStorage <|-- LocationStorage
+LocationStorage --> "DB" DatabaseContext
+@enduml

@@ -1,0 +1,10 @@
+@startuml
+interface IInventoryStorage {
+    getInventories() : Task<IEnumerable<Inventory>>
+    GetInventoriesInPagination(offset:int, limit:int) : Task<IEnumerable<Inventory>>
+    getInventory(id:int) : Task<Inventory?>
+    addInventory(inventory:Inventory) : Task<bool>
+    deleteInventory(id:int) : Task<bool>
+    updateInventory(id:int, inventory:Inventory?) : Task<bool>
+}
+@enduml

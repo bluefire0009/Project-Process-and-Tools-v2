@@ -1,0 +1,11 @@
+@startuml
+interface IWarehouseStorage {
+    getWarehouses() : Task<IEnumerable<Warehouse>>
+    getWarehouse(id:int) : Task<Warehouse?>
+    addWarehouse(warehouse:Warehouse) : Task<bool>
+    deleteWarehouse(id:int) : Task<bool>
+    updateWarehouse(id:int, warehouse:Warehouse?) : Task<bool>
+    getWarehouseLocations(id:int) : IEnumerable<Location>?
+    getWarehousesRange(offset:int, amountToReturn:int) : Task<IEnumerable<Warehouse>?>
+}
+@enduml

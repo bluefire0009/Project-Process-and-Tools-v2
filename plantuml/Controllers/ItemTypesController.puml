@@ -1,0 +1,13 @@
+@startuml
+class ItemTypesController {
+    + ItemTypesController(itemTypeStorage:IItemTypeStorage)
+    + <<async>> GetAllItemTypes(offset:int, limit:int) : Task<IActionResult>
+    + <<async>> GetItemType(id:int) : Task<IActionResult>
+    + <<async>> GetItemTypeItems(id:int) : Task<IActionResult>
+    + <<async>> AddItemType(itemType:ItemType) : Task<IActionResult>
+    + <<async>> RemoveItemType(id:int) : Task<IActionResult>
+    + <<async>> UpdateItemType(id:int, itemType:ItemType) : Task<IActionResult>
+}
+Controller <|-- ItemTypesController
+ItemTypesController --> "ItemTypeStorage" IItemTypeStorage
+@enduml

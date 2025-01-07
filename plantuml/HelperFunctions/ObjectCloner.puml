@@ -1,0 +1,5 @@
+@startuml
+class ObjectCopier <<static>> {
+    + {static} Clone(source:T) : T
+}
+@enduml

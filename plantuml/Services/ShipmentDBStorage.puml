@@ -1,0 +1,15 @@
+@startuml
+class ShipmentStorage {
+    + ShipmentStorage(db:DatabaseContext)
+    + <<async>> GetShipments() : Task<IEnumerable<Shipment>>
+    + <<async>> GetShipments(offset:int, limit:int, orderbyId:bool) : Task<IEnumerable<Shipment>>
+    + <<async>> GetShipment(shipmentId:int) : Task<Shipment?>
+    + <<async>> GetItemsInShipment(shipmentId:int) : Task<List<ShipmentItems>>
+    + <<async>> AddShipment(shipment:Shipment) : Task<bool>
+    + <<async>> UpdateShipment(shipmentId:int, shipment:Shipment) : Task<bool>
+    + <<async>> UpdateItemsInShipment(shipmentId:int, list2:List<ShipmentItems>, settings:string) : Task<bool>
+    + <<async>> DeleteShipment(shipmentId:int) : Task<bool>
+}
+IShipmentStorage <|-- ShipmentStorage
+ShipmentStorage --> "DB" DatabaseContext
+@enduml

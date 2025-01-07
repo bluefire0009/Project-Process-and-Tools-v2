@@ -1,0 +1,6 @@
+@startuml
+class ModelValidator <<static>> {
+    + {static} ValidateWarehouse(warehouse:Warehouse?) : bool
+    + {static} ValidateSupplier(supplier:Supplier?) : bool
+}
+@enduml
