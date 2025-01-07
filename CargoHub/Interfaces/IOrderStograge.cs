@@ -3,6 +3,7 @@ using CargoHub.Models;
 public interface IOrderStorage
 {
     Task<IEnumerable<Order>> GetOrders();
+    Task<IEnumerable<Order>> GetOrders(int offset, int limit, bool orderbyId = false);
     Task<Order?> GetOrder(int orderId);
     Task<IEnumerable<OrderItems>> GetItemsInOrder(int oderId);
     Task<IEnumerable<int>> GetOrdersInShipment(int shipmentId);
@@ -13,5 +14,5 @@ public interface IOrderStorage
     Task<bool> UpdateOrder(int orderId, Order order);
     Task<bool> UpdateItemsInOrder(int orderId, List<OrderItems> orderItems, string settings = "");
     Task<bool> UpdateOrdersInShipment(int shipmentId, List<int> orders);
-    Task<bool> DelteOrder(int orderId);
+    Task<bool> DeleteOrder(int orderId);
 }

@@ -1,6 +1,6 @@
 using CargoHub.Models;
 public interface IItemStorage {
-    Task<List<Item>> GetItems();
+    Task<List<Item>> GetItems(int offset, int limit);
     Task<Item?> GetItem(string uid);
     Task<List<Inventory>> GetItemInventory(string uid);
     Task<bool> AddItem(Item item);

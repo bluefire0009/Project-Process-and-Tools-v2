@@ -14,17 +14,10 @@ public class LocationController : Controller
         Storage = storage;
     }
 
-    [HttpGet("maxRate")]
-    public IActionResult Maxrate()
-    {
-        return Ok(Storage.MaxItemsLimit());
-    }
-
-
     [HttpGet("")]
-    public async Task<IActionResult> GetLocations()
+    public async Task<IActionResult> GetLocations([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool orderById = false)
     {
-        IEnumerable<Location> locations = await Storage.GetLocations();
+        IEnumerable<Location> locations = await Storage.GetLocations(offset, limit, orderById);
         return Ok(locations);
     }
 
@@ -37,7 +30,7 @@ public class LocationController : Controller
     }
 
     [HttpPost("")]
-    public async Task<IActionResult> AddLocation(Location location)
+    public async Task<IActionResult> AddLocation([FromBody]Location location)
     {
         if (await Storage.AddLocation(location)) return Ok("Loaction added");
         return BadRequest();

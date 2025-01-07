@@ -38,7 +38,7 @@ public class ItemDBTest
         ItemsDBStorage storage = new(db);
 
         // Act
-        List<Item> result = storage.GetItems().Result.ToList();
+        List<Item> result = storage.GetItems(0, 100).Result.ToList();
 
         // Assert
         Assert.IsTrue(result.Count == items.Count);
@@ -46,6 +46,38 @@ public class ItemDBTest
         {
             Assert.IsTrue(result[itemIterator].Equals(items[itemIterator]));
         }
+    }
+
+    public static IEnumerable<object[]> PaginationTestData => new List<object[]>
+    {
+        new object[] { 0, 0, 10, 0},
+        new object[] { 10, 0, 100, 10},
+        new object[] { 10, 5, 10, 5},
+        new object[] { 10, 10, 10, 0},
+        new object[] { 10, 0, 0, 0},
+        new object[] { 10, -1, 5, 5},
+        new object[] { 30, 10, 10, 10},
+        new object[] { 10, 10, -1, 0}
+    };
+    [TestMethod]
+    [DynamicData(nameof(PaginationTestData), DynamicDataSourceType.Property)]
+    public void TestGetPagination(int AmountItems, int offset, int limit, int expectedAmount)
+    {
+        // Arrange
+        for (int i = 0; i < AmountItems; i++)
+        {
+            Item item = new() {Uid = "P"+i};
+            db.Items.Add(item);
+            db.SaveChanges();
+        }
+
+        ItemsDBStorage storage = new(db);
+
+        // Act
+        List<Item> result = storage.GetItems(offset, limit).Result.ToList();
+
+        // Assert
+        Assert.IsTrue(result.Count == expectedAmount);
     }
 
     public static IEnumerable<object[]> SpecificItemTestData => new List<object[]>
@@ -92,7 +124,7 @@ public class ItemDBTest
         bool actualResult = storage.AddItem(item).Result;
 
         // Assert
-        Assert.IsTrue(actualResult == expectedResult);
+        Assert.IsTrue(actualResult.Equals(expectedResult));
         if (expectedResult == true)
             Assert.IsTrue(db.Items.Contains(item));
         if (expectedResult == false)
@@ -123,12 +155,15 @@ public class ItemDBTest
             new object[] { new List<Item> { new Item(){Uid = "P00001"}}, "P00000", false},
             new object[] { new List<Item> { new Item(){Uid = "P00001"}}, "P00003", false},
             new object[] { new List<Item> { new Item(){Uid = "P00001"}}, "P00001", true},
-            new object[] { new List<Item> { new Item(){Uid = "P00001"}, new Item(){Uid = "P00002"}}, "P00002", true}
+            new object[] { new List<Item> { new Item(){Uid = "P00001"}, new Item(){Uid = "P00002"}}, "P00002", true},
+            new object[] { new List<Item> { new Item(){Uid = "P00001"}, new Item(){Uid = "P00002", IsDeleted=true}}, "P00003", false},
+            new object[] { new List<Item> { new Item(){Uid = "P00001"}, new Item(){Uid = "P00002", IsDeleted=true}}, "P00001", true}
         };
     [TestMethod]
     [DynamicData(nameof(RemoveItemTestData), DynamicDataSourceType.Property)]
     public void TestRemove(List<Item> items, string idToRemove, bool expectedResult)
     {
+        int oldCount = items.Where(_ => !_.IsDeleted).Count();
         // Arrange
         foreach (Item item in items)
         {
@@ -143,9 +178,9 @@ public class ItemDBTest
         // Assert
         Assert.IsTrue(actualResult == expectedResult);
         if (expectedResult == true)
-            Assert.IsTrue(db.Items.Count() == items.Count -1);
+            Assert.IsTrue(db.Items.Where(_ => !_.IsDeleted).Count() == oldCount-1);
         if (expectedResult == false)
-            Assert.IsTrue(db.Items.Count() == items.Count);
+            Assert.IsTrue(db.Items.Where(_ => !_.IsDeleted).Count() == oldCount);
     }
 
     [TestMethod]

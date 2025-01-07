@@ -3,11 +3,11 @@ using Microsoft.EntityFrameworkCore;
 using CargoHub.HelperFuctions;
 using System.Diagnostics.CodeAnalysis;
 
-public class OrderStroage : IOrderStorage
+public class OrderStorage : IOrderStorage
 {
     DatabaseContext DB;
 
-    public OrderStroage(DatabaseContext db)
+    public OrderStorage(DatabaseContext db)
     {
         DB = db;
     }
@@ -18,6 +18,23 @@ public class OrderStroage : IOrderStorage
         return await DB.Orders
             .Include(s => s.Items)
             .Take(100)
+            .ToListAsync();
+    }
+
+    public async Task<IEnumerable<Order>> GetOrders(int offset, int limit, bool orderbyId = false)
+    {
+        // Fetch orders with pagination
+        if (orderbyId)
+        {
+            return await DB.Orders
+                .OrderBy(o => o.Id)
+                .Skip(offset) // Skip the first 'offset' items
+                .Take(limit)  // Take the next 'limit' items
+                .ToListAsync();
+        }
+        return await DB.Orders
+            .Skip(offset) // Skip the first 'offset' items
+            .Take(limit)  // Take the next 'limit' items
             .ToListAsync();
     }
 
@@ -36,8 +53,8 @@ public class OrderStroage : IOrderStorage
     public async Task<IEnumerable<int>> GetOrdersInShipment(int shipmentId)
     {
         // get all ordersId's in a shipment with shipmentId
-        List<Shipment> Shipments = await DB.Shipments.Where(x => x.Id == shipmentId).ToListAsync();
-        return Shipments.Select(x => x.OrderId).ToList();
+        List<ShipmentsInOrders> orderShipments = await DB.ShipmentsInOrders.Where(x => x.ShipmentId == shipmentId).ToListAsync();
+        return orderShipments.Select(x => x.ShipmentId);
     }
 
     // This already exists in the clients controller
@@ -52,7 +69,7 @@ public class OrderStroage : IOrderStorage
         List<OrderItems> orderItems = order.Items.ToList();
 
         // give it the correct CreatedAt field
-        order.CreatedAt = DateTime.Now;
+        order.CreatedAt = CETDateTime.Now();
         // add the order
         await DB.Orders.AddAsync(order);
 
@@ -87,7 +104,7 @@ public class OrderStroage : IOrderStorage
         await UpdateItemsInOrder(order.Id, order.Items.ToList(), settings: "add");
 
         // update updated at
-        FoundOrder.UpdatedAt = DateTime.Now;
+        FoundOrder.UpdatedAt = CETDateTime.Now();
 
         // update rest of exsting order
         // DB.Orders.Update(FoundOrder);
@@ -105,8 +122,7 @@ public class OrderStroage : IOrderStorage
         // FoundOrder.location = order.location;
         // FoundOrder.BillTo = order.BillTo;
         // FoundOrder.client = order.client;
-        // FoundOrder.ShipmentById = order.ShipmentById;
-        // FoundOrder.ShipmentId = order.ShipmentId;
+        // FoundOrder.ShipmentIds = order.ShipmentIds;
         FoundOrder.TotalAmount = order.TotalAmount;
         FoundOrder.TotalDiscount = order.TotalDiscount;
         FoundOrder.TotalTax = order.TotalTax;
@@ -114,6 +130,12 @@ public class OrderStroage : IOrderStorage
         // FoundOrder.CreatedAt = order.CreatedAt;
         // FoundOrder.UpdatedAt = order.UpdatedAt;
         // FoundOrder.Items = order.Items;
+
+        // use this to update the list of ShipmentIds 
+        DB.ShipmentsInOrders.RemoveRange(FoundOrder.ShipmentIds);
+        DB.ShipmentsInOrders.AddRange(order.ShipmentIds);
+
+        await DB.SaveChangesAsync();
 
         foreach (var item in FoundOrder.Items)
         {
@@ -144,7 +166,7 @@ public class OrderStroage : IOrderStorage
         return true;
     }
 
-    public async Task<bool> DelteOrder(int orderId)
+    public async Task<bool> DeleteOrder(int orderId)
     {
         // delete order by id
         Order? FoundOrder = await DB.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
@@ -152,9 +174,20 @@ public class OrderStroage : IOrderStorage
 
         // first remove the items from the order
         await UpdateItemsInOrder(FoundOrder.Id, []);
+        foreach (var item in FoundOrder.Items)
+        {
+            item.IsDeleted = true;
+        }
+
+        foreach (var ShipmentId in FoundOrder.ShipmentIds)
+        {
+            ShipmentId.IsDeleted = true;
+        }
 
         // then remove the order
-        DB.Orders.Remove(FoundOrder);
+        FoundOrder.IsDeleted = true;
+        DB.Orders.Update(FoundOrder);
+
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;
     }
@@ -268,7 +301,7 @@ public class OrderStroage : IOrderStorage
             {
                 Order? order = await GetOrder(orderId);
                 if (order == null) return false;
-                order.ShipmentId = -1;
+                order.ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(order.Id, -1) };
                 order.OrderStatus = "Scheduled";
                 await UpdateOrder(orderId, order);
             }
@@ -277,7 +310,7 @@ public class OrderStroage : IOrderStorage
         {
             Order? order = await GetOrder(orderId);
             if (order == null) return false;
-            order.ShipmentId = shipmentId;
+            order.ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(order.Id, shipmentId) };
             order.OrderStatus = "Packed";
             await UpdateOrder(orderId, order);
         }

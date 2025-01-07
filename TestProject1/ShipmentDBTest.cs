@@ -93,7 +93,11 @@ public class ShipmentDBTest
         }
         var FoundShipments = await storage.GetShipments();
 
+        List<Inventory> inventories = GetTestInventories();
+
         Assert.IsTrue(FoundShipments.Count() == shipments.Count());
+        AssertInventoryAmounts(expectedInventories, inventories);
+
     }
 
     [TestMethod]
@@ -176,8 +180,177 @@ public class ShipmentDBTest
         }
     }
 
+    [TestMethod]
+    public async Task TestSoftDeleteShipments()
+    {
+        // arrange
+        var Test_shipments = Enumerable.Range(1, 10).Select(id => new Shipment { Id = id }).ToList();
+        await db.Shipments.AddRangeAsync(Test_shipments); // Add the test data
+        await db.SaveChangesAsync();
+
+        ShipmentStorage storage = new(db);
+
+        // Act: Perform soft deletes
+        await storage.DeleteShipment(1);
+        await storage.DeleteShipment(1); // Deleting the same shipment twice should have no effect
+        await storage.DeleteShipment(2);
+        await storage.DeleteShipment(3);
+        await storage.DeleteShipment(4);
+        await storage.DeleteShipment(5);
+
+        // Get all shipments (should exclude soft-deleted ones)
+        List<Shipment> shipmentsGetAll = (await storage.GetShipments()).ToList();
+        Shipment? shipmentGet1 = await storage.GetShipment(1); // Should return null, as shipment 1 is soft-deleted
+        Shipment? shipmentGet2 = await storage.GetShipment(7); // Should return the shipment with ID 7
+
+        // Assert
+        Assert.IsTrue(shipmentGet1 == null); // Shipment 1 should be null as it's soft-deleted
+        Assert.IsTrue(shipmentGet2?.Id == 7); // Shipment 7 should still be present
+
+        Assert.IsTrue(shipmentsGetAll.Count == 5); // Only shipments with IDs 6, 7, 8, 9, 10 should remain
+
+        // Assert that the shipmentsGetAll list contains shipments with ids 6, 7, 8, 9, and 10
+        var expectedIds = new[] { 6, 7, 8, 9, 10 };
+        foreach (var id in expectedIds)
+        {
+            Assert.IsTrue(shipmentsGetAll.Any(s => s.Id == id), $"Shipment with ID {id} should be in the list.");
+        }
+
+        // Assert that the shipmentsGetAll list does NOT contain shipments with ids 1, 2, 3, 4, and 5
+        var deletedIds = new[] { 1, 2, 3, 4, 5 };
+        foreach (var id in deletedIds)
+        {
+            Assert.IsFalse(shipmentsGetAll.Any(s => s.Id == id), $"Shipment with ID {id} should NOT be in the list.");
+        }
+    }
+
+    [TestMethod]
+    public async Task TestSoftDelteItemsAndOrderIDs()
+    {
+        // Arrange
+        Shipment test_shipment = new Shipment()
+        {
+            Id = 1,
+            OrderIds = new List<OrdersInShipment> { new OrdersInShipment(1, 1) },
+            Items = new List<ShipmentItems>
+                    {
+                        new ShipmentItems("P000001", 20, 1),
+                        new ShipmentItems("P000002", 10, 1)
+                    }
+        };
+
+        db.Shipments.Add(test_shipment);
+        ShipmentStorage storage = new(db);
+
+        // Act
+        await storage.DeleteShipment(test_shipment.Id);
+
+        Shipment? foundshipment = await storage.GetShipment(test_shipment.Id);
+        List<ShipmentItems> Items = await db.ShipmentItems.Where(_ => _.ShipmentId == 1).ToListAsync();
+        List<OrdersInShipment> orders = await db.OrdersInShipment.Where(_ => _.ShipmentId == 1).ToListAsync();
+
+        // Assert
+
+        // Assert that the shipment is null after deletion
+        Assert.IsNull(foundshipment, "Shipment should be null after soft delete.");
+
+        // Assert that the related items are soft deleted (empty)
+        Assert.IsTrue(!Items.Any(), "ShipmentItems list should be empty after soft delete.");
+
+        // Assert that the related orders are soft deleted (empty)
+        Assert.IsTrue(!orders.Any(), "OrdersInShipment list should be empty after soft delete.");
+
+    }
 
 
+    [TestMethod]
+    public async Task TestOrderIds()
+    {
+        ShipmentStorage storage = new(db);
+
+        Shipment testShipment = new()
+        {
+            Id = 10,
+            OrderIds = new List<OrdersInShipment> { new OrdersInShipment(1, 1), new OrdersInShipment(1, 2), new OrdersInShipment(1, 3) }
+        };
+
+        bool postsucces = await storage.AddShipment(testShipment);
+        Assert.IsTrue(postsucces);
+
+        Shipment? FoundOrder = await storage.GetShipment(testShipment.Id);
+        Assert.IsNotNull(FoundOrder);
+
+        Assert.AreEqual(3, FoundOrder.OrderIds.Count());
+    }
+
+    [TestMethod]
+    public async Task TestAddingOrderIds()
+    {
+        ShipmentStorage storage = new(db);
+
+        Shipment testShipment = new()
+        {
+            Id = 1,
+            OrderIds = new List<OrdersInShipment> { new OrdersInShipment(1, 1) }
+        };
+
+        Shipment updatedTestShipment = new()
+        {
+            Id = 1,
+            OrderIds = new List<OrdersInShipment> { new OrdersInShipment(1, 1), new OrdersInShipment(2, 1), new OrdersInShipment(3, 1) }
+        };
+
+        bool orderpostsucces = await storage.AddShipment(testShipment);
+        Assert.IsTrue(orderpostsucces);
+
+        bool orderupdatesucces = await storage.UpdateShipment(updatedTestShipment.Id, updatedTestShipment);
+        Assert.IsTrue(orderupdatesucces);
+
+        Shipment? FoundShipment = await storage.GetShipment(updatedTestShipment.Id);
+        Assert.IsNotNull(FoundShipment);
+
+        Assert.AreEqual(3, FoundShipment.OrderIds.Count());
+    }
+
+    public static IEnumerable<object[]> TestGetShipmentsTestDataPagination => new List<object[]>
+    {
+    new object[] { Enumerable.Range(1, 0).Select(id => new Shipment { Id = id }).ToList(), 0, 5 },  //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Shipment { Id = id }).ToList(), 0, 5 }, //   0 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Shipment { Id = id }).ToList(), 5, 5 }, //   5 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Shipment { Id = id }).ToList(), 8, 5 }, //   8 offset, limit 5
+    new object[] { Enumerable.Range(1, 10).Select(id => new Shipment { Id = id }).ToList(), 10, 5 }  //  10 offset, limit 5
+    };
+
+    [TestMethod]
+    [DynamicData(nameof(TestGetShipmentsTestDataPagination), DynamicDataSourceType.Property)]
+    public async Task TestGetShipmentsWithPagination(List<Shipment> shipments, int offset, int limit)
+    {
+        // Arrange
+        await db.Shipments.AddRangeAsync(shipments); // Add the test data
+        await db.SaveChangesAsync();
+
+        ShipmentStorage storage = new(db);
+
+        // Act
+        IEnumerable<Shipment> x = await storage.GetShipments(offset, limit, true);
+        List<Shipment> result = x.ToList();
+
+        // Console.WriteLine($"offset: {offset}  limit:{limit}  count in db:{shipments.Count()}  result count:{result.Count()}");
+        // foreach (Shipment location in result)
+        // {
+        //     Console.WriteLine("Location: " + location.Id);
+        // }
+
+
+        // Assert
+        int expectedCount = Math.Min(limit, Math.Max(0, shipments.Count - offset));
+        Assert.AreEqual(expectedCount, result.Count, "Returned result count is incorrect.");
+
+        for (int i = 0; i < result.Count; i++)
+        {
+            Assert.AreEqual(shipments[offset + i].Id, result[i].Id, "Shipment ID does not match at index " + i);
+        }
+    }
 
 
     // Unique Shipment Types:
@@ -195,7 +368,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 1,
-                    OrderId = 1,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(1, 1) },
                     SourceId = 201,
                     OrderDate = DateTime.Parse("2024-11-01 10:00:00"),
                     RequestDate = DateTime.Parse("2024-11-02 12:00:00"),
@@ -220,9 +393,9 @@ public class ShipmentDBTest
                 }
             },
                     new List<Tuple<int, int, int, int, int>> {
-            new Tuple<int, int, int, int, int>(100, 0, 0, 8, 92), // (Total On Hand, Total Expected, Total Ordered, Total Allocated, Total Available)
-            new Tuple<int, int, int, int, int>(50, 0, 15, 2, 33),
-            new Tuple<int, int, int, int, int>(5, 0, 20, 0, -15)
+                        new Tuple<int, int, int, int, int>(100, 0, 0, 20, 80),
+                        new Tuple<int, int, int, int, int>(50, 0, 0, 10, 40),
+                        new Tuple<int, int, int, int, int>(5, 0, 0, 0, 5)
                     }
         },
         new object[]
@@ -233,7 +406,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 2,
-                    OrderId = 2,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(2, 2) },
                     SourceId = 202,
                     OrderDate = DateTime.Parse("2024-11-04 09:30:00"),
                     RequestDate = DateTime.Parse("2024-11-05 14:00:00"),
@@ -259,7 +432,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 3,
-                    OrderId = 3,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(3, 3) },
                     SourceId = 203,
                     OrderDate = DateTime.Parse("2024-11-07 13:00:00"),
                     RequestDate = DateTime.Parse("2024-11-08 16:00:00"),
@@ -283,9 +456,9 @@ public class ShipmentDBTest
                 }
             },
                     new List<Tuple<int, int, int, int, int>> {
-            new Tuple<int, int, int, int, int>(100, 0, 0, 8, 92), // (Total On Hand, Total Expected, Total Ordered, Total Allocated, Total Available)
-            new Tuple<int, int, int, int, int>(50, 0, 15, 2, 33),
-            new Tuple<int, int, int, int, int>(5, 0, 20, 0, -15)
+                        new Tuple<int, int, int, int, int>(70, 0, 0, 0, 70),
+                        new Tuple<int, int, int, int, int>(50, 0, 0, 0, 50),
+                        new Tuple<int, int, int, int, int>(-10, 0, 0, 0, -10)
             }
         },
         new object[]
@@ -296,7 +469,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 4,
-                    OrderId = 4,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(4, 4) },
                     SourceId = 204,
                     OrderDate = DateTime.Parse("2024-11-10 11:00:00"),
                     RequestDate = DateTime.Parse("2024-11-11 14:30:00"),
@@ -322,7 +495,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 5,
-                    OrderId = 5,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(5, 5) },
                     SourceId = 205,
                     OrderDate = DateTime.Parse("2024-11-13 12:00:00"),
                     RequestDate = DateTime.Parse("2024-11-14 15:00:00"),
@@ -347,7 +520,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 6,
-                    OrderId = 6,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(6, 6) },
                     SourceId = 206,
                     OrderDate = DateTime.Parse("2024-11-16 14:00:00"),
                     RequestDate = DateTime.Parse("2024-11-17 16:00:00"),
@@ -372,9 +545,9 @@ public class ShipmentDBTest
                 }
             },
                     new List<Tuple<int, int, int, int, int>> {
-            new Tuple<int, int, int, int, int>(100, 0, 0, 8, 92), // (Total On Hand, Total Expected, Total Ordered, Total Allocated, Total Available)
-            new Tuple<int, int, int, int, int>(50, 0, 15, 2, 33),
-            new Tuple<int, int, int, int, int>(5, 0, 20, 0, -15)
+                        new Tuple<int, int, int, int, int>(150, 30, 0, 0, 150),
+                        new Tuple<int, int, int, int, int>(120, 40, 0, 0, 120),
+                        new Tuple<int, int, int, int, int>(5, 60, 0, 0, 5)
                     }
         }
     };
@@ -389,7 +562,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 1,
-                    OrderId = 1,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(1, 1) },
                     SourceId = 1,
                     OrderDate = DateTime.Parse("2024-11-15T10:00:00Z"),
                     RequestDate = DateTime.Parse("2024-11-16T12:00:00Z"),
@@ -450,7 +623,7 @@ public class ShipmentDBTest
                 new Shipment
                 {
                     Id = 2,
-                    OrderId = 2,
+                    OrderIds =  new List<OrdersInShipment> { new OrdersInShipment(2, 2) },
                     SourceId = 2,
                     OrderDate = DateTime.Parse("2024-11-18T09:00:00Z"),
                     RequestDate = DateTime.Parse("2024-11-19T14:00:00Z"),

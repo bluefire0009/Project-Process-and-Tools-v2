@@ -2,8 +2,8 @@ using CargoHub.Models;
 
 public interface ILocationStorage
 {
-    int MaxItemsLimit();
     Task<IEnumerable<Location>> GetLocations();
+    Task<IEnumerable<Location>> GetLocations(int offset, int limit, bool orderbyId = false);
     Task<Location?> GetLocation(int locationId);
     Task<IEnumerable<Location>> GetLocationsInWarehouses(int warehouseId);
     Task<bool> AddLocation(Location location);

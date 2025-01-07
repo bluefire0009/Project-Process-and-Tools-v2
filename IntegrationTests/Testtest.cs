@@ -1,3 +1,4 @@
+using System.Diagnostics.CodeAnalysis;
 using System.Net;
 using System.Threading.Tasks;
 using Microsoft.AspNetCore.Mvc.Testing;
@@ -9,6 +10,7 @@ namespace IntegrationTests
     [TestClass]
     public class TestControllerIntegrationTests
     {
+        [ExcludeFromCodeCoverage]
 
         [TestMethod]
         public async Task SimpleTest()
