@@ -88,8 +88,8 @@ public class ShipmentDBTest
         foreach (var shipment in shipments)
         {
             // add each order and assert that the order has been added
-            bool shipmentpostsucces = (await storage.AddShipment(shipment));
-            Assert.IsTrue(shipmentpostsucces);
+            int shipmentpostsucces = await storage.AddShipment(shipment);
+            Assert.IsTrue(shipmentpostsucces != -1);
         }
         var FoundShipments = await storage.GetShipments();
 
@@ -110,8 +110,8 @@ public class ShipmentDBTest
         foreach (var shipment in shipments)
         {
             // Add each shipment and assert that it has been added
-            bool shipmentPostSuccess = await storage.AddShipment(shipment);
-            Assert.IsTrue(shipmentPostSuccess);
+            int shipmentpostsucces = await storage.AddShipment(shipment);
+            Assert.IsTrue(shipmentpostsucces != -1);
         }
 
         foreach (var shipment in shipments)
@@ -134,8 +134,8 @@ public class ShipmentDBTest
         foreach (var shipment in shipments)
         {
             // Add each shipment and assert that the shipment has been added
-            bool shipmentPostSuccess = await storage.AddShipment(shipment);
-            Assert.IsTrue(shipmentPostSuccess);
+            int shipmentpostsucces = await storage.AddShipment(shipment);
+            Assert.IsTrue(shipmentpostsucces != -1);
         }
 
         foreach (var shipment in shipments)
@@ -159,8 +159,8 @@ public class ShipmentDBTest
         foreach (var shipment in shipments)
         {
             // Add each shipment and assert that the shipment has been added
-            bool shipmentPostSuccess = await storage.AddShipment(shipment);
-            Assert.IsTrue(shipmentPostSuccess);
+            int shipmentpostsucces = await storage.AddShipment(shipment);
+            Assert.IsTrue(shipmentpostsucces != -1);
         }
 
         for (int i = 0; i < newShipmentStatuses.Count; i++)
@@ -274,8 +274,8 @@ public class ShipmentDBTest
             OrderIds = new List<OrdersInShipment> { new OrdersInShipment(1, 1), new OrdersInShipment(1, 2), new OrdersInShipment(1, 3) }
         };
 
-        bool postsucces = await storage.AddShipment(testShipment);
-        Assert.IsTrue(postsucces);
+        int shipmentpostsucces = await storage.AddShipment(testShipment);
+        Assert.IsTrue(shipmentpostsucces != -1);
 
         Shipment? FoundOrder = await storage.GetShipment(testShipment.Id);
         Assert.IsNotNull(FoundOrder);
@@ -300,8 +300,8 @@ public class ShipmentDBTest
             OrderIds = new List<OrdersInShipment> { new OrdersInShipment(1, 1), new OrdersInShipment(2, 1), new OrdersInShipment(3, 1) }
         };
 
-        bool orderpostsucces = await storage.AddShipment(testShipment);
-        Assert.IsTrue(orderpostsucces);
+        int shipmentpostsucces = await storage.AddShipment(testShipment);
+        Assert.IsTrue(shipmentpostsucces != -1);
 
         bool orderupdatesucces = await storage.UpdateShipment(updatedTestShipment.Id, updatedTestShipment);
         Assert.IsTrue(orderupdatesucces);

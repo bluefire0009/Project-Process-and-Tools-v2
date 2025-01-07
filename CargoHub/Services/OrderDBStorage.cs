@@ -60,10 +60,10 @@ public class OrderStorage : IOrderStorage
     // This already exists in the clients controller
     // public Task<IEnumerable<Order>> GetOrdersForClient(int clientId)
 
-    public async Task<bool> AddOrder(Order order)
+    public async Task<int> AddOrder(Order order)
     {
         // add order to orders
-        if (order == null) return false;
+        if (order == null) return -1;
 
         // extract items from order
         List<OrderItems> orderItems = order.Items.ToList();
@@ -74,13 +74,13 @@ public class OrderStorage : IOrderStorage
         await DB.Orders.AddAsync(order);
 
         // Save to make it available in the DB for the UpdateItemsInOrder
-        if (await DB.SaveChangesAsync() < 1) return false;
+        if (await DB.SaveChangesAsync() < 1) return -1;
 
         // update the items with add setting so it adjusts the inventories propperly
         await UpdateItemsInOrder(order.Id, orderItems, settings: "add");
 
         // var itms = GetItemsInOrder(order.Id);
-        return true;
+        return order.Id;
     }
 
     public async Task<bool> UpdateOrder(int orderId, Order order)
@@ -128,7 +128,6 @@ public class OrderStorage : IOrderStorage
         FoundOrder.TotalTax = order.TotalTax;
         FoundOrder.TotalSurcharge = order.TotalSurcharge;
         // FoundOrder.CreatedAt = order.CreatedAt;
-        // FoundOrder.UpdatedAt = order.UpdatedAt;
         // FoundOrder.Items = order.Items;
 
         // use this to update the list of ShipmentIds 

@@ -14,10 +14,10 @@ namespace IntegrationTests;
 
 [ExcludeFromCodeCoverage]
 [TestClass]
-public class LocationIntegrationTests : WebApplicationFactory<Program>
+public class OrderIntegrationTests : WebApplicationFactory<Program>
 {
     private DatabaseContext _dbContext;
-    private string Url = $"{Constants.VERSION}/locations";
+    private string Url = $"{Constants.VERSION}/orders";
     private HttpClient client;
 
     [TestInitialize]
@@ -35,7 +35,7 @@ public class LocationIntegrationTests : WebApplicationFactory<Program>
         // Add headers, including the API key
         client.DefaultRequestHeaders.Add("Api-Key", Constants.API_KEY);
 
-        addTestLoactionsToDB(client);
+        addTestOrdersToDB(client);
     }
 
     [TestCleanup]
@@ -47,31 +47,35 @@ public class LocationIntegrationTests : WebApplicationFactory<Program>
         }
     }
 
-    private void addTestLoactionsToDB(HttpClient client)
+
+    private void addTestOrdersToDB(HttpClient client)
     {
         // Add both warehouses to db
-        foreach (Location location in testLocations)
+        foreach (Order order in testOrders)
         {
-            string jsonData = JsonConvert.SerializeObject(location);
+            string jsonData = JsonConvert.SerializeObject(order);
             HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
             client.PostAsync($"{Url}", postContent).GetAwaiter().GetResult();
         }
     }
 
-    private Location[] testLocations = [
-        new Location() {Code = "test_code_2", Name = "Test_name_1", WareHouseId = null},
-        new Location() {Code = "test_code_1", Name = "Test_name_2", WareHouseId = null},
+    private Order[] testOrders = [
+        new Order() {Notes = "testorder_1"},
+        new Order() {Notes = "testorder_2"},
     ];
 
-    public int PostLocation(Location testLocation = null!)
+    public int PostOrder(Order testOrder = null!)
     {
-        // Use a default Location object if testLocation is null
-        if (testLocation == null)
+        // Use a default Order object if testOrder is null
+        if (testOrder == null)
         {
-            testLocation = new Location() { Code = "TESTCODE", Name = "TESTNAME", WareHouseId = null };
+            testOrder = new Order()
+            {
+                Notes = "testorder_3"
+            };
         }
 
-        string jsonData = JsonConvert.SerializeObject(testLocation);
+        string jsonData = JsonConvert.SerializeObject(testOrder);
         HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
         HttpResponseMessage postResponse = client.PostAsync(Url, postContent).Result;
         HttpStatusCode postStatus = postResponse.StatusCode;
@@ -81,15 +85,14 @@ public class LocationIntegrationTests : WebApplicationFactory<Program>
         return Convert.ToInt32(postResponse.Content.ReadAsStringAsync().Result);
     }
 
-    public Location GetLocation(int locationId)
+    public Order GetOrder(int orderId)
     {
         try
         {
-
-            var response = client.GetAsync(Url + $"/{locationId}").Result;
+            var response = client.GetAsync(Url + $"/{orderId}").Result;
             var content = response.Content.ReadAsStringAsync().Result;
-            Location? resultlocation = JsonConvert.DeserializeObject<Location>(content);
-            return resultlocation!;
+            Order? resultOrder = JsonConvert.DeserializeObject<Order>(content);
+            return resultOrder!;
         }
         catch (Exception)
         {
@@ -97,9 +100,9 @@ public class LocationIntegrationTests : WebApplicationFactory<Program>
         }
     }
 
-    public bool PutLocation(int Id, Location location)
+    public bool PutOrder(int Id, Order order)
     {
-        string jsonData = JsonConvert.SerializeObject(location);
+        string jsonData = JsonConvert.SerializeObject(order);
         HttpContent putContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
 
         HttpStatusCode putStatus = client.PutAsync(Url + $"/{Id}", putContent).Result.StatusCode;
@@ -108,7 +111,7 @@ public class LocationIntegrationTests : WebApplicationFactory<Program>
         return false;
     }
 
-    public bool DeleteLocation(int Id)
+    public bool DeleteOrder(int Id)
     {
         HttpResponseMessage deleteResponse = client.DeleteAsync(Url + $"/{Id}").Result;
         HttpStatusCode deleteStatus = deleteResponse.StatusCode;
@@ -116,92 +119,110 @@ public class LocationIntegrationTests : WebApplicationFactory<Program>
     }
 
     [TestMethod]
-    public void test_get_all_locations()
+    public void test_get_all_orders()
     {
-        // Tests the GET /locations endpoint
-        // makes sure the user can get all the locations in the db
+        // Tests the GET /orders endpoint
+        // makes sure the user can get all the orders in the db
 
         // Arrange
 
         // Act
         var response = client.GetAsync(Url).Result;
         var content = response.Content.ReadAsStringAsync().Result;
-        var resultLocations = JsonConvert.DeserializeObject<Location[]>(content);
+        var resultOrders = JsonConvert.DeserializeObject<Order[]>(content);
 
         // Assert
         Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
-        Assert.IsNotNull(testLocations);
-        Assert.AreEqual(testLocations.Length, resultLocations!.Length);
+        Assert.IsNotNull(testOrders);
+        Assert.AreEqual(testOrders.Length, resultOrders!.Length);
 
-        for (int warehouseIterator = 0; warehouseIterator < resultLocations.Length; warehouseIterator++)
+        for (int warehouseIterator = 0; warehouseIterator < resultOrders.Length; warehouseIterator++)
         {
-            Assert.IsTrue(testLocations[warehouseIterator].Equals(resultLocations[warehouseIterator]));
+            Assert.IsTrue(testOrders[warehouseIterator].Equals(resultOrders[warehouseIterator]));
         }
     }
 
     [TestMethod]
-    public void test_post_get_location()
+    public void test_post_get_order()
     {
         // test the Post /locaitons endpoint
         // makes sure the user can post and retrive a location
 
         // Arrange
-        int createdLocationId = PostLocation();
+        int createdOrderId = PostOrder();
 
         // Act
-        Location? resultlocation = GetLocation(createdLocationId);
+        Order? resultOrder = GetOrder(createdOrderId);
 
         // Assert
-        Assert.AreNotEqual(createdLocationId, -1);
-        Assert.IsTrue(resultlocation!.Id == createdLocationId);
+        Assert.AreNotEqual(createdOrderId, -1);
+        Assert.IsTrue(resultOrder.Id == createdOrderId);
     }
 
     [TestMethod]
-    public void test_put_location()
+    public void test_put_order()
     {
-        // test the Put /locations/{id} endpoint
+        // test the Put /orders/{id} endpoint
         // makes sure the user can modify a location in the db
 
         // Arrange
-        int createdLocationId = PostLocation();
-        Location? resultlocation = GetLocation(createdLocationId);
+        int createdLOrderId = PostOrder();
+        Order? resultOrder = GetOrder(createdLOrderId);
 
         // Act
-        resultlocation.Name = "Changed";
-        Assert.IsTrue(PutLocation(createdLocationId, resultlocation));
-        Location Updatedlocation = GetLocation(createdLocationId);
+        resultOrder.Notes = "Changed";
+        Assert.IsTrue(PutOrder(createdLOrderId, resultOrder));
+        Order Updatedlocation = GetOrder(createdLOrderId);
 
         // Assert
-        Assert.AreEqual(Updatedlocation.Name, "Changed");
+        Assert.AreEqual(Updatedlocation.Notes, "Changed");
     }
 
     [TestMethod]
-    public void test_delete_location()
+    public void test_get_order_items()
+    {
+        // test the Get /orders/{Id}/items endpoint
+        // makes sure the user can get the items from an order
+        Order testOrder = new()
+        {
+            Items = new List<OrderItems>
+                    {
+                        new OrderItems(null!, 10, 1),
+                        new OrderItems(null!, 20, 1),
+                        new OrderItems(null!, 5, 1)
+                    }
+        };
+
+        int createdLOrderId = PostOrder(testOrder);
+    }
+
+    [TestMethod]
+    public void test_delete_order()
     {
         // test the Delete /locations/{id} endpoint
         // makes sure you can (soft)delete a location from the db
 
         // Arrange
-        int createdLocationId = PostLocation();
+        int createdOrderId = PostOrder();
 
         // Act
         // Assert
-        Assert.IsTrue(DeleteLocation(createdLocationId));
-        Assert.IsTrue(GetLocation(createdLocationId) == null);
+        Assert.IsTrue(DeleteOrder(createdOrderId));
+        Assert.IsTrue(GetOrder(createdOrderId) == null);
     }
 
     [TestMethod]
-    public void test_delte_location_with_wrong_id()
+    public void test_delte_order_with_wrong_id()
     {
         // test the Delete /locations/{id} endpoint
         // Makes sure the porgram handles an incorrect id propperly
 
         // Arrange
-        int createdLocationId = PostLocation();
+        int createdOrderId = PostOrder();
 
         // Act
         // Assert
-        Assert.IsFalse(DeleteLocation(-1));
+        Assert.IsFalse(DeleteOrder(-1));
     }
 
     [TestMethod]
@@ -211,11 +232,11 @@ public class LocationIntegrationTests : WebApplicationFactory<Program>
         // Makes sure the porgram handles an incorrect id propperly
 
         // Arrange
-        int createdLocationId = PostLocation();
+        int createdOrderId = PostOrder();
 
         // Act
         // Assert
-        Assert.IsTrue(GetLocation(-1) == null);
+        Assert.IsTrue(GetOrder(-1) == null);
     }
 
     [TestMethod]
@@ -225,20 +246,20 @@ public class LocationIntegrationTests : WebApplicationFactory<Program>
         // Makes sure its created correctly and has the correct time and format
 
         // Arrange
-        int createdLocationId = PostLocation();
+        int createdOrderId = PostOrder();
 
         // Act
-        Location? resultlocation = GetLocation(createdLocationId);
+        Order? resultorder = GetOrder(createdOrderId);
 
         // Assert
-        Assert.IsNotNull(resultlocation, "The location should not be null after creation.");
+        Assert.IsNotNull(resultorder, "The location should not be null after creation.");
 
-        Assert.IsNotNull(resultlocation.CreatedAt, "The CreatedAt property should not be null.");
+        Assert.IsNotNull(resultorder.CreatedAt, "The CreatedAt property should not be null.");
 
         // Get current time in CET
         var cetTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
         DateTime now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, cetTimeZone); // Convert UTC to CET
-        DateTime createdAt = resultlocation.CreatedAt.Value;
+        DateTime createdAt = resultorder.CreatedAt.Value;
 
         // Round both times to the nearest minute for comparison
         now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
@@ -255,14 +276,14 @@ public class LocationIntegrationTests : WebApplicationFactory<Program>
         // Makes sure its created correctly and has the correct time and format
 
         // Arrange
-        int createdLocationId = PostLocation();
+        int createdOrderId = PostOrder();
 
         // Act
-        Location? resultlocation = GetLocation(createdLocationId);
+        Order? resultorder = GetOrder(createdOrderId);
 
-        resultlocation.Name = "Changed";
-        Assert.IsTrue(PutLocation(createdLocationId, resultlocation));
-        Location Updatedlocation = GetLocation(createdLocationId);
+        resultorder.Notes = "Changed";
+        Assert.IsTrue(PutOrder(createdOrderId, resultorder));
+        Order Updatedlocation = GetOrder(createdOrderId);
 
         // Assert
         Assert.IsNotNull(Updatedlocation, "The location should not be null after creation.");

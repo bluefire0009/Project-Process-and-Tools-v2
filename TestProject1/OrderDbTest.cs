@@ -91,8 +91,8 @@ public class OrderDBTest
         foreach (var order in orders)
         {
             // add each order and assert that the order has been added
-            bool orderpostsucces = (await storage.AddOrder(order));
-            Assert.IsTrue(orderpostsucces);
+            int orderpostsucces = await storage.AddOrder(order);
+            Assert.IsTrue(orderpostsucces != -1);
         }
 
         var FoundOrders = await storage.GetOrders();
@@ -114,8 +114,8 @@ public class OrderDBTest
         foreach (var order in orders)
         {
             // add each order and assert that the order has been added
-            bool orderpostsucces = (await storage.AddOrder(order));
-            Assert.IsTrue(orderpostsucces);
+            int orderpostsucces = await storage.AddOrder(order);
+            Assert.IsTrue(orderpostsucces != -1);
         }
 
         foreach (var order in orders)
@@ -137,8 +137,8 @@ public class OrderDBTest
         foreach (var order in orders)
         {
             // add each order and assert that the order has been added
-            bool orderpostsucces = (await storage.AddOrder(order));
-            Assert.IsTrue(orderpostsucces);
+            int orderpostsucces = await storage.AddOrder(order);
+            Assert.IsTrue(orderpostsucces != -1);
         }
 
         foreach (var order in orders)
@@ -161,8 +161,8 @@ public class OrderDBTest
         foreach (var order in orders)
         {
             // add each order and assert that the order has been added
-            bool orderpostsucces = (await storage.AddOrder(order));
-            Assert.IsTrue(orderpostsucces);
+            int orderpostsucces = await storage.AddOrder(order);
+            Assert.IsTrue(orderpostsucces != -1);
 
             if (order.Id == 1)
             {
@@ -184,8 +184,8 @@ public class OrderDBTest
         foreach (var order in orders)
         {
             // add each order and assert that the order has been added
-            bool orderpostsucces = (await storage.AddOrder(order));
-            Assert.IsTrue(orderpostsucces);
+            int orderpostsucces = await storage.AddOrder(order);
+            Assert.IsTrue(orderpostsucces != -1);
         }
 
         for (int i = 0; i < NewOrderStatuses.Count; i++)
@@ -213,8 +213,8 @@ public class OrderDBTest
         foreach (var order in orders)
         {
             // add each order and assert that the order has been added
-            bool orderpostsucces = (await storage.AddOrder(order));
-            Assert.IsTrue(orderpostsucces);
+            int orderpostsucces = (await storage.AddOrder(order));
+            Assert.IsTrue(orderpostsucces != -1);
         }
 
         foreach (var order in orders)
@@ -236,8 +236,8 @@ public class OrderDBTest
             ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(1, 1), new ShipmentsInOrders(1, 2), new ShipmentsInOrders(1, 3) }
         };
 
-        bool orderpostsucces = await storage.AddOrder(testOrder);
-        Assert.IsTrue(orderpostsucces);
+        int orderpostsucces = await storage.AddOrder(testOrder);
+        Assert.IsTrue(orderpostsucces != -1);
 
         Order? FoundOrder = await storage.GetOrder(testOrder.Id);
         Assert.IsNotNull(FoundOrder);
@@ -262,8 +262,8 @@ public class OrderDBTest
             ShipmentIds = new List<ShipmentsInOrders> { new ShipmentsInOrders(1, 1), new ShipmentsInOrders(1, 2), new ShipmentsInOrders(1, 3) }
         };
 
-        bool orderpostsucces = await storage.AddOrder(testOrder);
-        Assert.IsTrue(orderpostsucces);
+        int orderpostsucces = await storage.AddOrder(testOrder);
+        Assert.IsTrue(orderpostsucces != -1);
 
         bool orderupdatesucces = await storage.UpdateOrder(updatedTestOrder.Id, updatedTestOrder);
         Assert.IsTrue(orderupdatesucces);

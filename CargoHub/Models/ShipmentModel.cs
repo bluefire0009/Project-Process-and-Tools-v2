@@ -9,7 +9,6 @@ public class Shipment : IEquatable<Shipment>
 
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
-    [JsonIgnore]
     public int Id { get; set; }
     public ICollection<OrdersInShipment> OrderIds { get; set; } = new List<OrdersInShipment>();
     public int SourceId { get; set; }
@@ -31,24 +30,21 @@ public class Shipment : IEquatable<Shipment>
     public int TotalPackageCount { get; set; }
     public float TotalPackageWeight { get; set; }
 
-    [JsonIgnore]
     [DataType(DataType.DateTime)]
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime? CreatedAt { get; set; } = DateTime.Now;
 
-    [JsonIgnore]
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
 
     public ICollection<ShipmentItems> Items { get; set; } = new List<ShipmentItems>();
 
     // softdelte
-    [JsonIgnore]
     public bool IsDeleted { get; set; } = false;
     public bool Equals(Shipment? other)
     {
         if (other == null) return false;
 
-        return Id == other.Id &&
+        return
                SourceId == other.SourceId &&
                OrderDate == other.OrderDate &&
                RequestDate == other.RequestDate &&
