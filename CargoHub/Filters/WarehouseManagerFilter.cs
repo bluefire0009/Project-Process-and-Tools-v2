@@ -6,7 +6,7 @@ using System.Threading.Tasks;
 using System.Diagnostics.CodeAnalysis;
 namespace CargoHub.Filters
 {
-    
+    [ExcludeFromCodeCoverage]
     public class WarehouseManagerFilter : IAsyncActionFilter
     {
         private const string ApiKeyHeader = "Api-Key"; // Header
