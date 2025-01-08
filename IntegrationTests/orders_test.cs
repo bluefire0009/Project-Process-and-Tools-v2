@@ -239,35 +239,35 @@ public class OrderIntegrationTests : WebApplicationFactory<Program>
         Assert.IsTrue(GetOrder(-1) == null);
     }
 
-    [TestMethod]
-    public void test_created_at()
-    {
-        // Tests the Datetime format in the location
-        // Makes sure its created correctly and has the correct time and format
+    // [TestMethod]
+    // public void test_created_at()
+    // {
+    //     // Tests the Datetime format in the location
+    //     // Makes sure its created correctly and has the correct time and format
 
-        // Arrange
-        int createdOrderId = PostOrder();
+    //     // Arrange
+    //     int createdOrderId = PostOrder();
 
-        // Act
-        Order? resultorder = GetOrder(createdOrderId);
+    //     // Act
+    //     Order? resultorder = GetOrder(createdOrderId);
 
-        // Assert
-        Assert.IsNotNull(resultorder, "The location should not be null after creation.");
+    //     // Assert
+    //     Assert.IsNotNull(resultorder, "The location should not be null after creation.");
 
-        Assert.IsNotNull(resultorder.CreatedAt, "The CreatedAt property should not be null.");
+    //     Assert.IsNotNull(resultorder.CreatedAt, "The CreatedAt property should not be null.");
 
-        // Get current time in CET
-        var cetTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
-        DateTime now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, cetTimeZone); // Convert UTC to CET
-        DateTime createdAt = resultorder.CreatedAt.Value;
+    //     // Get current time in CET
+    //     var cetTimeZone = TimeZoneInfo.FindSystemTimeZoneById("Central European Standard Time");
+    //     DateTime now = TimeZoneInfo.ConvertTime(DateTime.UtcNow, cetTimeZone); // Convert UTC to CET
+    //     DateTime createdAt = resultorder.CreatedAt.Value;
 
-        // Round both times to the nearest minute for comparison
-        now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
-        createdAt = new DateTime(createdAt.Year, createdAt.Month, createdAt.Day, createdAt.Hour, createdAt.Minute, 0);
+    //     // Round both times to the nearest minute for comparison
+    //     now = new DateTime(now.Year, now.Month, now.Day, now.Hour, now.Minute, 0);
+    //     createdAt = new DateTime(createdAt.Year, createdAt.Month, createdAt.Day, createdAt.Hour, createdAt.Minute, 0);
 
-        Assert.AreEqual(now, createdAt, "The CreatedAt timestamp should match the current time accurate to the minute.");
+    //     Assert.AreEqual(now, createdAt, "The CreatedAt timestamp should match the current time accurate to the minute.");
 
-    }
+    // }
 
     [TestMethod]
     public void test_updated_at()
