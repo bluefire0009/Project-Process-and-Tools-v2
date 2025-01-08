@@ -11,7 +11,7 @@ namespace TestProject1
 {
     [ExcludeFromCodeCoverage]
     [TestClass]
-    public class ManagerFilterTest
+    public class WarehouseFilterTest
     {
         private IApiKeyValidationInterface _apiKeyValidationService;
 
