@@ -12,11 +12,12 @@ public class DocksDBStorage : IDocksStorage
 
     public async Task<IEnumerable<Dock>> GetAllDocksAsync()
     {
-        return await db.Docks
-            .Include(d => d.Transfers)
-            .Where(d => !d.isDeleted)
-            .ToListAsync();
-    }
+            return await db.Docks
+                .Include(d => d.Transfers)
+                .Where(d => !d.isDeleted)
+                .Take(100) 
+                .ToListAsync();
+        }
 
     public async Task<Dock?> GetDockByIdAsync(int id)
     {
