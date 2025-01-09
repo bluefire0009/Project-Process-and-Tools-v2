@@ -40,7 +40,12 @@ using System.Threading.Tasks;
 
         public async Task<bool> CreateDockAsync(Dock dock)
         {
-            var existingDock = await db.Docks.AsNoTracking().FirstOrDefaultAsync(d => d.Id == dock.Id);
+            if (dock.Id == 0)
+            {
+                return false;
+            }
+
+            var existingDock = await db.Docks.FirstOrDefaultAsync(d => d.LocationId == dock.LocationId && !d.isDeleted);
             if (existingDock != null)
             {
                 return false;
