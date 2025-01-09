@@ -1,162 +1,190 @@
+using System.Diagnostics.CodeAnalysis;
 using Microsoft.EntityFrameworkCore;
 using CargoHub.Models;
-using System.Diagnostics.CodeAnalysis;
 
-namespace TestProject1;
+using Microsoft.VisualStudio.TestTools.UnitTesting;
+using System.Collections.Generic;
+using System.Linq;
+using System.Threading.Tasks;
 
-[ExcludeFromCodeCoverage]
-[TestClass]
-public class DockDBTest
+namespace TestProject1
 {
-    private DatabaseContext db;
-
-    [TestInitialize]
-    public void SetUp()
+    [ExcludeFromCodeCoverage]
+    [TestClass]
+    public class DocksDBTest
     {
-        // Set up 
-        var options = new DbContextOptionsBuilder<DatabaseContext>()
-            .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
-            .Options;
-        db = new DatabaseContext(options);
-    }
+        private DatabaseContext db;
 
-    [TestCleanup]
-    public void Cleanup()
-    {
-        // Dispose of the database context after each test
-        db?.Dispose();
-    }
+        [TestInitialize]
+        public void SetUp()
+        {
+            var options = new DbContextOptionsBuilder<DatabaseContext>()
+                .UseInMemoryDatabase(databaseName: Guid.NewGuid().ToString())
+                .Options;
+            db = new DatabaseContext(options);
+        }
 
-    public static IEnumerable<object[]> TestGetDocksTestData => new List<object[]>
-    {
-        new object[] { new List<Dock>() },
-        new object[] { new List<Dock> { new Dock { Id = 1, ZipCode = "12345", TransferID = 1, created_at = DateTime.Now, updated_at = DateTime.Now } } },
-        new object[] { new List<Dock>
+        public static IEnumerable<object[]> DocksTestData => new List<object[]>
+        {
+            new object[] { new List<Dock> {} },
+            new object[] { new List<Dock> { new Dock { Id = 1, LocationId = 1, isDeleted = false } } },
+            new object[] { new List<Dock> { new Dock { Id = 1, LocationId = 1, isDeleted = false }, new Dock { Id = 2, LocationId = 2, isDeleted = false } } }
+        };
+
+        [TestMethod]
+        [DynamicData(nameof(DocksTestData), DynamicDataSourceType.Property)]
+        public void TestGetAll(List<Dock> docks)
+        {
+            // Arrange
+            foreach (Dock dock in docks)
             {
-                new Dock { Id = 1, ZipCode = "12345", TransferID = 1, created_at = DateTime.Now, updated_at = DateTime.Now },
-                new Dock { Id = 2, ZipCode = "67890", TransferID = 2, created_at = DateTime.Now, updated_at = DateTime.Now }
+                db.Docks.Add(dock);
+            }
+            db.SaveChanges();
+            DocksDBStorage storage = new(db);
+
+            // Act
+            List<Dock> result = storage.GetAllDocksAsync().Result.ToList();
+
+            // Assert
+            Assert.IsTrue(result.Count == docks.Count);
+            for (int dockIterator = 0; dockIterator < result.Count; dockIterator++)
+            {
+                Assert.IsTrue(result[dockIterator].Equals(docks[dockIterator]));
             }
         }
-    };
 
-    [TestMethod]
-    [DynamicData(nameof(TestGetDocksTestData), DynamicDataSourceType.Property)]
-    public async Task TestGetDocks(List<Dock> docks)
-    {
-        // Arrange
-        await db.Docks.AddRangeAsync(docks);
-        await db.SaveChangesAsync();
-
-        DockDBStorage storage = new(db);
-
-        // Act
-        IEnumerable<Dock> result = await storage.getDocks();
-
-        // Assert
-        Assert.AreEqual(docks.Count, result.Count());
-        CollectionAssert.AreEqual(docks, result.ToList());
-    }
-
-    public static IEnumerable<object[]> TestGetDockTestData => new List<object[]>
-    {
-        new object[] { new Dock { Id = 1, ZipCode = "12345", TransferID = 1, created_at = DateTime.Now, updated_at = DateTime.Now }, 1, true },
-        new object[] { new Dock { Id = 2, ZipCode = "67890", TransferID = 2, created_at = DateTime.Now, updated_at = DateTime.Now }, 3, false }
-    };
-
-    [TestMethod]
-    [DynamicData(nameof(TestGetDockTestData), DynamicDataSourceType.Property)]
-    public async Task TestGetDock(Dock dock, int id, bool expected)
-    {
-        // Arrange
-        await db.Docks.AddAsync(dock);
-        await db.SaveChangesAsync();
-
-        DockDBStorage storage = new(db);
-
-        // Act
-        Dock? result = await storage.getDock(id);
-
-        // Assert
-        Assert.AreEqual(expected, result != null && result.Equals(dock));
-    }
-
-    public static IEnumerable<object[]> TestAddDockTestData => new List<object[]>
-    {
-        new object[] { new Dock { Id = 1, ZipCode = "12345", TransferID = 1, created_at = DateTime.Now, updated_at = DateTime.Now } },
-        new object[] { new Dock { Id = 2, ZipCode = "67890", TransferID = 2, created_at = DateTime.Now, updated_at = DateTime.Now } }
-    };
-
-    [TestMethod]
-    [DynamicData(nameof(TestAddDockTestData), DynamicDataSourceType.Property)]
-    public async Task TestAddDock(Dock dock)
-    {
-        // Arrange
-        DockDBStorage storage = new(db);
-
-        // Act
-        bool added = await storage.addDock(dock);
-
-        // Assert
-        Assert.IsTrue(added);
-        Dock? result = await db.Docks.FirstOrDefaultAsync(x => x.Id == dock.Id);
-        Assert.IsNotNull(result);
-        Assert.AreEqual(dock.ZipCode, result.ZipCode);
-    }
-
-    public static IEnumerable<object[]> TestUpdateDockTestData => new List<object[]>
-    {
-        new object[] { new Dock { Id = 1, ZipCode = "12345", TransferID = 1, created_at = DateTime.Now, updated_at = DateTime.Now }, 1, true },
-        new object[] { new Dock { Id = 2, ZipCode = "67890", TransferID = 2, created_at = DateTime.Now, updated_at = DateTime.Now }, 3, false }
-    };
-
-    [TestMethod]
-    [DynamicData(nameof(TestUpdateDockTestData), DynamicDataSourceType.Property)]
-    public async Task TestUpdateDock(Dock dock, int idToUpdate, bool expected)
-    {
-        // Arrange
-        await db.Docks.AddAsync(dock);
-        await db.SaveChangesAsync();
-
-        DockDBStorage storage = new(db);
-
-        // Modify the dock for updating
-        dock.ZipCode = "UpdatedZipCode";
-
-        // Act
-        bool updated = await storage.updateDock(idToUpdate, dock);
-
-        // Assert
-        Assert.AreEqual(expected, updated);
-        if (expected)
+        public static IEnumerable<object[]> SpecificDockTestData => new List<object[]>
         {
-            Dock? updatedDock = await db.Docks.FirstOrDefaultAsync(x => x.Id == idToUpdate);
-            Assert.IsNotNull(updatedDock);
-            Assert.AreEqual(dock.ZipCode, updatedDock?.ZipCode);
+            new object[] { new List<Dock> {}, 1, false },
+            new object[] { new List<Dock> { new Dock { Id = 1, LocationId = 1, isDeleted = false } }, 2, false },
+            new object[] { new List<Dock> { new Dock { Id = 1, LocationId = 1, isDeleted = false } }, 1, true },
+            new object[] { new List<Dock> { new Dock { Id = 1, LocationId = 1, isDeleted = false }, new Dock { Id = 2, LocationId = 2, isDeleted = false } }, 2, true }
+        };
+
+        [TestMethod]
+        [DynamicData(nameof(SpecificDockTestData), DynamicDataSourceType.Property)]
+        public void TestGetSpecific(List<Dock> docks, int soughtId, bool expectedResult)
+        {
+            // Arrange
+            foreach (Dock dock in docks)
+            {
+                db.Docks.Add(dock);
+                db.SaveChanges();
+            }
+            DocksDBStorage storage = new(db);
+
+            // Act
+            Dock? foundDock = storage.GetDockByIdAsync(soughtId).Result;
+
+            // Assert
+            bool actualResult = foundDock != null;
+            Assert.IsTrue(actualResult == expectedResult);
         }
-    }
 
-    public static IEnumerable<object[]> TestDeleteDockTestData => new List<object[]>
-    {
-        new object[] { new Dock { Id = 1, ZipCode = "12345", TransferID = 1, created_at = DateTime.Now, updated_at = DateTime.Now } },
-        new object[] { new Dock { Id = 2, ZipCode = "67890", TransferID = 2, created_at = DateTime.Now, updated_at = DateTime.Now } }
-    };
+         public static IEnumerable<object[]> AddDockTestData => new List<object[]>
+        {
+            new object[] { null, false },
+            new object[] { new Dock { Id = 0, LocationId = 1, isDeleted = false }, false },
+            new object[] { new Dock { Id = 1, LocationId = 1, isDeleted = false }, true }
+        };
 
-    [TestMethod]
-    [DynamicData(nameof(TestDeleteDockTestData), DynamicDataSourceType.Property)]
-    public async Task TestDeleteDock(Dock dock)
-    {
-        // Arrange
-        await db.Docks.AddAsync(dock);
-        await db.SaveChangesAsync();
+        [TestMethod]
+        [DynamicData(nameof(AddDockTestData), DynamicDataSourceType.Property)]
+        public void TestAdd(Dock dock, bool expectedResult)
+        {
+            // Arrange
+            DocksDBStorage storage = new(db);
 
-        DockDBStorage storage = new(db);
+            // Act
+            bool actualResult = false;
+            if (dock != null)
+            {
+                actualResult = storage.CreateDockAsync(dock).Result;
+            }
 
-        // Act
-        bool deleted = await storage.deleteDock(dock.Id);
+            // Assert
+            Assert.AreEqual(expectedResult, actualResult);
+            if (expectedResult)
+            {
+                Assert.IsTrue(db.Docks.Contains(dock));
+            }
+            else
+            {
+                if (dock != null)
+                {
+                    Assert.IsFalse(db.Docks.Contains(dock));
+                }
+            }
+        }
 
-        // Assert
-        Assert.IsTrue(deleted);
-        Dock? result = await db.Docks.FirstOrDefaultAsync(x => x.Id == dock.Id);
-        Assert.IsNull(result);
+
+        [TestMethod]
+        public void TestAddSameIdTwice()
+        {
+            // Arrange
+            Dock d1 = new() { Id = 1, LocationId = 1, isDeleted = false };
+            Dock d2 = new() { Id = 1, LocationId = 2, isDeleted = false };
+            DocksDBStorage storage = new(db);
+
+            // Act
+            bool firstAdd = storage.CreateDockAsync(d1).Result;
+            bool secondAdd = storage.CreateDockAsync(d2).Result;
+
+            // Assert
+            Assert.IsTrue(firstAdd == true);
+            Assert.IsTrue(secondAdd == false);
+        }
+
+        public static IEnumerable<object[]> RemoveDockTestData => new List<object[]>
+        {
+            new object[] { new List<Dock> {}, 1, false },
+            new object[] { new List<Dock> { new Dock { Id = 1, LocationId = 1, isDeleted = false } }, 0, false },
+            new object[] { new List<Dock> { new Dock { Id = 1, LocationId = 1, isDeleted = false } }, 2, false },
+            new object[] { new List<Dock> { new Dock { Id = 1, LocationId = 1, isDeleted = false } }, 1, true },
+            new object[] { new List<Dock> { new Dock { Id = 1, LocationId = 1, isDeleted = false }, new Dock { Id = 2, LocationId = 2, isDeleted = false } }, 2, true }
+        };
+
+        [TestMethod]
+        [DynamicData(nameof(RemoveDockTestData), DynamicDataSourceType.Property)]
+        public async Task TestRemove(List<Dock> docks, int idToRemove, bool expectedResult)
+        {
+            int oldCount = docks.Where(_ => !_.isDeleted).Count();
+            // Arrange
+            foreach (Dock dock in docks)
+            {
+                db.Docks.Add(dock);
+                db.SaveChanges();
+            }
+            DocksDBStorage storage = new(db);
+
+            // Act
+            bool actualResult = await storage.SoftDeleteDockAsync(idToRemove);
+
+            // Assert
+            Assert.IsTrue(actualResult == expectedResult);
+            if (expectedResult == true)
+                Assert.IsTrue(db.Docks.Where(_ => !_.isDeleted).Count() == oldCount - 1);
+            if (expectedResult == false)
+                Assert.IsTrue(db.Docks.Where(_ => !_.isDeleted).Count() == oldCount);
+        }
+
+        [TestMethod]
+        public void TestRemoveSameTwice()
+        {
+            // Arrange
+            Dock d1 = new() { Id = 1, LocationId = 1, isDeleted = false };
+            db.Docks.Add(d1);
+            db.SaveChanges();
+            DocksDBStorage storage = new(db);
+
+            // Act
+            bool firstRemove = storage.SoftDeleteDockAsync(d1.Id).Result;
+            bool secondRemove = storage.SoftDeleteDockAsync(d1.Id).Result;
+
+            // Assert
+            Assert.IsTrue(firstRemove == true);
+            Assert.IsTrue(secondRemove == false);
+        }
     }
 }
