@@ -1,10 +1,11 @@
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 using System.Collections.Generic;
+using System.Diagnostics.CodeAnalysis;
 using System.Linq;
 using System.Threading.Tasks;
 
-
+    [ExcludeFromCodeCoverage]
     public class DocksDBStorage : IDocksStorage  
     {
         private readonly DatabaseContext db;
@@ -45,7 +46,7 @@ using System.Threading.Tasks;
                 return false;
             }
 
-            var existingDock = await db.Docks.FirstOrDefaultAsync(d => d.LocationId == dock.LocationId && !d.isDeleted);
+            var existingDock = await db.Docks.AsNoTracking().FirstOrDefaultAsync(d => d.Id == dock.Id);
             if (existingDock != null)
             {
                 return false;
