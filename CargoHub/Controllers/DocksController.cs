@@ -13,20 +13,21 @@ public class DocksController : Controller
     {
         this.dockStorage = dockStorage;
     }
-
+    //Get all
     [HttpGet]
     public async Task<IActionResult> GetAllDocks()
     {
         var docks = await dockStorage.GetAllDocksAsync();
         return Ok(docks);
     }
-    
+    //Pagination
      [HttpGet("pagination")]
     public async Task<IActionResult> GetDocksWithPagination(int offset, int limit)
     {
         var docks = await dockStorage.GetDocksWithPaginationAsync(offset, limit);
         return Ok(docks);
     }
+    //Get by id
     [HttpGet("{id}")]
     public async Task<IActionResult> GetDockById(int id)
     {
@@ -34,7 +35,7 @@ public class DocksController : Controller
         if (dock == null) return NotFound();
         return Ok(dock);
     }
-
+   //Create
     [HttpPost]
     public async Task<IActionResult> CreateDock([FromBody] Dock dock)
     {
@@ -42,7 +43,7 @@ public class DocksController : Controller
         if (!created) return BadRequest();
         return CreatedAtAction(nameof(GetDockById), new { id = dock.Id }, dock);
     }
-
+    //Soft Delete
     [HttpDelete("{id}")]
     public async Task<IActionResult> SoftDeleteDock(int id)
     {
