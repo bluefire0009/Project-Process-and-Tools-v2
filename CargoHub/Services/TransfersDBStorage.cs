@@ -148,14 +148,14 @@ public class TransferDBStorage : ITransferStorage
 
         // check if there are enough items for the transfer
         foreach (TransferItem item in transferInDatabase.Items)
-            if ((await checkIfItemTransferPossible(item.ItemUid, transferInDatabase.TransferTo, item.Amount)) == false)
+            if ((await checkIfItemTransferPossible(item.ItemUid, item.Amount)) == false)
                 return (false, TransferResult.notEnoughItems);
 
         // carry out the transfer
         foreach (TransferItem item in transferInDatabase.Items)
         {
-            Inventory? inventoryWithAskedItem = await db.Inventories.FirstOrDefaultAsync(i => i.ItemId == item.ItemUid);
-            Inventory? inventoryToTransferTo = await db.Inventories.Where(i => i.InventoryLocations.Select(l => l.LocationId).Contains(transferInDatabase.TransferFrom)).FirstOrDefaultAsync();
+            Inventory? inventoryWithAskedItem = await db.Inventories.Include(i => i.InventoryLocations).FirstOrDefaultAsync(i => i.ItemId == item.ItemUid);
+            Inventory? inventoryToTransferTo = await db.Inventories.Include(i => i.InventoryLocations).Where(i => i.InventoryLocations.Select(l => l.LocationId).Contains(transferInDatabase.TransferFrom)).FirstOrDefaultAsync();
             if (inventoryWithAskedItem == null) return (false, TransferResult.FromInventoryNotExsists);
             if (inventoryToTransferTo == null) return (false, TransferResult.ToInventoryNotExsists);
 
@@ -179,11 +179,11 @@ public class TransferDBStorage : ITransferStorage
             InventoryLocation ilToAdd = new() { InventoryId = inventoryToTransferTo.Id, LocationId = transferInDatabase.TransferTo };
             if (!inventoryToTransferTo.InventoryLocations.Any(l => l.LocationId == ilToAdd.LocationId && l.InventoryId == ilToAdd.InventoryId))
             {
-                inventoryToTransferTo.InventoryLocations.ToList().Add(ilToAdd);
-                inventoryToTransferTo.InventoryLocations.ToArray();
+                inventoryToTransferTo.InventoryLocations.Add(ilToAdd);
             }
-            db.InventoryLocations.ToList().Add(ilToAdd);
-            db.Inventories.Add(inventoryToTransferTo);
+            if (inventoryToTransferTo.Equals(inventoryToTransferTo)) db.Inventories.Update(inventoryToTransferTo);
+            else db.Inventories.Add(inventoryToTransferTo);
+
             await db.SaveChangesAsync();
         }
         
@@ -195,12 +195,10 @@ public class TransferDBStorage : ITransferStorage
         return (true, TransferResult.possible);
     }
 
-    private async Task<bool> checkIfItemTransferPossible(string itemId, int locationTo, int amountToTransfer)
+    private async Task<bool> checkIfItemTransferPossible(string itemId, int amountToTransfer)
     {
         Inventory? inventoryWithAskedItem = await db.Inventories.FirstOrDefaultAsync(i => i.ItemId == itemId);
-        Inventory? inventoryToTransferTo = await db.Inventories.Include(i => i.InventoryLocations).Where(i => i.InventoryLocations.Select(l => l.LocationId).Contains(locationTo)).FirstOrDefaultAsync();
         if (inventoryWithAskedItem == null) return false;
-        if (inventoryToTransferTo == null) return false;
 
         if (inventoryWithAskedItem.total_available - amountToTransfer < 0) return false;
 
