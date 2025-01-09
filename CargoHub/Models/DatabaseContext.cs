@@ -48,7 +48,6 @@ public class DatabaseContext : DbContext
                 modelBuilder.Entity<ShipmentItems>().HasQueryFilter(s => !s.IsDeleted);
                 modelBuilder.Entity<ItemLine>().HasQueryFilter(i => !i.IsDeleted);
 
-                modelBuilder.Entity<ApiKey>().ToTable("API_keys");
                 modelBuilder.Entity<TransferItem>().HasKey(i => new { i.TransferId, i.ItemUid });
                 modelBuilder.Entity<InventoryLocation>().HasKey(l => new { l.InventoryId, l.LocationId });
                 modelBuilder.Entity<Transfer>().HasOne(t => t.LocationFrom).WithMany().HasForeignKey(t => t.TransferFrom);

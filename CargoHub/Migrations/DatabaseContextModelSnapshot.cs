@@ -36,7 +36,7 @@ namespace CargoHub.Migrations
 
                     b.HasKey("Id");
 
-                    b.ToTable("API_keys", (string)null);
+                    b.ToTable("ApiKeys");
                 });
 
             modelBuilder.Entity("CargoHub.Models.Client", b =>

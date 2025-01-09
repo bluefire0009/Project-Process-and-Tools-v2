@@ -11,7 +11,7 @@ public class SuppliersController : Controller
     {
         this.supplierStorage = supplierStorage;
     }
-
+    
     [HttpGet("")]
     public async Task<IActionResult> GetSuppliers([FromQuery] int offset = 0, [FromQuery] int limit = 100, [FromQuery] bool orderById = false)
     {
