@@ -37,7 +37,7 @@ public class TransferController : Controller
         bool added = await transferStorage.addTransfer(transfer);
 
         if (!added) return BadRequest($"Couldn't add transfer:{JsonConvert.SerializeObject(transfer)}");
-        return Ok($"Added transfer:{JsonConvert.SerializeObject(transfer)}");
+        return Created("",$"Added transfer:{JsonConvert.SerializeObject(transfer)}");
     }
 
     [HttpDelete("{id}")]
