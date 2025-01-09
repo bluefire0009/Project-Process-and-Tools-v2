@@ -4,13 +4,13 @@ namespace CargoHub.Models;
 
 public class Dock
 {
-    public int Id {get;set;}
+[Key]
+    public int Id { get; set; }
+    public int LocationId { get; set; }
+    public bool isDeleted { get; set; } = false;
 
-    public int LocationId {get;set;}
-    
-    public int TransferId {get;set;}
-    public bool isDeleted {get;set;} = false;
+ 
+    public ICollection<Transfer> Transfers { get; set; }
 
-    
 
 }

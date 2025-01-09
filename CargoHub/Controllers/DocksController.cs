@@ -4,77 +4,44 @@ using Newtonsoft.Json;
 using System.Diagnostics.CodeAnalysis;
 
 [Route("/api/v2/docks")]
-// Gets tested in testfile
 [ExcludeFromCodeCoverage]
 public class DocksController : Controller
 {
-    private IDocksStorage dockStorage;
+    private readonly IDocksStorage dockStorage;
     
     public DocksController(IDocksStorage dockStorage)
     {
         this.dockStorage = dockStorage;
     }
 
-    [HttpGet("")]
+    [HttpGet]
     public async Task<IActionResult> GetAllDocks()
     {
-        List<Dock> docks = (await dockStorage.getDocks()).ToList();
+        var docks = await dockStorage.GetAllDocksAsync();
         return Ok(docks);
     }
 
     [HttpGet("{id}")]
-    public async Task<IActionResult> GetSpecificDock(int id)
+    public async Task<IActionResult> GetDockById(int id)
     {
-        if (id <= 0) return BadRequest("Invalid id in the url");
-
-        Dock? foundDock = await dockStorage.getDock(id);
-        if (foundDock == null) return NotFound($"No dock with id:{id} found");
-
-        return Ok(foundDock);
+        var dock = await dockStorage.GetDockByIdAsync(id);
+        if (dock == null) return NotFound();
+        return Ok(dock);
     }
 
-    [HttpGet("{id}/docktransfers")]
-    public async Task<IActionResult> GetTransferSpecificDock(int id)
+    [HttpPost]
+    public async Task<IActionResult> CreateDock([FromBody] Dock dock)
     {
-        if (id <= 0) return BadRequest("Invalid id in the url");
-
-        Dock? foundDock = await dockStorage.getDock(id);
-        if (foundDock == null) return NotFound($"No dock with id:{id} found");
-
-        List<Transfer> dockTransfer = dockStorage.getDockTransfers(id).ToList();
-
-        return Ok(dockTransfer);
-    }
-
-    [HttpPost("")]
-    public async Task<IActionResult> PostDock([FromBody] Dock dock)
-    {
-        bool added = await dockStorage.addDock(dock);
-
-        if (!added) return BadRequest($"Couldn't add dock:{JsonConvert.SerializeObject(dock)}");
-        return Ok($"Added dock:{JsonConvert.SerializeObject(dock)}");
+        var created = await dockStorage.CreateDockAsync(dock);
+        if (!created) return BadRequest();
+        return CreatedAtAction(nameof(GetDockById), new { id = dock.Id }, dock);
     }
 
     [HttpDelete("{id}")]
-    public async Task<IActionResult> RemoveDock(int id)
+    public async Task<IActionResult> SoftDeleteDock(int id)
     {
-        if (id <= 0) return BadRequest("Invalid id in the url");
-
-        bool deleted = await dockStorage.deleteDock(id);
-
-        if (!deleted) return NotFound($"No dock with id:{id} in the database");
-        return Ok($"Deleted dock with id: {id}");
-    }
-
-    [HttpPut("{idToUpdate}")]
-    public async Task<IActionResult> UpdateDock(int idToUpdate, [FromBody] Dock updatedDock)
-    {
-        if (idToUpdate <= 0) return BadRequest("Invalid id in the url");
-        if (updatedDock == null) return BadRequest("updatedDock cannot be null");
-
-        bool updated = await dockStorage.updateDock(idToUpdate, updatedDock);
-
-        if (!updated) return NotFound($"No dock with id:{idToUpdate} in the database");
-        return Ok($"Updated dock id:{idToUpdate} to:{updatedDock}");
+        var deleted = await dockStorage.SoftDeleteDockAsync(id);
+        if (!deleted) return NotFound();
+        return NoContent();
     }
 }

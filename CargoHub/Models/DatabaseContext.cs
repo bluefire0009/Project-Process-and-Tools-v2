@@ -1,3 +1,4 @@
+
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -23,7 +24,9 @@ public class DatabaseContext : DbContext
         public DbSet<TransferItem> TransferItems { get; set; }
         public DbSet<Warehouse> Warehouses { get; set; }
         public DbSet<ApiKey> ApiKeys { get; set; }
-    public DbSet<Dock> Docks { get; set; }  
+
+         public DbSet<Dock> Docks { get; set; }
+
 
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
@@ -52,5 +55,11 @@ public class DatabaseContext : DbContext
                 modelBuilder.Entity<InventoryLocation>().HasKey(l => new { l.InventoryId, l.LocationId });
                 modelBuilder.Entity<Transfer>().HasOne(t => t.LocationFrom).WithMany().HasForeignKey(t => t.TransferFrom);
                 modelBuilder.Entity<Transfer>().HasOne(t => t.LocationTo).WithMany().HasForeignKey(t => t.TransferTo);
+
+                 modelBuilder.Entity<Dock>()
+            .HasMany(d => d.Transfers)
+            .WithOne()
+            .HasForeignKey(t => t.TransferFrom);
+
         }
 }

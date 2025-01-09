@@ -3,81 +3,42 @@ using Microsoft.EntityFrameworkCore;
 
 public class DockDBStorage : IDocksStorage  
 {
-    DatabaseContext db;
+    private readonly DatabaseContext db;
 
     public DockDBStorage(DatabaseContext db)  
     {
         this.db = db;
     }
 
-    // Get all Docks 
-    public async Task<IEnumerable<Dock>> getDocks()
+    public async Task<IEnumerable<Dock>> GetAllDocksAsync()
     {
-        List<Dock> docks = await db.Docks.ToListAsync(); 
-        return docks;
+        return await db.Docks
+            .Include(d => d.Transfers)
+            .Where(d => !d.isDeleted)
+            .ToListAsync();
     }
 
-    // Get specific Dock by ID
-    public async Task<Dock?> getDock(int id)
+    public async Task<Dock?> GetDockByIdAsync(int id)
     {
-        Dock? dock = await db.Docks.Where(d => d.Id == id).FirstOrDefaultAsync();  
-        return dock;
+        return await db.Docks
+            .Include(d => d.Transfers)
+            .FirstOrDefaultAsync(d => d.Id == id && !d.isDeleted);
     }
 
-    // Get transfers associated with a specific Dock 
-    public IEnumerable<Transfer>? getDockTransfers(int dockTransferID)
+    public async Task<bool> CreateDockAsync(Dock dock)
     {
-        if (dockTransferID <= 0) return null;
-
-        IEnumerable<Transfer> DockTransfers = db.Transfers.Where(l => l.Id == dockTransferID); 
-        return DockTransfers;
+        await db.Docks.AddAsync(dock);
+        await db.SaveChangesAsync();
+        return true;
     }
 
-    // Add a new Dock
-    public async Task<bool> addDock(Dock dock)
+    public async Task<bool> SoftDeleteDockAsync(int id)
     {
+        var dock = await db.Docks.FirstOrDefaultAsync(d => d.Id == id);
         if (dock == null) return false;
-        if (dock.Id <= 0) return false;
 
-        Dock? dockInDatabase = await db.Docks.Where(d => d.Id == dock.Id).FirstOrDefaultAsync(); 
-        if (dockInDatabase != null) return false;
-
-        await db.Docks.AddAsync(dock);  
-
+        dock.isDeleted = true;
         await db.SaveChangesAsync();
-        return true;
-    }
-
-    // Delete an existing Dock
-    public async Task<bool> deleteDock(int id)
-    {
-        if (id <= 0) return false;
-
-        Dock? dockInDatabase = await db.Docks.Where(d => d.Id == id).FirstOrDefaultAsync(); 
-        if (dockInDatabase == null) return false;
-
-        db.Docks.Remove(dockInDatabase);  
-
-        await db.SaveChangesAsync();
-        return true;
-    }
-
-    // Update an existing Dock
-    public async Task<bool> updateDock(int idToUpdate, Dock? updatedDock)
-    {
-        if (updatedDock == null) return false;
-        if (idToUpdate != updatedDock.Id) return false;
-        if (idToUpdate <= 0 || updatedDock.Id <= 0) return false;
-
-        Dock? dockInDatabase = await db.Docks.Where(d => d.Id == idToUpdate).FirstOrDefaultAsync();  
-        if (dockInDatabase == null) return false;
-
-        db.Remove(dockInDatabase);
-        await db.SaveChangesAsync();
-
-        db.Add(updatedDock);
-        await db.SaveChangesAsync();
-
         return true;
     }
 }
