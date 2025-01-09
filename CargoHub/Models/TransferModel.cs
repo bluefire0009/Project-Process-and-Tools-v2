@@ -2,6 +2,7 @@ namespace CargoHub.Models;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using Newtonsoft.Json;
 
 public class Transfer : IEquatable<Transfer>
 {
@@ -45,6 +46,7 @@ public class Transfer : IEquatable<Transfer>
 public class TransferItem : IEquatable<TransferItem>
 {
     [ForeignKey("TransferId")]
+    [JsonIgnore] // Prevent circular reference
     public Transfer? transfer { get; set; }
     public int TransferId { get; set; }
 
