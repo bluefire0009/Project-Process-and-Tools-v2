@@ -54,6 +54,51 @@ namespace TestProject1
             }
         }
 
+        [TestMethod]
+        public void TestGetAll_LimitTo100()
+        {
+            // Arrange
+            for (int i = 0; i < 150; i++)
+            {
+                db.Docks.Add(new Dock { Id = i + 1, LocationId = i + 1, isDeleted = false });
+            }
+            db.SaveChanges();
+            DocksDBStorage storage = new(db);
+
+            // Act
+            List<Dock> result = storage.GetAllDocksAsync().Result.ToList();
+
+            // Assert
+            Assert.IsTrue(result.Count <= 100);
+        }
+
+        public static IEnumerable<object[]> PaginationTestData => new List<object[]>
+        {
+            new object[] { 150, 0, 100, 100 },
+            new object[] { 150, 100, 100, 50 },
+            new object[] { 150, 50, 50, 50 },
+            new object[] { 150, 150, 50, 0 }
+        };
+
+        [TestMethod]
+        [DynamicData(nameof(PaginationTestData), DynamicDataSourceType.Property)]
+        public void TestGetDocksWithPagination(int totalItems, int offset, int limit, int expectedCount)
+        {
+            // Arrange
+            for (int i = 0; i < totalItems; i++)
+            {
+                db.Docks.Add(new Dock { Id = i + 1, LocationId = i + 1, isDeleted = false });
+            }
+            db.SaveChanges();
+            DocksDBStorage storage = new(db);
+
+            // Act
+            List<Dock> result = storage.GetDocksWithPaginationAsync(offset, limit).Result.ToList();
+
+            // Assert
+            Assert.AreEqual(expectedCount, result.Count);
+        }
+
         public static IEnumerable<object[]> SpecificDockTestData => new List<object[]>
         {
             new object[] { new List<Dock> {}, 1, false },
@@ -70,8 +115,8 @@ namespace TestProject1
             foreach (Dock dock in docks)
             {
                 db.Docks.Add(dock);
-                db.SaveChanges();
             }
+            db.SaveChanges();
             DocksDBStorage storage = new(db);
 
             // Act
@@ -82,7 +127,7 @@ namespace TestProject1
             Assert.IsTrue(actualResult == expectedResult);
         }
 
-         public static IEnumerable<object[]> AddDockTestData => new List<object[]>
+        public static IEnumerable<object[]> AddDockTestData => new List<object[]>
         {
             new object[] { null, false },
             new object[] { new Dock { Id = 0, LocationId = 1, isDeleted = false }, false },
@@ -118,7 +163,6 @@ namespace TestProject1
             }
         }
 
-
         [TestMethod]
         public void TestAddSameIdTwice()
         {
@@ -147,19 +191,19 @@ namespace TestProject1
 
         [TestMethod]
         [DynamicData(nameof(RemoveDockTestData), DynamicDataSourceType.Property)]
-        public async Task TestRemove(List<Dock> docks, int idToRemove, bool expectedResult)
+        public void TestRemove(List<Dock> docks, int idToRemove, bool expectedResult)
         {
             int oldCount = docks.Where(_ => !_.isDeleted).Count();
             // Arrange
             foreach (Dock dock in docks)
             {
                 db.Docks.Add(dock);
-                db.SaveChanges();
             }
+            db.SaveChanges();
             DocksDBStorage storage = new(db);
 
             // Act
-            bool actualResult = await storage.SoftDeleteDockAsync(idToRemove);
+            bool actualResult = storage.SoftDeleteDockAsync(idToRemove).Result;
 
             // Assert
             Assert.IsTrue(actualResult == expectedResult);
