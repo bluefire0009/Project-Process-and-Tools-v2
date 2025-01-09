@@ -42,7 +42,6 @@ public class TransferDBStorage : ITransferStorage
     public async Task<bool> addTransfer(Transfer transfer)
     {
         if (transfer == null) return false;
-        if (transfer.Id <= 0) return false;
 
         // Check that transferLocations are valid
         if ((await db.Locations.FirstOrDefaultAsync(l => l.Id == transfer.TransferFrom)) == null) return false;
@@ -52,34 +51,25 @@ public class TransferDBStorage : ITransferStorage
         foreach (TransferItem item in transfer.Items)
         {
             if (item == null) return false;
-            bool containsItemUid = await db.TransferItems.Where(i => i.ItemUid == item.ItemUid).FirstOrDefaultAsync() != null;
-            bool containsTransferId = await db.TransferItems.Where(i => i.TransferId == item.TransferId).FirstOrDefaultAsync() != null;
-            bool containsCompositeKey = containsTransferId && containsItemUid;
-            if (containsCompositeKey) return false;
+            
             // Check if transfer holds duplicate of the composite key
             bool containsDuplicatesKeys = transfer.Items.Where(i => i.TransferId == item.TransferId && i.ItemUid == item.ItemUid).Count() > 1;
             if (containsDuplicatesKeys) return false;
             // Check if updated item actually exsists in the Items table
             bool itemExsists = db.Items.Select(i => i.Uid).Contains(item.ItemUid);
             if (!itemExsists) return false;
-            // Check if the TransferId of the item is the same as the transfer it's in
-            if (item.TransferId != transfer.Id) return false;
         }
 
         Transfer? transferInDatabase = await db.Transfers.Where(s => s.Id == transfer.Id).FirstOrDefaultAsync();
         if (transferInDatabase != null) return false;
 
-        foreach (TransferItem item in transfer.Items)
-        {
-            await db.TransferItems.AddAsync(item);
-        }
         transfer.CreatedAt = CETDateTime.Now();
         transfer.UpdatedAt = CETDateTime.Now();
         transfer.TransferStatus = "Scheduled";
         await System.IO.File.AppendAllTextAsync("log.txt", $"Scheduled batch transfer: {transfer.Id} \n");
         await db.Transfers.AddAsync(transfer);
-
         await db.SaveChangesAsync();
+
         return true;
     }
 
