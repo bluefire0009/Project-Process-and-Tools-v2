@@ -33,7 +33,8 @@ public class DatabaseContext : DbContext
 
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+        {        modelBuilder.Entity<Dock>().HasQueryFilter(d => !d.isDeleted);
+                
                 modelBuilder.Entity<Supplier>().HasQueryFilter(s => !s.IsDeleted);
                 modelBuilder.Entity<Warehouse>().HasQueryFilter(w => !w.IsDeleted);
                 modelBuilder.Entity<Item>().HasQueryFilter(i => !i.IsDeleted);

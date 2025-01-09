@@ -20,7 +20,13 @@ public class DocksController : Controller
         var docks = await dockStorage.GetAllDocksAsync();
         return Ok(docks);
     }
-
+    
+     [HttpGet("pagination")]
+    public async Task<IActionResult> GetDocksWithPagination(int offset, int limit)
+    {
+        var docks = await dockStorage.GetDocksWithPaginationAsync(offset, limit);
+        return Ok(docks);
+    }
     [HttpGet("{id}")]
     public async Task<IActionResult> GetDockById(int id)
     {
