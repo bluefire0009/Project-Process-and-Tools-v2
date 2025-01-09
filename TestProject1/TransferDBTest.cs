@@ -140,8 +140,8 @@ public class TransferDBTest
             new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 4, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
             new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 4, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
             new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 4, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
-            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 1, Items = {new(){TransferId = 2, ItemUid = "1"}}}, false},
+            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 2, Items = {new(){TransferId = 2, ItemUid = "1"}}}, true},
+            new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 2, TransferTo = 1, Items = {new(){TransferId = 2, ItemUid = "1"}}}, true},
 
             new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}}, new Transfer(){Id = 1, TransferFrom = 1, TransferTo = 2, Items = {new(){TransferId = 1, ItemUid = "1"}}}, true},
             new object[] { new List<Location>(){new(){Id = 1}, new(){Id = 2}}, new List<Item>(){new(){Uid = "1"}, new(){Uid = "2"}}, new Transfer(){Id = 1, TransferFrom = 1, TransferTo = 2, Items = {new(){TransferId = 1, ItemUid = "1"}, new(){TransferId = 1, ItemUid = "2"}}}, true}
