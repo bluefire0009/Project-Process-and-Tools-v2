@@ -4,6 +4,7 @@ using System.Text;
 using CargoHub.HelperFuctions;
 using CargoHub.Models;
 using Microsoft.AspNetCore.Mvc.Testing;
+using Microsoft.EntityFrameworkCore;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.VisualStudio.TestPlatform.TestHost;
 using Microsoft.VisualStudio.TestTools.UnitTesting;
@@ -24,6 +25,7 @@ namespace IntegrationTests
         private static string ItemGroupUrl = "/api/v2/item_groups";
         private static string ItemUrl = "/api/v2/items";
         private static string SupplierUrl = "/api/v2/suppliers";
+        private static string InventoryUrl = "/api/v2/inventories";
         private ItemType testItemType = new() { Name = "Test Appliances", Description = "test 123" };
         private ItemLine testItemLine = new() { Name = "Test Appliances", Description = "test 123" };
         private ItemGroup testItemGroup = new() { Name = "Test Appliances", Description = "test 123" };
@@ -40,6 +42,7 @@ namespace IntegrationTests
             new(){Id = 1, Reference = "", TransferFrom = 1, TransferTo = 2, Items = [new() {ItemUid = "P999999", TransferId = 1, Amount = 10}]},
             new(){Id = 2, Reference = "", TransferFrom = 2, TransferTo = 1, Items = [new() {ItemUid = "P999999", TransferId = 2, Amount = 10}]}
         ];
+        private Inventory testInventory = new(){Id = 1, ItemId = "P999999", Description = "", total_available = 100, total_expected = 100, total_on_hand = 100, total_ordered = 0, ItemReference = "", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}, new(){InventoryId = 1, LocationId = 2}}};
         
 
         private HttpClient client;
@@ -63,6 +66,7 @@ namespace IntegrationTests
             addTestResourceToDB(client, [testItem], ItemUrl);
             addTestResourceToDB(client, testLocations, LocationUrl);
             addTestResourceToDB(client, testTransfers, TransferUrl);
+            addTestResourceToDB(client, [testInventory], InventoryUrl);
         }
 
         [TestCleanup]
@@ -148,6 +152,72 @@ namespace IntegrationTests
             resultTransfer.UpdatedAt = new();
             resultTransfer.TransferStatus = null;
             Assert.IsTrue(testTransfers.Any(t=>t.Equals(resultTransfer)));
+        }
+
+        [TestMethod]
+        public void test_put_transfer()
+        {
+            // Arrange
+            Transfer extraTransfer = new(){Reference = "", TransferFrom = 2, TransferTo = 2, Items = [new() {ItemUid = "P999999", Amount = 20}]};
+            
+            // Act
+            string jsonData = JsonConvert.SerializeObject(extraTransfer);
+            HttpContent putContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            //Capture the time around when the put request happens to check it later
+            DateTime roughPutDate = CETDateTime.Now();
+            HttpStatusCode putStatus = client.PutAsync($"{TransferUrl}/{testTransfers[0].Id}", putContent).Result.StatusCode;
+
+            var response = client.GetAsync(TransferUrl).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+            var resultTransfers = JsonConvert.DeserializeObject<Transfer[]>(content);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, putStatus);
+            Assert.IsTrue(resultTransfers.Length == testTransfers.Length);
+            
+            //Check the modification date
+            Assert.IsTrue(resultTransfers.Last().UpdatedAt - roughPutDate <= TimeSpan.FromSeconds(60));
+
+            //Clear the date fields, id's so I can just assert using .equals function
+            resultTransfers.ToList().ForEach(t=>{ t.Id = 0; t.Items.ForEach(ti => {ti.TransferId = 0;}); t.CreatedAt = new(); t.UpdatedAt = new();});
+            extraTransfer.CreatedAt = new();
+            extraTransfer.UpdatedAt = new();
+            Assert.IsTrue(resultTransfers.Any(t=>t.Equals(extraTransfer)));
+        }
+
+        [TestMethod]
+        public void test_commit_transfer()
+        {
+            // Arrange
+            
+            // Act
+            //Capture the time around when the put request happens to check it later
+            DateTime roughCommitDate = CETDateTime.Now();
+            HttpStatusCode commitStatus = client.PutAsync($"{TransferUrl}/{testTransfers[0].Id}/commit", null).Result.StatusCode;
+
+            var response = client.GetAsync(TransferUrl).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+            var resultTransfers = JsonConvert.DeserializeObject<Transfer[]>(content);
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, commitStatus);
+        }
+
+        [TestMethod]
+        public void test_delete_transfer()
+        {
+            // Arrange
+
+            // Act
+            HttpStatusCode deleteStatus = client.DeleteAsync($"{TransferUrl}/{testTransfers[0].Id}").Result.StatusCode;
+
+            var response = client.GetAsync(TransferUrl).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+            var resultTransfer = JsonConvert.DeserializeObject<Transfer[]>(content);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, deleteStatus);
+            Assert.IsTrue(resultTransfer.Length == testTransfers.Length - 1);
+            Assert.IsTrue(!resultTransfer.Any(t=>t.Equals(testTransfers[0])));
         }
 
         private static void addTestResourceToDB<T>(HttpClient client, T[] resourceArray, string url)
