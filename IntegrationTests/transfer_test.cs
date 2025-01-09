@@ -42,7 +42,7 @@ namespace IntegrationTests
             new(){Id = 1, Reference = "", TransferFrom = 1, TransferTo = 2, Items = [new() {ItemUid = "P999999", TransferId = 1, Amount = 10}]},
             new(){Id = 2, Reference = "", TransferFrom = 2, TransferTo = 1, Items = [new() {ItemUid = "P999999", TransferId = 2, Amount = 10}]}
         ];
-        private Inventory testInventory = new(){Id = 1, ItemId = "P999999", Description = "", total_available = 100, total_expected = 100, total_on_hand = 100, total_ordered = 0, ItemReference = "", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}, new(){InventoryId = 1, LocationId = 2}}};
+        private Inventory testInventory = new(){Id = 1, ItemId = "P999999", Description = "", total_available = 100, total_expected = 100, total_on_hand = 100, total_ordered = 0, ItemReference = "", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}};
         
 
         private HttpClient client;
@@ -200,6 +200,10 @@ namespace IntegrationTests
             var resultTransfers = JsonConvert.DeserializeObject<Transfer[]>(content);
             // Assert
             Assert.AreEqual(HttpStatusCode.OK, commitStatus);
+            Assert.IsTrue(resultTransfers.First(t => t.Id == testTransfers[0].Id).TransferStatus == "Processed");
+            // Check if location has been added inventoryLocations, if yes the transfer has been ACTUALLY processed
+            Inventory inventoryTransferedTo = _dbContext.Inventories.Include(i => i.InventoryLocations).First(i => i.ItemId == testTransfers[0].Items[0].ItemUid);
+            Assert.IsTrue(inventoryTransferedTo.InventoryLocations.Select(il => il.LocationId).Contains(testTransfers[0].TransferTo));
         }
 
         [TestMethod]
