@@ -103,6 +103,53 @@ namespace IntegrationTests
             }
         }
 
+        [TestMethod]
+        public void test_post_transfer()
+        {
+            // Arrange
+            Transfer testTransfer = new(){Reference = "", TransferFrom = 2, TransferTo = 2, Items = [new() {ItemUid = "P999999", Amount = 20}]};
+            
+            // Act
+            string jsonData = JsonConvert.SerializeObject(testTransfer);
+            HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            HttpStatusCode postStatus = client.PostAsync(TransferUrl, postContent).Result.StatusCode;
+
+            var response = client.GetAsync(TransferUrl).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+            var resultTransfers = JsonConvert.DeserializeObject<Transfer[]>(content);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.Created, postStatus);
+            Assert.IsTrue(resultTransfers.Length == testTransfers.Length + 1);
+            Assert.IsTrue(resultTransfers.Last().TransferStatus == "Scheduled");
+
+            //Clear the date fields, transfer status's and id so I can just assert using .equals function
+            resultTransfers.ToList().ForEach(t=>{t.Id = 0; t.Items.ForEach(ti => {ti.TransferId = 0;}); t.TransferStatus = null; t.CreatedAt = new(); t.UpdatedAt = new();});
+            testTransfer.CreatedAt = new();
+            testTransfer.UpdatedAt = new();
+            Assert.IsTrue(resultTransfers.Any(t=>t.Equals(testTransfer)));
+        }
+
+        [TestMethod]
+        public void test_get_one()
+        {
+            // Arrange
+
+            // Act
+            var response = client.GetAsync($"{TransferUrl}/{testTransfers[0].Id}").Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+            var resultTransfer = JsonConvert.DeserializeObject<Transfer>(content);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
+            //Clear the date fields, transferStatus so I can just assert using .equals function
+            testTransfers.ToList().ForEach(t=>{t.TransferStatus = null; t.CreatedAt = new(); t.UpdatedAt = new();});
+            resultTransfer.CreatedAt = new();
+            resultTransfer.UpdatedAt = new();
+            resultTransfer.TransferStatus = null;
+            Assert.IsTrue(testTransfers.Any(t=>t.Equals(resultTransfer)));
+        }
+
         private static void addTestResourceToDB<T>(HttpClient client, T[] resourceArray, string url)
         {
             // Add both transfers to db
