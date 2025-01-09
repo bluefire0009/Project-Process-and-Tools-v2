@@ -40,3 +40,12 @@
 /api/v2/Docks/1 - {
     "locationId": 5
 } - 200 
+/api/v2/Docks/1 - {
+    "locationId": 5
+} - 200 
+/api/v2/Docks/1 - {
+    "locationId": 5
+} - 200 
+/api/v2/Docks - {
+    "locationId": 5
+} - 200 
