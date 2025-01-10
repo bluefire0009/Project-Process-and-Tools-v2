@@ -39,8 +39,8 @@ namespace IntegrationTests
         ];
         private Transfer[] testTransfers = 
         [
-            new(){Id = 1, Reference = "", TransferFrom = 1, TransferTo = 2, Items = [new() {ItemUid = "P999999", TransferId = 1, Amount = 10}]},
-            new(){Id = 2, Reference = "", TransferFrom = 2, TransferTo = 1, Items = [new() {ItemUid = "P999999", TransferId = 2, Amount = 10}]}
+            new(){Id = 1, Reference = "A transfer", TransferFrom = 1, TransferTo = 2, Items = [new() {ItemUid = "P999999", TransferId = 1, Amount = 10}]},
+            new(){Id = 2, Reference = "B transfer", TransferFrom = 2, TransferTo = 1, Items = [new() {ItemUid = "P999999", TransferId = 2, Amount = 10}]}
         ];
         private Inventory testInventory = new(){Id = 1, ItemId = "P999999", Description = "", total_available = 100, total_expected = 100, total_on_hand = 100, total_ordered = 0, ItemReference = "", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}};
         
@@ -111,7 +111,7 @@ namespace IntegrationTests
         public void test_post_transfer()
         {
             // Arrange
-            Transfer testTransfer = new(){Reference = "", TransferFrom = 2, TransferTo = 2, Items = [new() {ItemUid = "P999999", Amount = 20}]};
+            Transfer testTransfer = new(){Reference = "C transfer", TransferFrom = 2, TransferTo = 2, Items = [new() {ItemUid = "P999999", Amount = 20}]};
             
             // Act
             string jsonData = JsonConvert.SerializeObject(testTransfer);
@@ -158,7 +158,7 @@ namespace IntegrationTests
         public void test_put_transfer()
         {
             // Arrange
-            Transfer extraTransfer = new(){Reference = "", TransferFrom = 2, TransferTo = 2, Items = [new() {ItemUid = "P999999", Amount = 20}]};
+            Transfer extraTransfer = new(){Reference = "C transfer", TransferFrom = 2, TransferTo = 2, Items = [new() {ItemUid = "P999999", Amount = 20}]};
             
             // Act
             string jsonData = JsonConvert.SerializeObject(extraTransfer);
@@ -224,6 +224,49 @@ namespace IntegrationTests
             Assert.IsTrue(!resultTransfer.Any(t=>t.Equals(testTransfers[0])));
         }
 
+        [TestMethod]
+        public void test_add_transfer_wrong_format()
+        {
+            // Arrange
+            Dictionary<string, object> testTransfer = new(){{"id", 100000003}, {"refference", "TR00001"}, {"tlansfer_from", null}, {"tlansfer_to", 9229}, {"tlansfer_status", "Scheduled"}, {"created_at", "2000-03-11T13:11:14Z"}, {"updated_at", "2000-03-12T16:11:14Z"}};
+            
+            // Act
+            string jsonData = JsonConvert.SerializeObject(testTransfer);
+            HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            HttpStatusCode postStatus = client.PostAsync(TransferUrl, postContent).Result.StatusCode;
+
+            var response = client.GetAsync(TransferUrl).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+            var resultTransfers = JsonConvert.DeserializeObject<Transfer[]>(content);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.BadRequest, postStatus);
+            Assert.IsTrue(resultTransfers.Length == testTransfers.Length);
+
+            //Clear the date fields, transfer status's and id so I can just assert using .equals function
+            resultTransfers.ToList().ForEach(t=>{t.Id = 0; t.Items.ForEach(ti => {ti.TransferId = 0;}); t.TransferStatus = null; t.CreatedAt = new(); t.UpdatedAt = new();});
+            Assert.IsTrue(!resultTransfers.Any(t=>t.Equals(testTransfer)));
+        }
+
+        [TestMethod]
+        public void test_put_transfer_wrong_format()
+        {
+            // Arrange
+            Dictionary<string, object> transferWrongFormat = new(){{"id", testTransfers[0].Id}, {"refference", "TR00001"}, {"tlansfer_from", null}, {"tlansfer_to", 9229}, {"tlansfer_status", "Scheduled"}, {"created_at", "2000-03-11T13:11:14Z"}, {"updated_at", "2000-03-12T16:11:14Z"}};
+            
+            // Act
+            string jsonData = JsonConvert.SerializeObject(transferWrongFormat);
+            HttpContent putContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
+            HttpStatusCode putStatus = client.PutAsync($"{TransferUrl}/{testTransfers[0].Id}", putContent).Result.StatusCode;
+
+            var response = client.GetAsync(TransferUrl).Result;
+            var content = response.Content.ReadAsStringAsync().Result;
+            var resultTransfers = JsonConvert.DeserializeObject<Transfer[]>(content);
+
+            // Assert
+            Assert.AreEqual(HttpStatusCode.BadRequest, putStatus);
+            Assert.IsTrue(resultTransfers.Any(w=>w.Id != (int)transferWrongFormat["id"]));
+        }
         private static void addTestResourceToDB<T>(HttpClient client, T[] resourceArray, string url)
         {
             // Add both transfers to db
