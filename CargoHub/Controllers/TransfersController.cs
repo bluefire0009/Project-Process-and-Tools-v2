@@ -34,6 +34,7 @@ public class TransferController : Controller
     [HttpPost("")]
     public async Task<IActionResult> PostTransfer([FromBody] Transfer transfer)
     {
+        if (!ModelValidator.ValidateTransfer(transfer)) return BadRequest("transfer cannot have invalid fields");
         bool added = await transferStorage.addTransfer(transfer);
 
         if (!added) return BadRequest($"Couldn't add transfer:{JsonConvert.SerializeObject(transfer)}");
@@ -55,6 +56,7 @@ public class TransferController : Controller
     {
         if (idToUpdate <= 0) return BadRequest("Invalid id in the url");
         if (updatedTransfer == null) BadRequest("updatedTransfer cannot be null");
+        if (!ModelValidator.ValidateTransfer(updatedTransfer)) return BadRequest("updatedTransfer cannot have invalid fields");
 
         bool updated = await transferStorage.updateTransfer(idToUpdate, updatedTransfer);
 
@@ -66,7 +68,7 @@ public class TransferController : Controller
     public async Task<IActionResult> CommitTransfer(int idToUpdate)
     {
         if (idToUpdate <= 0) return BadRequest("Invalid id in the url");
-
+        
         var updated = await transferStorage.commitTransfer(idToUpdate);
 
         if (!updated.succeded && updated.message == TransferDBStorage.TransferResult.notEnoughItems) return BadRequest($"There are not enough items in the location to carry out the transfer");

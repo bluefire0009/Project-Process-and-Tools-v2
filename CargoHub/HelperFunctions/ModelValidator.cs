@@ -22,4 +22,11 @@ public static class ModelValidator
             supplier.Reference == null) return false;
         return true;
     }
+    // takes in a Transfer to validate its fields for endpoints
+    public static bool ValidateTransfer(Transfer? transfer)
+    {
+        if (transfer == null) return false;
+        if(transfer.Reference == null || transfer.Reference == "" || transfer.TransferFrom == 0 || transfer.TransferTo == 0) return false;
+        return true;
+    }
 }
