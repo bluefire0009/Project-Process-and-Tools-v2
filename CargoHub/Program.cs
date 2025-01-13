@@ -12,7 +12,8 @@ namespace CargoHub
         {
             var builder = WebApplication.CreateBuilder(args);
             builder.Services.AddControllersWithViews();
-
+            
+            builder.Services.AddScoped<IDocksStorage, DocksDBStorage>();
             builder.Services.AddScoped<IApiKeyValidationInterface, ApiKeyValidationService>();
 
             builder.Services.AddScoped<IClientStorage, ClientDBStorage>();
