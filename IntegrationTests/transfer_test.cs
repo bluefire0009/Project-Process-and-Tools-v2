@@ -58,15 +58,15 @@ namespace IntegrationTests
             _dbContext.Database.EnsureDeleted();  // Delete any existing database
             _dbContext.Database.EnsureCreated();  // Create a new fresh database
             client = CreateClient();
-            addTestResourceToDB(client, [testWarehouse], WarehouseUrl);
-            addTestResourceToDB(client, [testSupplier], SupplierUrl);
-            addTestResourceToDB(client, [testItemGroup], ItemGroupUrl);
-            addTestResourceToDB(client, [testItemLine], ItemLineUrl);
-            addTestResourceToDB(client, [testItemType], ItemTypeUrl);
-            addTestResourceToDB(client, [testItem], ItemUrl);
-            addTestResourceToDB(client, testLocations, LocationUrl);
-            addTestResourceToDB(client, testTransfers, TransferUrl);
-            addTestResourceToDB(client, [testInventory], InventoryUrl);
+            bool testResourceResponse1 = addTestResourceToDB(client, [testWarehouse], WarehouseUrl);
+            bool testResourceResponse2 = addTestResourceToDB(client, [testSupplier], SupplierUrl);
+            bool testResourceResponse3 = addTestResourceToDB(client, [testItemGroup], ItemGroupUrl);
+            bool testResourceResponse4 = addTestResourceToDB(client, [testItemLine], ItemLineUrl);
+            bool testResourceResponse5 = addTestResourceToDB(client, [testItemType], ItemTypeUrl);
+            bool testResourceResponse6 = addTestResourceToDB(client, [testItem], ItemUrl);
+            bool testResourceResponse7 = addTestResourceToDB(client, testLocations, LocationUrl);
+            bool testResourceResponse8 = addTestResourceToDB(client, testTransfers, TransferUrl);
+            bool testResourceResponse9 = addTestResourceToDB(client, [testInventory], InventoryUrl);
         }
 
         [TestCleanup]
@@ -267,15 +267,22 @@ namespace IntegrationTests
             Assert.AreEqual(HttpStatusCode.BadRequest, putStatus);
             Assert.IsTrue(resultTransfers.Any(w=>w.Id != (int)transferWrongFormat["id"]));
         }
-        private static void addTestResourceToDB<T>(HttpClient client, T[] resourceArray, string url)
+        private static bool addTestResourceToDB<T>(HttpClient client, T[] resourceArray, string url)
         {
+            // if (resourceArray is Transfer[]) 
+            //     Console.WriteLine("");
+            List<bool> responses = [];
             // Add both transfers to db
             foreach(T resource in resourceArray)
             {
                 string jsonData = JsonConvert.SerializeObject(resource);
                 HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
-                client.PostAsync($"{url}", postContent).GetAwaiter().GetResult();
+                HttpStatusCode responseStatus = client.PostAsync($"{url}", postContent).GetAwaiter().GetResult().StatusCode;
+                if(responseStatus == HttpStatusCode.OK || responseStatus == HttpStatusCode.Created) responses.Add(true);
+                else responses.Add(false);
             }
+            if (responses.All(r => r == true)) return true;
+            return false;
         }
     }
 }
