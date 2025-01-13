@@ -15,4 +15,15 @@ public class ItemType
 
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
+
+    public bool Equals(ItemType? other)
+    {
+        if (other is null)
+            return false;
+
+        // Compare all relevant properties except foreign keys
+        return Id == other.Id &&
+        Name == other.Name &&
+        Description == other.Description;
+    }
 }
