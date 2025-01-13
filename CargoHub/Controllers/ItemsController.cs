@@ -5,7 +5,6 @@ using System.Diagnostics.CodeAnalysis;
 
 [Route("/api/v2/items")]
 // Doesn't have to be covered because we have integration tests for that
-[ExcludeFromCodeCoverage]
 public class ItemsController : Controller {
     private IItemStorage ItemStorage;
 
@@ -13,13 +12,13 @@ public class ItemsController : Controller {
         ItemStorage = itemStorage;
     }
 
-    [HttpGet("get")]
+    [HttpGet()]
     public async Task<IActionResult> GetAllItems([FromQuery] int offset = 0, [FromQuery] int limit = 100) {
         List<Item> items = await ItemStorage.GetItems(offset, limit);
         return Ok(items);
     }
 
-    [HttpGet("get/{uid}")]
+    [HttpGet("{uid}")]
     public async Task<IActionResult> GetItem(string uid) {
         if (uid == "") return BadRequest("invalid uid");
         Item? item = await ItemStorage.GetItem(uid);
@@ -28,7 +27,7 @@ public class ItemsController : Controller {
         return Ok(item);
     }
 
-    [HttpGet("{uid}/iventory")]
+    [HttpGet("inventory/{uid}")]
     public async Task<IActionResult> GetItemInventory(string uid) {
         if (uid == "") return BadRequest("invalid uid");
         List<Inventory> itemInventories = await ItemStorage.GetItemInventory(uid);
@@ -36,7 +35,7 @@ public class ItemsController : Controller {
         return Ok(itemInventories);
     }
 
-    [HttpGet("{uid}/inventory/totals")]
+    [HttpGet("inventory/{uid}/totals")]
     public async Task<IActionResult> GetItemInventoryTotals(string uid) {
         if (uid == "") return BadRequest("invalid uid");
         List<Inventory> itemInventories = await ItemStorage.GetItemInventory(uid);
@@ -66,7 +65,7 @@ public class ItemsController : Controller {
         bool added = await ItemStorage.AddItem(item);
 
         if (!added) return BadRequest($"Couldn't add item:{JsonConvert.SerializeObject(item)}");
-        return Ok("Item has been created");
+        return Created("", "Item has been created");
     }
 
     [HttpDelete("{uid}")]

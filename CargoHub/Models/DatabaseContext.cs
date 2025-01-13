@@ -1,3 +1,4 @@
+
 using CargoHub.Models;
 using Microsoft.EntityFrameworkCore;
 
@@ -24,12 +25,16 @@ public class DatabaseContext : DbContext
         public DbSet<Warehouse> Warehouses { get; set; }
         public DbSet<ApiKey> ApiKeys { get; set; }
 
+         public DbSet<Dock> Docks { get; set; }
+
+
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
         {
 
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {
+        {        modelBuilder.Entity<Dock>().HasQueryFilter(d => !d.isDeleted);
+                
                 modelBuilder.Entity<Supplier>().HasQueryFilter(s => !s.IsDeleted);
                 modelBuilder.Entity<Warehouse>().HasQueryFilter(w => !w.IsDeleted);
                 modelBuilder.Entity<Item>().HasQueryFilter(i => !i.IsDeleted);
@@ -47,10 +52,15 @@ public class DatabaseContext : DbContext
                 modelBuilder.Entity<ShipmentItems>().HasQueryFilter(s => !s.IsDeleted);
                 modelBuilder.Entity<ItemLine>().HasQueryFilter(i => !i.IsDeleted);
 
-                modelBuilder.Entity<ApiKey>().ToTable("API_keys");
                 modelBuilder.Entity<TransferItem>().HasKey(i => new { i.TransferId, i.ItemUid });
                 modelBuilder.Entity<InventoryLocation>().HasKey(l => new { l.InventoryId, l.LocationId });
                 modelBuilder.Entity<Transfer>().HasOne(t => t.LocationFrom).WithMany().HasForeignKey(t => t.TransferFrom);
                 modelBuilder.Entity<Transfer>().HasOne(t => t.LocationTo).WithMany().HasForeignKey(t => t.TransferTo);
+
+                 modelBuilder.Entity<Dock>()
+            .HasMany(d => d.Transfers)
+            .WithOne()
+            .HasForeignKey(t => t.TransferFrom);
+
         }
 }

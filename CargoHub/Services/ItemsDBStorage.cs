@@ -69,9 +69,12 @@ public class ItemsDBStorage : IItemStorage
 
         item.UpdatedAt = CETDateTime.Now();
 
-        db.Items.Update(itemInDatabase);
+        db.Items.Remove(itemInDatabase);
         await db.SaveChangesAsync();
 
+        item.UpdatedAt = CETDateTime.Now();
+        db.Items.Add(item);
+        await db.SaveChangesAsync();
         return true;
     }
 }
