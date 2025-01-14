@@ -25,7 +25,7 @@ public class DatabaseContext : DbContext
         public DbSet<Warehouse> Warehouses { get; set; }
         public DbSet<ApiKey> ApiKeys { get; set; }
 
-         public DbSet<Dock> Docks { get; set; }
+        public DbSet<Dock> Docks { get; set; }
 
 
         public DatabaseContext(DbContextOptions<DatabaseContext> options) : base(options)
@@ -33,8 +33,8 @@ public class DatabaseContext : DbContext
 
         }
         protected override void OnModelCreating(ModelBuilder modelBuilder)
-        {        modelBuilder.Entity<Dock>().HasQueryFilter(d => !d.isDeleted);
-                
+        {
+                modelBuilder.Entity<Dock>().HasQueryFilter(d => !d.isDeleted);
                 modelBuilder.Entity<Supplier>().HasQueryFilter(s => !s.IsDeleted);
                 modelBuilder.Entity<Warehouse>().HasQueryFilter(w => !w.IsDeleted);
                 modelBuilder.Entity<Item>().HasQueryFilter(i => !i.IsDeleted);
@@ -56,11 +56,6 @@ public class DatabaseContext : DbContext
                 modelBuilder.Entity<InventoryLocation>().HasKey(l => new { l.InventoryId, l.LocationId });
                 modelBuilder.Entity<Transfer>().HasOne(t => t.LocationFrom).WithMany().HasForeignKey(t => t.TransferFrom);
                 modelBuilder.Entity<Transfer>().HasOne(t => t.LocationTo).WithMany().HasForeignKey(t => t.TransferTo);
-
-                 modelBuilder.Entity<Dock>()
-            .HasMany(d => d.Transfers)
-            .WithOne()
-            .HasForeignKey(t => t.TransferFrom);
-
+                modelBuilder.Entity<Dock>().HasMany(d => d.Transfers).WithOne();
         }
 }
