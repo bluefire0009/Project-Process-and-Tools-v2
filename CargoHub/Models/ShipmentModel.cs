@@ -2,11 +2,13 @@ namespace CargoHub.Models;
 
 using System.ComponentModel.DataAnnotations;
 using System.ComponentModel.DataAnnotations.Schema;
+using System.Text.Json.Serialization;
 
 public class Shipment : IEquatable<Shipment>
 {
 
     [Key]
+    [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     public ICollection<OrdersInShipment> OrderIds { get; set; } = new List<OrdersInShipment>();
     public int SourceId { get; set; }
@@ -29,7 +31,7 @@ public class Shipment : IEquatable<Shipment>
     public float TotalPackageWeight { get; set; }
 
     [DataType(DataType.DateTime)]
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime? CreatedAt { get; set; } = DateTime.Now;
 
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
@@ -42,7 +44,7 @@ public class Shipment : IEquatable<Shipment>
     {
         if (other == null) return false;
 
-        return Id == other.Id &&
+        return
                SourceId == other.SourceId &&
                OrderDate == other.OrderDate &&
                RequestDate == other.RequestDate &&

@@ -38,8 +38,16 @@ public class OrderController : Controller
     [HttpPost("")]
     public async Task<IActionResult> AddOrder([FromBody] Order order)
     {
-        if (await Storage.AddOrder(order)) return Ok("Order added");
-        return BadRequest();
+        if (order == null) return BadRequest("Order is null");
+
+        if (!ModelState.IsValid)
+        {
+            return BadRequest("Invalid model");
+        }
+
+        int id = await Storage.AddOrder(order);
+        if (id == -1) return BadRequest();
+        return Created("", $"{id}");
     }
 
     [HttpPut("{Id}")]
