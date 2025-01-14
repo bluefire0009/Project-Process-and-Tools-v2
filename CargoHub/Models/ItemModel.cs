@@ -35,7 +35,7 @@ public class Item : IEquatable<Item>
     [ForeignKey("SupplierId")]
     public Supplier? SupplierById { get; set; }
     public int SupplierId { get; set; }
-    public int SupplierCode { get; set; }
+    public string? SupplierCode { get; set; }
     public string? SupplierPartNumber { get; set; }
 
     public bool IsDeleted { get; set; } = false;
