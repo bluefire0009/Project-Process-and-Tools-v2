@@ -31,19 +31,19 @@ namespace IntegrationTests
         private ItemGroup testItemGroup = new() { Name = "Test Appliances", Description = "test 123" };
         private Item testItem = new() { Uid = "P999999", Code = "mYt79640E", Description = "Down-sized system-worthy productivity", ShortDescription = "pass", UpcCode = 25411126, ModelNumber = "ZK-417773-PXy", CommodityCode = "z - 761 - L5A", ItemLine = 1, ItemGroup = 1, ItemType = 1, UnitPurchaseQuantity = 3, UnitOrderQuantity = 18, PackOrderQuantity = 13, SupplierId = 1, SupplierCode = "YQZZNL56", SupplierPartNumber = "ZH - 103509 - MLv" };
         private Warehouse testWarehouse = new Warehouse() { Id = 1, Code = "GIOMNL90", Name = "Petten longterm hub", Address = "Owenweg 731", Zip = "4615 RB", City = "Petten", Province = "Noord-Holland", Country = "NL", ContactEmail = "nickteunissen@example.com", ContactName = "Maud Adryaens", ContactPhone = "+31836 752702" };
-        private Supplier testSupplier = new() {Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)"};
+        private Supplier testSupplier = new() { Id = 1, Code = "YQZZNL56", Name = "Heemskerk cargo hub", Address = "Karlijndreef 281", AddressExtra = "Boven", ZipCode = "4002 AS", City = "Heemskerk", Province = "Friesland", Country = "NL", ContactName = "Fem Keijzer", PhoneNumber = "(078) 0013363", Reference = ":)" };
         private Location[] testLocations =
         [
             new(){WareHouseId= 1, Code= "test_code", Name= "test_name"},
             new(){WareHouseId= 1, Code= "test_code", Name= "test_name"}
         ];
-        private Transfer[] testTransfers = 
+        private Transfer[] testTransfers =
         [
             new(){Id = 1, Reference = "A transfer", TransferFrom = 1, TransferTo = 2, Items = [new() {ItemUid = "P999999", TransferId = 1, Amount = 10}]},
             new(){Id = 2, Reference = "B transfer", TransferFrom = 2, TransferTo = 1, Items = [new() {ItemUid = "P999999", TransferId = 2, Amount = 10}]}
         ];
-        private Inventory testInventory = new(){Id = 1, ItemId = "P999999", Description = "", total_available = 100, total_expected = 100, total_on_hand = 100, total_ordered = 0, ItemReference = "", InventoryLocations = {new(){InventoryId = 1, LocationId = 1}}};
-        
+        private Inventory testInventory = new() { Id = 1, ItemId = "P999999", Description = "", total_available = 100, total_expected = 100, total_on_hand = 100, total_ordered = 0, ItemReference = "", InventoryLocations = { new() { InventoryId = 1, LocationId = 1 } } };
+
 
         private HttpClient client;
 
@@ -58,15 +58,15 @@ namespace IntegrationTests
             _dbContext.Database.EnsureDeleted();  // Delete any existing database
             _dbContext.Database.EnsureCreated();  // Create a new fresh database
             client = CreateClient();
-            bool testResourceResponse1 = addTestResourceToDB(client, [testWarehouse], WarehouseUrl);
-            bool testResourceResponse2 = addTestResourceToDB(client, [testSupplier], SupplierUrl);
-            bool testResourceResponse3 = addTestResourceToDB(client, [testItemGroup], ItemGroupUrl);
-            bool testResourceResponse4 = addTestResourceToDB(client, [testItemLine], ItemLineUrl);
-            bool testResourceResponse5 = addTestResourceToDB(client, [testItemType], ItemTypeUrl);
-            bool testResourceResponse6 = addTestResourceToDB(client, [testItem], ItemUrl);
-            bool testResourceResponse7 = addTestResourceToDB(client, testLocations, LocationUrl);
-            bool testResourceResponse8 = addTestResourceToDB(client, testTransfers, TransferUrl);
-            bool testResourceResponse9 = addTestResourceToDB(client, [testInventory], InventoryUrl);
+            bool warehouseResponse = addTestResourceToDB(client, [testWarehouse], WarehouseUrl);
+            bool supplierResponse = addTestResourceToDB(client, [testSupplier], SupplierUrl);
+            bool itemGroupResponse = addTestResourceToDB(client, [testItemGroup], ItemGroupUrl);
+            bool itemLineResponse = addTestResourceToDB(client, [testItemLine], ItemLineUrl);
+            bool itemTypeResponse = addTestResourceToDB(client, [testItemType], ItemTypeUrl);
+            bool itemResponse = addTestResourceToDB(client, [testItem], ItemUrl);
+            bool locationsResponse = addTestResourceToDB(client, testLocations, LocationUrl);
+            bool transferResponse = addTestResourceToDB(client, testTransfers, TransferUrl);
+            bool inventoryResponse = addTestResourceToDB(client, [testInventory], InventoryUrl);
         }
 
         [TestCleanup]
@@ -91,17 +91,17 @@ namespace IntegrationTests
             // Assert
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             Assert.AreEqual(testTransfers.Length, resultTransfers.Length);
-            
+
             foreach (Transfer transfer in resultTransfers)
             {
                 Assert.IsTrue(transfer.TransferStatus == "Scheduled");
             }
 
             //Clear the date fields and status fiels of resultTransfers so I can just assert using .equals function
-            resultTransfers.ToList().ForEach(t=>{t.CreatedAt = new(); t.UpdatedAt = new(); t.TransferStatus = null;});
-            testTransfers.ToList().ForEach(t=>{t.CreatedAt = new(); t.UpdatedAt = new();});
+            resultTransfers.ToList().ForEach(t => { t.CreatedAt = new(); t.UpdatedAt = new(); t.TransferStatus = null; });
+            testTransfers.ToList().ForEach(t => { t.CreatedAt = new(); t.UpdatedAt = new(); });
 
-            for(int transferIterator = 0; transferIterator<resultTransfers.Length; transferIterator++)
+            for (int transferIterator = 0; transferIterator < resultTransfers.Length; transferIterator++)
             {
                 Assert.AreEqual(testTransfers[transferIterator], resultTransfers[transferIterator]);
             }
@@ -111,8 +111,8 @@ namespace IntegrationTests
         public void test_post_transfer()
         {
             // Arrange
-            Transfer testTransfer = new(){Reference = "C transfer", TransferFrom = 2, TransferTo = 2, Items = [new() {ItemUid = "P999999", Amount = 20}]};
-            
+            Transfer testTransfer = new() { Reference = "C transfer", TransferFrom = 2, TransferTo = 2, Items = [new() { ItemUid = "P999999", Amount = 20 }] };
+
             // Act
             string jsonData = JsonConvert.SerializeObject(testTransfer);
             HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
@@ -128,10 +128,10 @@ namespace IntegrationTests
             Assert.IsTrue(resultTransfers.Last().TransferStatus == "Scheduled");
 
             //Clear the date fields, transfer status's and id so I can just assert using .equals function
-            resultTransfers.ToList().ForEach(t=>{t.Id = 0; t.Items.ForEach(ti => {ti.TransferId = 0;}); t.TransferStatus = null; t.CreatedAt = new(); t.UpdatedAt = new();});
+            resultTransfers.ToList().ForEach(t => { t.Id = 0; t.Items.ForEach(ti => { ti.TransferId = 0; }); t.TransferStatus = null; t.CreatedAt = new(); t.UpdatedAt = new(); });
             testTransfer.CreatedAt = new();
             testTransfer.UpdatedAt = new();
-            Assert.IsTrue(resultTransfers.Any(t=>t.Equals(testTransfer)));
+            Assert.IsTrue(resultTransfers.Any(t => t.Equals(testTransfer)));
         }
 
         [TestMethod]
@@ -147,19 +147,19 @@ namespace IntegrationTests
             // Assert
             Assert.AreEqual(HttpStatusCode.OK, response.StatusCode);
             //Clear the date fields, transferStatus so I can just assert using .equals function
-            testTransfers.ToList().ForEach(t=>{t.TransferStatus = null; t.CreatedAt = new(); t.UpdatedAt = new();});
+            testTransfers.ToList().ForEach(t => { t.TransferStatus = null; t.CreatedAt = new(); t.UpdatedAt = new(); });
             resultTransfer.CreatedAt = new();
             resultTransfer.UpdatedAt = new();
             resultTransfer.TransferStatus = null;
-            Assert.IsTrue(testTransfers.Any(t=>t.Equals(resultTransfer)));
+            Assert.IsTrue(testTransfers.Any(t => t.Equals(resultTransfer)));
         }
 
         [TestMethod]
         public void test_put_transfer()
         {
             // Arrange
-            Transfer extraTransfer = new(){Reference = "C transfer", TransferFrom = 2, TransferTo = 2, Items = [new() {ItemUid = "P999999", Amount = 20}]};
-            
+            Transfer extraTransfer = new() { Reference = "C transfer", TransferFrom = 2, TransferTo = 2, Items = [new() { ItemUid = "P999999", Amount = 20 }] };
+
             // Act
             string jsonData = JsonConvert.SerializeObject(extraTransfer);
             HttpContent putContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
@@ -174,22 +174,22 @@ namespace IntegrationTests
             // Assert
             Assert.AreEqual(HttpStatusCode.OK, putStatus);
             Assert.IsTrue(resultTransfers.Length == testTransfers.Length);
-            
+
             //Check the modification date
             Assert.IsTrue(resultTransfers.Last().UpdatedAt - roughPutDate <= TimeSpan.FromSeconds(60));
 
             //Clear the date fields, id's so I can just assert using .equals function
-            resultTransfers.ToList().ForEach(t=>{ t.Id = 0; t.Items.ForEach(ti => {ti.TransferId = 0;}); t.CreatedAt = new(); t.UpdatedAt = new();});
+            resultTransfers.ToList().ForEach(t => { t.Id = 0; t.Items.ForEach(ti => { ti.TransferId = 0; }); t.CreatedAt = new(); t.UpdatedAt = new(); });
             extraTransfer.CreatedAt = new();
             extraTransfer.UpdatedAt = new();
-            Assert.IsTrue(resultTransfers.Any(t=>t.Equals(extraTransfer)));
+            Assert.IsTrue(resultTransfers.Any(t => t.Equals(extraTransfer)));
         }
 
         [TestMethod]
         public void test_commit_transfer()
         {
             // Arrange
-            
+
             // Act
             //Capture the time around when the put request happens to check it later
             DateTime roughCommitDate = CETDateTime.Now();
@@ -221,15 +221,15 @@ namespace IntegrationTests
             // Assert
             Assert.AreEqual(HttpStatusCode.OK, deleteStatus);
             Assert.IsTrue(resultTransfer.Length == testTransfers.Length - 1);
-            Assert.IsTrue(!resultTransfer.Any(t=>t.Equals(testTransfers[0])));
+            Assert.IsTrue(!resultTransfer.Any(t => t.Equals(testTransfers[0])));
         }
 
         [TestMethod]
         public void test_add_transfer_wrong_format()
         {
             // Arrange
-            Dictionary<string, object> testTransfer = new(){{"id", 100000003}, {"refference", "TR00001"}, {"tlansfer_from", null}, {"tlansfer_to", 9229}, {"tlansfer_status", "Scheduled"}, {"created_at", "2000-03-11T13:11:14Z"}, {"updated_at", "2000-03-12T16:11:14Z"}};
-            
+            Dictionary<string, object> testTransfer = new() { { "id", 100000003 }, { "refference", "TR00001" }, { "tlansfer_from", null }, { "tlansfer_to", 9229 }, { "tlansfer_status", "Scheduled" }, { "created_at", "2000-03-11T13:11:14Z" }, { "updated_at", "2000-03-12T16:11:14Z" } };
+
             // Act
             string jsonData = JsonConvert.SerializeObject(testTransfer);
             HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
@@ -244,16 +244,16 @@ namespace IntegrationTests
             Assert.IsTrue(resultTransfers.Length == testTransfers.Length);
 
             //Clear the date fields, transfer status's and id so I can just assert using .equals function
-            resultTransfers.ToList().ForEach(t=>{t.Id = 0; t.Items.ForEach(ti => {ti.TransferId = 0;}); t.TransferStatus = null; t.CreatedAt = new(); t.UpdatedAt = new();});
-            Assert.IsTrue(!resultTransfers.Any(t=>t.Equals(testTransfer)));
+            resultTransfers.ToList().ForEach(t => { t.Id = 0; t.Items.ForEach(ti => { ti.TransferId = 0; }); t.TransferStatus = null; t.CreatedAt = new(); t.UpdatedAt = new(); });
+            Assert.IsTrue(!resultTransfers.Any(t => t.Equals(testTransfer)));
         }
 
         [TestMethod]
         public void test_put_transfer_wrong_format()
         {
             // Arrange
-            Dictionary<string, object> transferWrongFormat = new(){{"id", testTransfers[0].Id}, {"refference", "TR00001"}, {"tlansfer_from", null}, {"tlansfer_to", 9229}, {"tlansfer_status", "Scheduled"}, {"created_at", "2000-03-11T13:11:14Z"}, {"updated_at", "2000-03-12T16:11:14Z"}};
-            
+            Dictionary<string, object> transferWrongFormat = new() { { "id", testTransfers[0].Id }, { "refference", "TR00001" }, { "tlansfer_from", null }, { "tlansfer_to", 9229 }, { "tlansfer_status", "Scheduled" }, { "created_at", "2000-03-11T13:11:14Z" }, { "updated_at", "2000-03-12T16:11:14Z" } };
+
             // Act
             string jsonData = JsonConvert.SerializeObject(transferWrongFormat);
             HttpContent putContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
@@ -265,7 +265,7 @@ namespace IntegrationTests
 
             // Assert
             Assert.AreEqual(HttpStatusCode.BadRequest, putStatus);
-            Assert.IsTrue(resultTransfers.Any(w=>w.Id != (int)transferWrongFormat["id"]));
+            Assert.IsTrue(resultTransfers.Any(w => w.Id != (int)transferWrongFormat["id"]));
         }
         private static bool addTestResourceToDB<T>(HttpClient client, T[] resourceArray, string url)
         {
@@ -273,12 +273,12 @@ namespace IntegrationTests
             //     Console.WriteLine("");
             List<bool> responses = [];
             // Add both transfers to db
-            foreach(T resource in resourceArray)
+            foreach (T resource in resourceArray)
             {
                 string jsonData = JsonConvert.SerializeObject(resource);
                 HttpContent postContent = new StringContent(jsonData, Encoding.UTF8, "application/json");
                 HttpStatusCode responseStatus = client.PostAsync($"{url}", postContent).GetAwaiter().GetResult().StatusCode;
-                if(responseStatus == HttpStatusCode.OK || responseStatus == HttpStatusCode.Created) responses.Add(true);
+                if (responseStatus == HttpStatusCode.OK || responseStatus == HttpStatusCode.Created) responses.Add(true);
                 else responses.Add(false);
             }
             if (responses.All(r => r == true)) return true;
