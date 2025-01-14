@@ -35,6 +35,16 @@ namespace CargoHub
 
             builder.Services.AddDbContext<DatabaseContext>(x => x.UseSqlite(builder.Configuration.GetConnectionString("DefaultConnection")));
 
+            builder.Services.AddControllers()
+                .AddJsonOptions(options =>
+                    {
+                        // Example: Ignore null values when serializing
+                        options.JsonSerializerOptions.DefaultIgnoreCondition = System.Text.Json.Serialization.JsonIgnoreCondition.WhenWritingNull;
+
+                        // Example: Handle cycles (to replace ReferenceLoopHandling.Ignore)
+                        options.JsonSerializerOptions.ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles;
+                    });
+
             var app = builder.Build();
 
             if (app.Environment.IsDevelopment())
