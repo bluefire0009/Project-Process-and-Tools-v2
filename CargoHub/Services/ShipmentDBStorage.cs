@@ -55,10 +55,10 @@ public class ShipmentStorage : IShipmentStorage
         return await DB.ShipmentItems.Where(x => x.ShipmentId == shipmentId).ToListAsync();
     }
 
-    public async Task<bool> AddShipment(Shipment shipment)
+    public async Task<int> AddShipment(Shipment shipment)
     {
         // add shipment to shipments
-        if (shipment == null) return false;
+        if (shipment == null) return -1;
 
         // extract items from order
         List<ShipmentItems> shipmentItems = shipment.Items.ToList();
@@ -69,13 +69,13 @@ public class ShipmentStorage : IShipmentStorage
         await DB.Shipments.AddAsync(shipment);
 
         // Save to make it available in the DB for the UpdateItemsInShipment
-        if (await DB.SaveChangesAsync() < 1) return false;
+        if (await DB.SaveChangesAsync() < 1) return -1;
 
         // update the items with add setting so it adjusts the inventories propperly
         await UpdateItemsInShipment(shipment.Id, shipmentItems, settings: "add");
 
         // var itms = GetItemsInOrder(order.Id);
-        return true;
+        return shipment.Id;
     }
     public async Task<bool> UpdateShipment(int shipmentId, Shipment shipment)
     {
@@ -98,7 +98,7 @@ public class ShipmentStorage : IShipmentStorage
         await UpdateItemsInShipment(shipment.Id, shipment.Items.ToList(), settings: "add");
 
         // update updated at
-        shipment.UpdatedAt = CETDateTime.Now();
+        FoundShipment.UpdatedAt = CETDateTime.Now();
 
         // Update the rest of the existing shipment
         FoundShipment.SourceId = shipment.SourceId;

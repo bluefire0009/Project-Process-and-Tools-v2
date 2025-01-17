@@ -24,7 +24,7 @@ public class ItemLinesController : Controller {
         if (id < 0) return BadRequest("invalid uid");
         ItemLine? itemLine = await ItemLineStorage.GetItemLine(id);
 
-        if (itemLine == null) return NotFound($"No item with id:{id} found");
+        if (itemLine == null) return NotFound($"No itemLine with id:{id} found");
         return Ok(itemLine);
     }
 
@@ -43,7 +43,7 @@ public class ItemLinesController : Controller {
         bool added = await ItemLineStorage.AddItemLine(itemLine);
 
         if (!added) return BadRequest($"Couldn't add item:{JsonConvert.SerializeObject(itemLine)}");
-        return Ok("Item has been created");
+        return Created("", "ItemLine has been created");
     }
 
     [HttpDelete("{id}")]
@@ -51,7 +51,7 @@ public class ItemLinesController : Controller {
         if (id < 0) return BadRequest("invalid id");
 
         bool removed = await ItemLineStorage.DeleteItemLine(id);
-        if (!removed) return BadRequest($"Couldn't remove item with id {id}");
+        if (!removed) return BadRequest($"Couldn't remove item Line with id {id}");
         return Ok("Item has been created");
     }
 
@@ -61,10 +61,10 @@ public class ItemLinesController : Controller {
         if (itemLine.Id != id) return BadRequest("id does not line up");
 
         ItemLine? existingItemLine = await ItemLineStorage.GetItemLine(id);
-        if (existingItemLine is null) return NotFound($"Item with uid:{id} not found");
+        if (existingItemLine is null) return NotFound($"ItemLine with id:{id} not found");
 
         bool updated = await ItemLineStorage.UpdateItemLine(id, itemLine);
-        if (!updated) return NotFound($"No item with uid:{id} in the database");
+        if (!updated) return NotFound($"No itemLine with id:{id} in the database");
 
         return Ok($"Updated warhouse id:{id} to:{itemLine}");
     }

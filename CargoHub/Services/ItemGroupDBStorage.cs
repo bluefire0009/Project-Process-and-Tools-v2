@@ -33,7 +33,7 @@ public class ItemGroupDBStorage : IItemGroupStorage
     public async Task<bool> addItemGroup(ItemGroup itemGroup)
     {
         if (itemGroup == null) return false;
-        if (itemGroup.Id <= 0) return false;
+        if (itemGroup.Id < 0) return false;
 
         ItemGroup? itemGroupInDatabase = await db.ItemGroups.Where(i => i.Id == itemGroup.Id).FirstOrDefaultAsync();
         if (itemGroupInDatabase != null) return false;

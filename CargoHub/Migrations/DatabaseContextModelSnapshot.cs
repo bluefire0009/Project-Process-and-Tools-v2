@@ -18,14 +18,11 @@ namespace CargoHub.Migrations
 #pragma warning disable 612, 618
             modelBuilder.HasAnnotation("ProductVersion", "8.0.10");
 
-            modelBuilder.Entity("CargoHub.Models.ApiKey", b =>
+            modelBuilder.Entity("ApiKey", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
                         .HasColumnType("INTEGER");
-
-                    b.Property<DateTime>("CreatedAt")
-                        .HasColumnType("TEXT");
 
                     b.Property<string>("Key_type")
                         .IsRequired()
@@ -35,9 +32,13 @@ namespace CargoHub.Migrations
                         .IsRequired()
                         .HasColumnType("TEXT");
 
+                    b.Property<string>("Salt")
+                        .IsRequired()
+                        .HasColumnType("TEXT");
+
                     b.HasKey("Id");
 
-                    b.ToTable("API_keys", (string)null);
+                    b.ToTable("ApiKeys");
                 });
 
             modelBuilder.Entity("CargoHub.Models.Client", b =>
@@ -316,7 +317,7 @@ namespace CargoHub.Migrations
                     b.Property<string>("Code")
                         .HasColumnType("TEXT");
 
-                    b.Property<DateTime>("CreatedAt")
+                    b.Property<DateTime?>("CreatedAt")
                         .HasColumnType("TEXT");
 
                     b.Property<bool>("IsDeleted")

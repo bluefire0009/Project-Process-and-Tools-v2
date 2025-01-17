@@ -104,7 +104,7 @@ public class ItemGroupDBStorageTest
     {
         new object[] { null, false },
         new object[] { new ItemGroup() { Id = -1 }, false },
-        new object[] { new ItemGroup() { Id = 0 }, false },
+        new object[] { new ItemGroup() { Id = 0 }, true },
         new object[] { new ItemGroup() { Id = 1 }, true }
     };
 
