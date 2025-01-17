@@ -31,6 +31,7 @@ public class Client
     [JsonRequired]
     public string ContactName { get; set; } = string.Empty;
 
+    [Phone]
     [JsonRequired]
     public string ContactPhone { get; set; } = string.Empty;
 
