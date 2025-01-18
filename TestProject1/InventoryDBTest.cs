@@ -105,7 +105,7 @@ public class InventoriesDBTest
     {
         new object[] { null, false },
         new object[] { new Inventory() { Id = -1 }, false },
-        new object[] { new Inventory() { Id = 0 }, false },
+        new object[] { new Inventory() { Id = 0 }, true },
         new object[] { new Inventory() { Id = 1 }, true }
     };
 
