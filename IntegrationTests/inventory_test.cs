@@ -62,20 +62,6 @@ namespace IntegrationTests
 
         [TestInitialize]
         public void Setup()
-        /*
-        {
-            // Get the service provider and create a new scope for each test
-            var scope = Services.CreateScope();
-            _dbContext = scope.ServiceProvider.GetRequiredService<DatabaseContext>();
-
-            // Reset the database to ensure it is clean for each test
-            _dbContext.Database.EnsureDeleted();  // Delete any existing database
-            _dbContext.Database.EnsureCreated();  // Create a new fresh database
-            client = CreateClient();
-            addTestResourceToDB(client);
-            addTestInventoriesToDB(client);
-        }
-        */
         {
             // Get the service provider and create a new scope for each test
             var scope = Services.CreateScope();
