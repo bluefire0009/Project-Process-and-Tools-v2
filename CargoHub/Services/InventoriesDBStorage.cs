@@ -33,11 +33,12 @@ public class InventoriesDBStorage : IInventoryStorage
     public async Task<bool> addInventory(Inventory inventory)
     {
         if (inventory == null) return false;
-        if (inventory.Id <= 0) return false;
+        if (inventory.Id < 0) return false;
 
         Inventory? inventoryInDatabase = await db.Inventories.Where(w => w.Id == inventory.Id).FirstOrDefaultAsync();
         if (inventoryInDatabase != null) return false;
 
+        inventory.Id = 0;
         inventory.CreatedAt = CETDateTime.Now();
         inventory.UpdatedAt = CETDateTime.Now();
 
