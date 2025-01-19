@@ -62,8 +62,7 @@ public class ReportController : Controller
         // if dateEnd is null set to max value
         DateOnly dateEnd = endDate ?? DateOnly.MaxValue;
 
-        dynamic? data = null; // Define data outside the if/else blocks.
-        data = table.ToLower() switch
+        dynamic? data = table.ToLower() switch
         {
             "items" => await _itemStorage.GetItems(0, int.MaxValue),
             "itemgroups" => await _itemGroupStorage.getItemGroups(),
@@ -86,7 +85,12 @@ public class ReportController : Controller
         data = status is not null && (table == "orders" || table == "transfers") 
             ? FilterListByDatesAndStatus(table, data, dateStart, dateEnd, status)
             : FilterListByDates(data, dateStart, dateEnd);
-        return Ok(ListToCSVFormat(data));
+
+        string result = ListToCSVFormat(data);
+        if (result != "")
+            return Ok(ListToCSVFormat(data));
+        else
+            return NoContent();
     }
 
     private List<T> FilterListByDatesAndStatus<T>(string table, List<T> list, DateOnly startDate, DateOnly endDate, string status) {
@@ -148,9 +152,17 @@ public class ReportController : Controller
 
     private string ListToCSVFormat<T>(List<T> list)
     {
-        if (list.Count == 0) return "no entries found";
+        if (list.Count == 0) return "";
         string resultString;
-        resultString = string.Join(",", list[0].GetType().GetProperties().Select(_ => _.ToString().Split(" ").Last()).ToList());
+        List<string> headers = new();
+
+        foreach (PropertyInfo property in list[0].GetType().GetProperties())
+        {
+            if (property.PropertyType.Namespace != "System.Collections.Generic")
+                headers.Add(property.ToString().Split(" ").Last());
+        }
+
+        resultString = string.Join(",", headers);
         foreach (T item in list)
         {
             resultString += "\n";
@@ -158,11 +170,13 @@ public class ReportController : Controller
             foreach (PropertyInfo property in item.GetType().GetProperties())
             {
                 var test = property.GetType().Namespace;
-                if (property.PropertyType.Namespace == "System.Collections.Generic") {
-                    values.Add($"Insert collection here");
-                } else {
-                    values.Add((property.GetValue(item) ?? "").ToString() ?? "");
+                if (property.PropertyType.Namespace != "System.Collections.Generic") {
+                    if (DateTime.TryParse((property.GetValue(item)?? "").ToString(), out DateTime parsedDate)) 
+                        values.Add($"\"\"\"{(property.GetValue(item) ?? "").ToString() ?? ""}\"\"\"");
+                    else
+                        values.Add((property.GetValue(item) ?? "").ToString() ?? "");
                 }
+                    
             }
             resultString += string.Join(",", values);
         }
