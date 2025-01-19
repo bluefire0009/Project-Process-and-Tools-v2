@@ -1,6 +1,9 @@
 using System.Diagnostics.CodeAnalysis;
 using Microsoft.AspNetCore.Mvc;
 using System.Reflection;
+using CargoHub.Models;
+using Microsoft.VisualBasic;
+using System.Collections;
 
 [Route("/api/v2/report")]
 // Doesn't have to be covered because we have integration tests for that
@@ -52,12 +55,12 @@ public class ReportController : Controller
     }
 
     [HttpGet("")]
-    public async Task<ActionResult> TestEndpoint([FromQuery] string table, [FromQuery] DateOnly? dateStart, [FromQuery] DateOnly? dateEnd)
+    public async Task<ActionResult> TestEndpoint([FromQuery] string table, [FromQuery] DateOnly? startDate, [FromQuery] DateOnly? endDate, [FromQuery] string? status)
     {
         // if dateStart is null set to minimal value
-        dateStart ??= DateOnly.MinValue;
+        DateOnly dateStart = startDate ?? DateOnly.MinValue;
         // if dateEnd is null set to max value
-        dateEnd ??= DateOnly.MaxValue;
+        DateOnly dateEnd = endDate ?? DateOnly.MaxValue;
 
         dynamic? data = null; // Define data outside the if/else blocks.
         data = table.ToLower() switch
@@ -79,7 +82,68 @@ public class ReportController : Controller
         };
 
         if (data is null || data.Count == 0) return NoContent();
+
+        data = status is not null && (table == "orders" || table == "transfers") 
+            ? FilterListByDatesAndStatus(table, data, dateStart, dateEnd, status)
+            : FilterListByDates(data, dateStart, dateEnd);
         return Ok(ListToCSVFormat(data));
+    }
+
+    private List<T> FilterListByDatesAndStatus<T>(string table, List<T> list, DateOnly startDate, DateOnly endDate, string status) {
+        string statusPropertyName = table.ToLower() switch {
+            "orders" => "OrderStatus",
+            "transfers" => "TransferStatus",
+            // "shipments" => "ShipmentStatus",
+            _ => "ShipmentStatus"
+        };
+
+        return list.Where(item => {
+            var property = typeof(T).GetProperty("CreatedAt");
+            if (property == null)
+            {
+                throw new InvalidOperationException($"Type {typeof(T).Name} does not contain a property named 'CreatedAt'.");
+            }
+
+            var value = property.GetValue(item);
+            if (value is DateTime createdAt)
+            {
+                return createdAt > startDate.ToDateTime(TimeOnly.MinValue) && createdAt < endDate.ToDateTime(TimeOnly.MaxValue);
+            }
+            throw new InvalidOperationException($"Property 'CreatedAt' on type {typeof(T).Name} is not a DateTime.");
+        })
+        .Where(item => {
+            var property = typeof(T).GetProperty(statusPropertyName);
+            if (property == null)
+            {
+                throw new InvalidOperationException($"Type {typeof(T).Name} does not contain a property named 'CreatedAt'.");
+            }
+
+            var value = property.GetValue(item);
+            if (value is string itemStatus)
+            {
+                return itemStatus == status;
+            }
+            throw new InvalidOperationException($"Property '{statusPropertyName}' on type {typeof(T).Name} is not a string.");
+        })
+        .ToList();
+    }
+
+    private List<T> FilterListByDates<T>(List<T> list, DateOnly startDate, DateOnly endDate) {
+        return list.Where(item => {
+            var property = typeof(T).GetProperty("CreatedAt");
+            if (property == null)
+            {
+                throw new InvalidOperationException($"Type {typeof(T).Name} does not contain a property named 'CreatedAt'.");
+            }
+
+            var value = property.GetValue(item);
+            if (value is DateTime createdAt)
+            {
+                return createdAt > startDate.ToDateTime(TimeOnly.MinValue) && createdAt < endDate.ToDateTime(TimeOnly.MaxValue);
+            }
+            throw new InvalidOperationException($"Property 'CreatedAt' on type {typeof(T).Name} is not a DateTime.");
+        })
+        .ToList();
     }
 
     private string ListToCSVFormat<T>(List<T> list)
@@ -93,7 +157,12 @@ public class ReportController : Controller
             List<string> values = new();
             foreach (PropertyInfo property in item.GetType().GetProperties())
             {
-                values.Add((property.GetValue(item) ?? "").ToString() ?? "");
+                var test = property.GetType().Namespace;
+                if (property.PropertyType.Namespace == "System.Collections.Generic") {
+                    values.Add($"Insert collection here");
+                } else {
+                    values.Add((property.GetValue(item) ?? "").ToString() ?? "");
+                }
             }
             resultString += string.Join(",", values);
         }
