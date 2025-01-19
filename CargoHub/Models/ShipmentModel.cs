@@ -11,24 +11,24 @@ public class Shipment : IEquatable<Shipment>
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
     public ICollection<OrdersInShipment> OrderIds { get; set; } = new List<OrdersInShipment>();
-    public int SourceId { get; set; }
+    public int? SourceId { get; set; }
 
     [DataType(DataType.DateTime)]
-    public DateTime OrderDate { get; set; }
+    public DateTime OrderDate { get; set; } = DateTime.Now;
     [DataType(DataType.DateTime)]
-    public DateTime RequestDate { get; set; }
+    public DateTime RequestDate { get; set; } = DateTime.Now;
     [DataType(DataType.DateTime)]
-    public DateTime ShipmentDate { get; set; }
+    public DateTime ShipmentDate { get; set; } = DateTime.Now;
     public string? ShipmentType { get; set; }
-    public string? ShipmentStatus { get; set; }
+    public string? ShipmentStatus { get; set; } = "Pending";
     public string? Notes { get; set; }
     public string? CarrierCode { get; set; }
     public string? CarrierDescription { get; set; }
     public string? ServiceCode { get; set; }
     public string? PaymentType { get; set; }
     public string? TransferMode { get; set; }
-    public int TotalPackageCount { get; set; }
-    public float TotalPackageWeight { get; set; }
+    public int? TotalPackageCount { get; set; }
+    public float? TotalPackageWeight { get; set; }
 
     [DataType(DataType.DateTime)]
     public DateTime? CreatedAt { get; set; } = DateTime.Now;
@@ -79,6 +79,7 @@ public class ShipmentItems
     public Item? item { get; set; }
     public string ItemUid { get; set; }
 
+    [Range(0, int.MaxValue, ErrorMessage = "Amount cannot be less than 0.")]
     public int Amount { get; set; }
 
     // softdelte

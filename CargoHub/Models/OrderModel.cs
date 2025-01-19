@@ -9,16 +9,16 @@ public class Order : IEquatable<Order>
     [Key]
     [DatabaseGenerated(DatabaseGeneratedOption.Identity)]
     public int Id { get; set; }
-    public int SourceId { get; set; }
+    public int? SourceId { get; set; }
 
     [DataType(DataType.DateTime)]
-    public DateTime OrderDate { get; set; }
+    public DateTime OrderDate { get; set; } = DateTime.Now;
 
     [DataType(DataType.DateTime)]
-    public DateTime RequestDate { get; set; }
+    public DateTime RequestDate { get; set; } = DateTime.Now;
 
     public string? Reference { get; set; }
-    public string? OrderStatus { get; set; }
+    public string? OrderStatus { get; set; } = "Pending";
     public string? Notes { get; set; }
     public string? ShippingNotes { get; set; }
     public string? PickingNotes { get; set; }
@@ -116,6 +116,7 @@ public class OrderItems : IEquatable<OrderItems>
     public Item? item { get; set; }
     public string ItemUid { get; set; }
 
+    [Range(0, int.MaxValue, ErrorMessage = "Amount cannot be less than 0.")]
     public int Amount { get; set; }
 
     // softdelte

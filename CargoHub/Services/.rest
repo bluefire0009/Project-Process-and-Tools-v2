@@ -1,14 +1,189 @@
-POST http://localhost:3000/api/v2/clients
+POST http://localhost:3000/api/v2/items
+Content-Type:  application/json
+
+{
+  "Uid": "P000001"
+}
+
+#####
+// Maak een inventory met 10x van item: P000001
+POST http://localhost:3000/api/v2/inventories
+Content-Type:  application/json
+
+{
+  "ItemId": "P000001",
+  "total_on_hand": 10,
+  "total_expected": 0,
+  "total_ordered": 0,
+  "total_allocated": 0,
+  "total_available": 10
+}
+
+
+#####
+// probeer een order te plaatsen voor 20x van item: P000001
+POST http://localhost:3000/api/v2/orders
 Content-Type: application/json
 
 {
-  "name": "string",
-  "address": "string",
-  "city": "string",
-  "zipCode": "string",
-  "province": "string",
-  "country": "string",
-  "contactName": "string",
-  "contactPhone": "string",
-  "contactEmail": "user@example.com"
+  "OrderStatus" : "Pending",
+  "Items": [
+    {
+      "ItemUid": "P000001",
+      "Amount": 20,
+      "OrderId": 1
+    }
+  ]
 }
+
+####
+// stuur een shipment met items naar de inventory met item: "P000001"
+POST http://localhost:3000/api/v2/shipments
+Content-Type: application/json
+
+{
+  "ShipmentType" : "I",
+  "ShipmentStatus" : "Pending",
+  "Items": [
+    {
+      "Id": 1,
+      "ItemUid": "P000001",
+      "Amount": 20,
+      "ShipmentId": 1
+    }
+  ]
+}
+
+####
+// zet het naar Transit
+Put http://localhost:3000/api/v2/shipments/1
+Content-Type: application/json
+
+{
+  "ShipmentType" : "I",
+  "ShipmentStatus" : "Transit",
+  "Items": [
+    {
+      "Id": 1,
+      "ItemUid": "P000001",
+      "Amount": 20,
+      "ShipmentId": 1
+    }
+  ]
+}
+
+####
+// zet het naar Delivered
+Put http://localhost:3000/api/v2/shipments/1
+Content-Type: application/json
+
+{
+  "ShipmentType" : "I",
+  "ShipmentStatus" : "Delivered",
+  "Items": [
+    {
+      "Id": 1,
+      "ItemUid": "P000001",
+      "Amount": 20,
+      "ShipmentId": 1
+    }
+  ]
+}
+
+
+#####
+// probeer een order te plaatsen voor 20x van item: P000001
+POST http://localhost:3000/api/v2/orders
+Content-Type: application/json
+
+{
+  "OrderStatus" : "Pending",
+  "Items": [
+    {
+      "ItemUid": "P000001",
+      "Amount": 20,
+      "OrderId": 1
+    }
+  ]
+}
+
+#####
+// verander de hoeveelheid items
+Put http://localhost:3000/api/v2/orders/1
+Content-Type: application/json
+
+{
+  "OrderStatus" : "Pending",
+  "Items": [
+    {
+      "ItemUid": "P000001",
+      "Amount": 30,
+      "OrderId": 1
+    }
+  ]
+}
+
+#####
+// verander de hoeveelheid items naar een negatief getal
+Put http://localhost:3000/api/v2/orders/1
+Content-Type: application/json
+
+{
+  "OrderStatus" : "Pending",
+  "Items": [
+    {
+      "ItemUid": "P000001",
+      "Amount": -10,
+      "OrderId": 1
+    }
+  ]
+}
+
+####
+// zet het naar Packed
+Put http://localhost:3000/api/v2/orders/1
+Content-Type: application/json
+
+{
+  "OrderStatus" : "Packed",
+  "Items": [
+    {
+      "ItemUid": "P000001",
+      "Amount": 20,
+      "OrderId": 1
+    }
+  ]
+}
+
+####
+// zet het naar Shipped
+Put http://localhost:3000/api/v2/orders/1
+Content-Type: application/json
+
+{
+  "OrderStatus" : "Shipped",
+  "Items": [
+    {
+      "ItemUid": "P000001",
+      "Amount": 20,
+      "OrderId": 1
+    }
+  ]
+}
+
+####
+// zet het naar Delivered
+Put http://localhost:3000/api/v2/orders/1
+Content-Type: application/json
+
+{
+  "OrderStatus" : "Delivered",
+  "Items": [
+    {
+      "ItemUid": "P000001",
+      "Amount": 20,
+      "OrderId": 1
+    }
+  ]
+}
+

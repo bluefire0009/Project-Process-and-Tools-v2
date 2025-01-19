@@ -12,7 +12,7 @@ public interface IOrderStorage
     // Task<IEnumerable<Order>> GetOrdersForClient(int clientId)
     Task<int> AddOrder(Order order);
     Task<bool> UpdateOrder(int orderId, Order order);
-    Task<bool> UpdateItemsInOrder(int orderId, List<OrderItems> orderItems, string settings = "", bool fromPost = false);
+    Task<bool> UpdateItemsInOrder(int orderId, List<OrderItems> orderItems, string settings = "", bool fromPost = false, string PrevStatus = "");
     Task<bool> UpdateOrdersInShipment(int shipmentId, List<int> orders);
     Task<bool> DeleteOrder(int orderId);
 }

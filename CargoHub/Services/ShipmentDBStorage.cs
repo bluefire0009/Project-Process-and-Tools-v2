@@ -40,13 +40,7 @@ public class ShipmentStorage : IShipmentStorage
 
     public async Task<Shipment?> GetShipment(int shipmentId)
     {
-        // return shipment by id
-        Shipment? shipment = await DB.Shipments.FirstOrDefaultAsync(x => x.Id == shipmentId);
-        List<ShipmentItems> shipmentItems = await GetItemsInShipment(shipmentId);
-        // assign items to shipment
-        if (shipment != null)
-        { shipment.Items = shipmentItems; }
-        return shipment;
+        return await DB.Shipments.Include(s => s.Items).FirstOrDefaultAsync(x => x.Id == shipmentId);
     }
 
     public async Task<List<ShipmentItems>> GetItemsInShipment(int shipmentId)
@@ -59,6 +53,8 @@ public class ShipmentStorage : IShipmentStorage
     {
         // add shipment to shipments
         if (shipment == null) return -1;
+        using var transaction = await DB.Database.BeginTransactionAsync();
+
 
         // extract items from order
         List<ShipmentItems> shipmentItems = shipment.Items.ToList();
@@ -71,10 +67,18 @@ public class ShipmentStorage : IShipmentStorage
         // Save to make it available in the DB for the UpdateItemsInShipment
         if (await DB.SaveChangesAsync() < 1) return -1;
 
-        // update the items with add setting so it adjusts the inventories propperly
-        await UpdateItemsInShipment(shipment.Id, shipmentItems, settings: "add", true);
+        if (shipmentItems.Count > 0)
+        {
+            // update the items with add setting so it adjusts the inventories propperly
+            bool ShipmentAddStatus = await UpdateItemsInShipment(shipment.Id, shipmentItems, settings: "add", true);
+            if (!ShipmentAddStatus)
+            {
+                await transaction.RollbackAsync();
+                return -1;
+            }
+        }
 
-        // var itms = GetItemsInOrder(order.Id);
+        await transaction.CommitAsync();
         return shipment.Id;
     }
     public async Task<bool> UpdateShipment(int shipmentId, Shipment shipment)
@@ -85,6 +89,7 @@ public class ShipmentStorage : IShipmentStorage
         // make sure the shipment exists
         Shipment? FoundShipment = await DB.Shipments.FirstOrDefaultAsync(x => x.Id == shipmentId);
         if (FoundShipment == null) return false;
+        string? prevStatus = FoundShipment.ShipmentStatus;
 
         // first empty the items incase the ShipmentStatus or Shipmenttype changed
         await UpdateItemsInShipment(shipmentId, []);
@@ -94,8 +99,13 @@ public class ShipmentStorage : IShipmentStorage
         FoundShipment.ShipmentType = shipment.ShipmentType;
         await DB.SaveChangesAsync();
 
+        if (prevStatus == "Delivered")
+        {
+            Console.WriteLine("aa");
+        }
+
         // Update the items first
-        await UpdateItemsInShipment(shipment.Id, shipment.Items.ToList(), settings: "add");
+        await UpdateItemsInShipment(shipmentId, shipment.Items.ToList(), settings: "add", PrevStatus: prevStatus);
 
         // update updated at
         FoundShipment.UpdatedAt = CETDateTime.Now();
@@ -152,7 +162,7 @@ public class ShipmentStorage : IShipmentStorage
         return true;
     }
 
-    public async Task<bool> UpdateItemsInShipment(int shipmentId, List<ShipmentItems> list2, string settings = "", bool fromPost = false)
+    public async Task<bool> UpdateItemsInShipment(int shipmentId, List<ShipmentItems> list2, string settings = "", bool fromPost = false, string PrevStatus = "")
     {
         // Unique Shipment Types:
         // { None, 'O', 'I'}
@@ -248,7 +258,7 @@ public class ShipmentStorage : IShipmentStorage
             }
             else if (ShipmentStatus == "Delivered")
             {
-                if (fromPost)
+                if (fromPost || PrevStatus != "Delivered")
                 {
                     // if the shipment is already delivered then change the total_on_hand and total_available
                     // invert the amount if the shipment was Outgoing
@@ -256,9 +266,10 @@ public class ShipmentStorage : IShipmentStorage
                     {
                         item.Amount *= -1;
                     }
-                    // example item1 = (Id:1, amount:10) and Incomming means we have 10 more items than before
-                    // otherwise if it is Outgoing it means we have 10 less items than before
-                    totalAvailable += item.Amount;
+                    if (ShipmentType == "O" || ShipmentType == "I")
+                        // example item1 = (Id:1, amount:10) and Incomming means we have 10 more items than before
+                        // otherwise if it is Outgoing it means we have 10 less items than before
+                        totalAvailable += item.Amount;
                     totalOnHand += item.Amount;
                 }
                 else

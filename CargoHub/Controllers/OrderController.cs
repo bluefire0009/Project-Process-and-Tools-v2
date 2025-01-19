@@ -42,7 +42,11 @@ public class OrderController : Controller
 
         if (!ModelState.IsValid)
         {
-            return BadRequest("Invalid model");
+            var errors = ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage);
+
+            return BadRequest(new { Message = "Invalid JSON", Errors = errors });
         }
 
         int id = await Storage.AddOrder(order);
@@ -53,6 +57,16 @@ public class OrderController : Controller
     [HttpPut("{Id}")]
     public async Task<IActionResult> UpdateOrder([FromRoute] int Id, [FromBody] Order order)
     {
+
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage);
+
+            return BadRequest(new { Message = "Invalid JSON", Errors = errors });
+        }
+
         if (await Storage.UpdateOrder(Id, order)) return Ok($"Order with Id{Id} was updated successfully");
         return BadRequest();
     }

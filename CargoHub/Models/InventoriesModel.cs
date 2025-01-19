@@ -14,10 +14,9 @@ public class Inventory : IEquatable<Inventory>
     public Item item { get; set; } = null!;
     [JsonRequired]
     public string? ItemId { get; set; }
-    [JsonRequired]
     public string? Description { get; set; }
-    [JsonRequired]
     public string? ItemReference { get; set; }
+    
     [JsonRequired]
     public int total_on_hand { get; set; } = 0;
     [JsonRequired]
@@ -32,7 +31,7 @@ public class Inventory : IEquatable<Inventory>
     public ICollection<InventoryLocation> InventoryLocations { get; set; } = new List<InventoryLocation>();
 
     [DataType(DataType.DateTime)]
-    public DateTime CreatedAt { get; set; } = DateTime.Now;
+    public DateTime? CreatedAt { get; set; } = DateTime.Now;
 
     [DataType(DataType.DateTime)]
     public DateTime? UpdatedAt { get; set; } = null;
