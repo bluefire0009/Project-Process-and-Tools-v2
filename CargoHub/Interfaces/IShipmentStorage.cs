@@ -8,6 +8,6 @@ public interface IShipmentStorage
     Task<List<ShipmentItems>> GetItemsInShipment(int shipmentId);
     Task<int> AddShipment(Shipment shipment);
     Task<bool> UpdateShipment(int shipmentId, Shipment shipment);
-    Task<bool> UpdateItemsInShipment(int shipmentId, List<ShipmentItems> items, string settings = "");
+    Task<bool> UpdateItemsInShipment(int shipmentId, List<ShipmentItems> items, string settings = "", bool fromPost = false);
     Task<bool> DeleteShipment(int shipmentId);
 }

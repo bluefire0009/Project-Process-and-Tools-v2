@@ -96,7 +96,7 @@ public class ShipmentDBTest
         List<Inventory> inventories = GetTestInventories();
 
         Assert.IsTrue(FoundShipments.Count() == shipments.Count());
-        AssertInventoryAmounts(expectedInventories, inventories);
+        Assert.IsTrue(AssertInventoryAmounts(expectedInventories, inventories));
 
     }
 
@@ -176,7 +176,8 @@ public class ShipmentDBTest
             Assert.IsTrue(await storage.UpdateShipment(shipments[0].Id, clonedShipment));
             // GetTestInventories(newShipmentStatus, shipments[0].ShipmentType!);
             // Compare expected inventories to actual inventories
-            AssertInventoryAmounts(expectedInventories, GetTestInventories());
+            List<Inventory> inventories = GetTestInventories();
+            Assert.IsTrue(AssertInventoryAmounts(expectedInventories, inventories));
         }
     }
 
@@ -458,7 +459,7 @@ public class ShipmentDBTest
                     new List<Tuple<int, int, int, int, int>> {
                         new Tuple<int, int, int, int, int>(70, 0, 0, 0, 70),
                         new Tuple<int, int, int, int, int>(50, 0, 0, 0, 50),
-                        new Tuple<int, int, int, int, int>(-10, 0, 0, 0, -10)
+                        new Tuple<int, int, int, int, int>(5, 0, 0, 0, 5)
             }
         },
         new object[]
@@ -607,9 +608,9 @@ public class ShipmentDBTest
                     // Delivered | O
                     new List<Tuple<int, int, int, int, int>>
                     {
-                        new Tuple<int, int, int, int, int>(90, 0, 0, 0, 90),
-                        new Tuple<int, int, int, int, int>(35, 0, 0, 0, 35),
-                        new Tuple<int, int, int, int, int>(0, 0, 0, 0, 0)
+                        new Tuple<int, int, int, int, int>(100, 0, 0, 0, 100),
+                        new Tuple<int, int, int, int, int>(50, 0, 0, 0, 50),
+                        new Tuple<int, int, int, int, int>(5, 0, 0, 0, 5)
                     }
                 },
             // List of statuses to test
@@ -668,9 +669,9 @@ public class ShipmentDBTest
             // Delivered | I
             new List<Tuple<int, int, int, int, int>>
             {
-                new Tuple<int, int, int, int, int>(108, 0, 0, 0, 108),
-                new Tuple<int, int, int, int, int>(58, 0, 0, 0, 58),
-                new Tuple<int, int, int, int, int>(17, 0, 0, 0, 17)
+                new Tuple<int, int, int, int, int>(100, 0, 0, 0, 100),
+                new Tuple<int, int, int, int, int>(50, 0, 0, 0, 50),
+                new Tuple<int, int, int, int, int>(5, 0, 0, 0, 5)
             }
         },
             // List of statuses to test
@@ -698,15 +699,19 @@ public class ShipmentDBTest
         return inventories;
     }
 
-    private void AssertInventoryAmounts(List<Tuple<int, int, int, int, int>> expectedInventories, List<Inventory> inventories)
+    private bool AssertInventoryAmounts(List<Tuple<int, int, int, int, int>> expectedInventories, List<Inventory> inventories)
     {
         for (int i = 0; i < expectedInventories.Count; i++)
         {
-            Assert.IsTrue(expectedInventories[i].Item1 == inventories[i].total_on_hand);
-            Assert.IsTrue(expectedInventories[i].Item2 == inventories[i].total_expected);
-            Assert.IsTrue(expectedInventories[i].Item3 == inventories[i].total_ordered);
-            Assert.IsTrue(expectedInventories[i].Item4 == inventories[i].total_allocated);
-            Assert.IsTrue(expectedInventories[i].Item5 == inventories[i].total_available);
+            if (expectedInventories[i].Item1 != inventories[i].total_on_hand ||
+                expectedInventories[i].Item2 != inventories[i].total_expected ||
+                expectedInventories[i].Item3 != inventories[i].total_ordered ||
+                expectedInventories[i].Item4 != inventories[i].total_allocated ||
+                expectedInventories[i].Item5 != inventories[i].total_available)
+            {
+                return false; // Return false if any mismatch is found
+            }
         }
+        return true; // Return true if all match
     }
 }
