@@ -62,6 +62,7 @@ public class ReportController : Controller
         // if dateEnd is null set to max value
         DateOnly dateEnd = endDate ?? DateOnly.MaxValue;
 
+        // switch case to get appropriate data
         dynamic? data = table.ToLower() switch
         {
             "items" => await _itemStorage.GetItems(0, int.MaxValue),
@@ -80,15 +81,18 @@ public class ReportController : Controller
             _ => null,
         };
 
+        // if no data return noContent
         if (data is null || data.Count == 0) return NoContent();
 
-        data = status is not null && (table == "orders" || table == "transfers") 
+        // depending on the tables filter
+        data = status is not null && (table == "orders" || table == "transfers" || table == "shipments") 
             ? FilterListByDatesAndStatus(table, data, dateStart, dateEnd, status)
             : FilterListByDates(data, dateStart, dateEnd);
 
+        // convert to CSV format
         string result = ListToCSVFormat(data);
         if (result != "")
-            return Ok(ListToCSVFormat(data));
+            return Ok(result);
         else
             return NoContent();
     }
@@ -101,6 +105,7 @@ public class ReportController : Controller
             _ => "ShipmentStatus"
         };
 
+        // filter createdAt date
         return list.Where(item => {
             var property = typeof(T).GetProperty("CreatedAt");
             if (property == null)
@@ -115,6 +120,7 @@ public class ReportController : Controller
             }
             throw new InvalidOperationException($"Property 'CreatedAt' on type {typeof(T).Name} is not a DateTime.");
         })
+        // filter on status
         .Where(item => {
             var property = typeof(T).GetProperty(statusPropertyName);
             if (property == null)
@@ -133,6 +139,7 @@ public class ReportController : Controller
     }
 
     private List<T> FilterListByDates<T>(List<T> list, DateOnly startDate, DateOnly endDate) {
+        // filter on createdAt
         return list.Where(item => {
             var property = typeof(T).GetProperty("CreatedAt");
             if (property == null)
@@ -152,10 +159,12 @@ public class ReportController : Controller
 
     private string ListToCSVFormat<T>(List<T> list)
     {
+        // if no objects return empty string
         if (list.Count == 0) return "";
         string resultString;
-        List<string> headers = new();
 
+        // obtain all headers from object except for ones where the result is a collection
+        List<string> headers = new();
         foreach (PropertyInfo property in list[0].GetType().GetProperties())
         {
             if (property.PropertyType.Namespace != "System.Collections.Generic")
@@ -163,21 +172,27 @@ public class ReportController : Controller
         }
 
         resultString = string.Join(",", headers);
+        // for each object in the list
         foreach (T item in list)
         {
             resultString += "\n";
             List<string> values = new();
+            // for each property of the object
             foreach (PropertyInfo property in item.GetType().GetProperties())
             {
                 var test = property.GetType().Namespace;
+                // if property value is not a collection
                 if (property.PropertyType.Namespace != "System.Collections.Generic") {
+                    // stringify dateTime to make readable in excel
                     if (DateTime.TryParse((property.GetValue(item)?? "").ToString(), out DateTime parsedDate)) 
                         values.Add($"\"\"\"{(property.GetValue(item) ?? "").ToString() ?? ""}\"\"\"");
+                    // Add to values
                     else
                         values.Add((property.GetValue(item) ?? "").ToString() ?? "");
                 }
                     
             }
+            // join on result string
             resultString += string.Join(",", values);
         }
         return resultString;
