@@ -30,7 +30,7 @@ public class InventoriesController : Controller
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSpecificInventory(int id)
     {
-        if (id <= 0) return BadRequest("Invalid id in the url");
+        if (id < 0) return BadRequest("Invalid id in the url");
 
         Inventory? foundInventory = await inventoryStorage.getInventory(id);
         if (foundInventory == null) return NotFound($"No inventory with id:{id} found");

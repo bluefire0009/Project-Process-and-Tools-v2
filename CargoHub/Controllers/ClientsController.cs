@@ -31,7 +31,7 @@ public class ClientsController : Controller
     [HttpGet("{id}")]
     public async Task<IActionResult> GetSpecificClient(int id)
     {
-        if (id <= 0) return BadRequest("Invalid id in the url");
+        if (id < 0) return BadRequest("Invalid id in the url");
 
         Client? foundClient = await clientStorage.getClient(id);
         if (foundClient == null) return NotFound($"No client with id:{id} found");
@@ -42,7 +42,7 @@ public class ClientsController : Controller
     [HttpGet("{id}/orders")]
     public async Task<IActionResult> GetOrdersSpecificClient(int id)
     {
-        if (id <= 0) return BadRequest("Invalid id in the URL");
+        if (id < 0) return BadRequest("Invalid id in the URL");
 
         Client? foundClient = await clientStorage.getClient(id);
         if (foundClient == null) return NotFound($"No client with id:{id} found");
@@ -64,7 +64,7 @@ public class ClientsController : Controller
     [HttpDelete("{id}")]
     public async Task<IActionResult> RemoveClient(int id)
     {
-        if (id <= 0) return BadRequest("Invalid id in the url");
+        if (id < 0) return BadRequest("Invalid id in the url");
         bool deleted = await clientStorage.deleteClient(id);
 
         if (!deleted) return NotFound($"No client with id:{id} in the database");
@@ -74,7 +74,7 @@ public class ClientsController : Controller
     [HttpPut("{idToUpdate}")]
     public async Task<IActionResult> UpdateClient(int idToUpdate, [FromBody] Client updatedClient)
     {
-        if (idToUpdate <= 0) return BadRequest("Invalid id in the url");
+        if (idToUpdate < 0) return BadRequest("Invalid id in the url");
         if (updatedClient == null) BadRequest("updatedClient cannot be null");
 
         bool updated = await clientStorage.updateClient(idToUpdate, updatedClient);

@@ -121,7 +121,7 @@ namespace IntegrationTests
         }
 
         [TestMethod]
-        public void test_put_warehouse()
+        public void test_put_supplier()
         {
             // Arrange
             Supplier testSupplier = new() { Id = testSuppliers[0].Id, Code = "GIOMNL90", Name = "Petten longterm hub", Address = "Owenweg 731", AddressExtra = "Beneden", ZipCode = "4615 RB", City = "Petten", Province = "Noord-Holland", Country = "NL", ContactName = "Maud Adryaens", PhoneNumber = "+31836 752702", Reference = ":)" };
