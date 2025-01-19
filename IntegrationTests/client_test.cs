@@ -60,8 +60,8 @@ namespace IntegrationTests
         ];
         private Warehouse testWarehouse = new Warehouse() { Id = 1, Code = "GIOMNL90", Name = "Petten longterm hub", Address = "Owenweg 731", Zip = "4615 RB", City = "Petten", Province = "Noord-Holland", Country = "NL", ContactEmail = "nickteunissen@example.com", ContactName = "Maud Adryaens", ContactPhone = "+31836 752702" };
         private Order[] testOrders = [
-            new Order() {Notes = "testorder_1", BillTo = 1},
-            new Order() {Notes = "testorder_2", BillTo = 2}
+            new Order() {Notes = "testorder_1", BillTo = 1, ShipTo = 1},
+            new Order() {Notes = "testorder_2", BillTo = 2, ShipTo = 1}
         ];
         private Client[] testClients = [
             new Client() {Name = "Milan", Address = "Jasmijnstraat 53", City = "Papnedrecht", ContactEmail = "milan22veersluis@gamil.com", ContactName = "Milan Versluis", ContactPhone = "0638182257", Country = "Netherlands", Province = "Zuid-Holland", ZipCode = "3353 CG"},
@@ -90,8 +90,8 @@ namespace IntegrationTests
             bool itemResponse = addTestResourceToDB(client, testItems, ItemUrl);
             bool locationsResponse = addTestResourceToDB(client, testLocations, LocationUrl);
             bool inventoryResponse = addTestResourceToDB(client, testInventories, InventoryUrl);
-            bool OrderResponse = addTestResourceToDB(client, testOrders, OrdersUrl);
             bool ClientResponse = addTestResourceToDB(client,testClients, ClientUrl);
+            bool OrderResponse = addTestResourceToDB(client, testOrders, OrdersUrl);
         }
 
         [TestCleanup]
