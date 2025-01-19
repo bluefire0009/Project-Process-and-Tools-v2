@@ -101,7 +101,7 @@ public class OrderDBTest
         List<Inventory> inventories = GetTestInventories();
 
         // Assert the amounts in the inventories
-        AssertInventoryAmounts(expectedInventories, inventories);
+        Assert.IsTrue(AssertInventoryAmounts(expectedInventories, inventories));
     }
 
     [TestMethod]
@@ -200,7 +200,10 @@ public class OrderDBTest
 
             Assert.IsTrue(await storage.UpdateOrder(orders[0].Id, ClonedOrder));
             // Compare expected inventories to actual inventories
-            AssertInventoryAmounts(expectedInventories, GetTestInventories());
+
+            List<Inventory> inventories = GetTestInventories();
+
+            Assert.IsTrue(AssertInventoryAmounts(expectedInventories, inventories));
         }
     }
 
@@ -545,7 +548,7 @@ public class OrderDBTest
             new List<Tuple<int, int, int, int, int>> {
             new Tuple<int, int, int, int, int>(100, 0, 0, 8, 92), // (Total On Hand, Total Expected, Total Ordered, Total Allocated, Total Available)
             new Tuple<int, int, int, int, int>(50, 0, 15, 2, 33),
-            new Tuple<int, int, int, int, int>(5, 0, 20, 0, -15)
+            new Tuple<int, int, int, int, int>(5, 0, 0, 0, 5)
             }
     }
     };
@@ -601,15 +604,15 @@ public class OrderDBTest
             },
             // Shipped
             new List<Tuple<int, int, int, int, int>> {
-                new Tuple<int, int, int, int, int>(90, 0, 0, 0, 90),
-                new Tuple<int, int, int, int, int>(30, 0, 0, 0, 30),
-                new Tuple<int, int, int, int, int>(0, 0, 0, 0, 0)
+                new Tuple<int, int, int, int, int>(100, 0, 0, 0, 100),
+                new Tuple<int, int, int, int, int>(50, 0, 0, 0, 50),
+                new Tuple<int, int, int, int, int>(5, 0, 0, 0, 5)
             },
             // Delivered
             new List<Tuple<int, int, int, int, int>> {
-                new Tuple<int, int, int, int, int>(90, 0, 0, 0, 90),
-                new Tuple<int, int, int, int, int>(30, 0, 0, 0, 30),
-                new Tuple<int, int, int, int, int>(0, 0, 0, 0, 0)
+                new Tuple<int, int, int, int, int>(100, 0, 0, 0, 100),
+                new Tuple<int, int, int, int, int>(50, 0, 0, 0, 50),
+                new Tuple<int, int, int, int, int>(5, 0, 0, 0, 5)
             }
         }
 ,
@@ -629,7 +632,7 @@ public class OrderDBTest
         Assert.IsNotNull(inventory2);
         Assert.IsNotNull(inventory3);
 
-        Console.WriteLine($"--------------- Inventories for test {type} ------------------");
+        // Console.WriteLine($"--------------- Inventories for test {type} ------------------");
         // Console.WriteLine($"Total On Hand: {inventory1.total_on_hand}, Total Expected: {inventory1.total_expected}, Total Ordered: {inventory1.total_ordered}, Total Allocated: {inventory1.total_allocated}, Total Available: {inventory1.total_available}");
         // Console.WriteLine($"Total On Hand: {inventory2.total_on_hand}, Total Expected: {inventory2.total_expected}, Total Ordered: {inventory2.total_ordered}, Total Allocated: {inventory2.total_allocated}, Total Available: {inventory2.total_available}");
         // Console.WriteLine($"Total On Hand: {inventory3.total_on_hand}, Total Expected: {inventory3.total_expected}, Total Ordered: {inventory3.total_ordered}, Total Allocated: {inventory3.total_allocated}, Total Available: {inventory3.total_available}");
@@ -638,16 +641,20 @@ public class OrderDBTest
         return inventories;
     }
 
-    private void AssertInventoryAmounts(List<Tuple<int, int, int, int, int>> expectedInventories, List<Inventory> inventories)
+    private bool AssertInventoryAmounts(List<Tuple<int, int, int, int, int>> expectedInventories, List<Inventory> inventories)
     {
         for (int i = 0; i < expectedInventories.Count; i++)
         {
-            Assert.IsTrue(expectedInventories[i].Item1 == inventories[i].total_on_hand);
-            Assert.IsTrue(expectedInventories[i].Item2 == inventories[i].total_expected);
-            Assert.IsTrue(expectedInventories[i].Item3 == inventories[i].total_ordered);
-            Assert.IsTrue(expectedInventories[i].Item4 == inventories[i].total_allocated);
-            Assert.IsTrue(expectedInventories[i].Item5 == inventories[i].total_available);
+            if (expectedInventories[i].Item1 != inventories[i].total_on_hand ||
+                expectedInventories[i].Item2 != inventories[i].total_expected ||
+                expectedInventories[i].Item3 != inventories[i].total_ordered ||
+                expectedInventories[i].Item4 != inventories[i].total_allocated ||
+                expectedInventories[i].Item5 != inventories[i].total_available)
+            {
+                return false; // Return false if any mismatch is found
+            }
         }
+        return true; // Return true if all match
     }
 
 

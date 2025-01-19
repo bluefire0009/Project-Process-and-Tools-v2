@@ -72,7 +72,7 @@ public class ShipmentStorage : IShipmentStorage
         if (await DB.SaveChangesAsync() < 1) return -1;
 
         // update the items with add setting so it adjusts the inventories propperly
-        await UpdateItemsInShipment(shipment.Id, shipmentItems, settings: "add");
+        await UpdateItemsInShipment(shipment.Id, shipmentItems, settings: "add", true);
 
         // var itms = GetItemsInOrder(order.Id);
         return shipment.Id;
@@ -152,7 +152,7 @@ public class ShipmentStorage : IShipmentStorage
         return true;
     }
 
-    public async Task<bool> UpdateItemsInShipment(int shipmentId, List<ShipmentItems> list2, string settings = "")
+    public async Task<bool> UpdateItemsInShipment(int shipmentId, List<ShipmentItems> list2, string settings = "", bool fromPost = false)
     {
         // Unique Shipment Types:
         // { None, 'O', 'I'}
@@ -224,46 +224,61 @@ public class ShipmentStorage : IShipmentStorage
             Inventory? inventory = await DB.Inventories.FirstOrDefaultAsync(x => x.ItemId == item.ItemUid);
             if (inventory == null) return false;
 
+            int totalAvailable = inventory.total_available;
+            int totalOnHand = inventory.total_on_hand;
+            int totalAllocated = inventory.total_allocated;
+            int totalOrdered = inventory.total_ordered;
+            int totalExpected = inventory.total_expected;
+
+
 
             if (ShipmentStatus == "Transit")
             {
                 // if shipment is in transit during change and its Incomming then change total expected
                 if (ShipmentType == "I")
                 {
-                    inventory.total_expected += item.Amount;
+                    totalExpected += item.Amount;
                 }
                 // if its Outgoing then change total available and total on hand
                 else if (ShipmentType == "O")
                 {
-                    inventory.total_available -= item.Amount;
-                    inventory.total_on_hand -= item.Amount;
+                    totalAvailable -= item.Amount;
+                    totalOnHand -= item.Amount;
                 }
             }
             else if (ShipmentStatus == "Delivered")
             {
-                // if the shipment is already delivered then change the total_on_hand and total_available
-                // invert the amount if the shipment was Outgoing
-                if (ShipmentType == "O")
+                if (fromPost)
                 {
-                    item.Amount *= -1;
+                    // if the shipment is already delivered then change the total_on_hand and total_available
+                    // invert the amount if the shipment was Outgoing
+                    if (ShipmentType == "O")
+                    {
+                        item.Amount *= -1;
+                    }
+                    // example item1 = (Id:1, amount:10) and Incomming means we have 10 more items than before
+                    // otherwise if it is Outgoing it means we have 10 less items than before
+                    totalAvailable += item.Amount;
+                    totalOnHand += item.Amount;
                 }
-                // example item1 = (Id:1, amount:10) and Incomming means we have 10 more items than before
-                // otherwise if it is Outgoing it means we have 10 less items than before
-                inventory.total_available += item.Amount;
-                inventory.total_on_hand += item.Amount;
+                else
+                {
+                    // cant change a delivered shipment
+                    return false;
+                }
             }
             else if (ShipmentStatus == "Pending")
             {
                 // if the shipment is still pending and Incomming then total_expected changes
                 if (ShipmentType == "I")
                 {
-                    inventory.total_expected += item.Amount;
+                    totalExpected += item.Amount;
                 }
                 // if the shipment is still pending and Outgoing then change the total_allocated and total_available
                 else if (ShipmentType == "O")
                 {
-                    inventory.total_allocated += item.Amount;
-                    inventory.total_available -= item.Amount;
+                    totalAllocated += item.Amount;
+                    totalAvailable -= item.Amount;
                 }
             }
             else
@@ -271,6 +286,18 @@ public class ShipmentStorage : IShipmentStorage
                 // if ShipmentStatus is anything else return false
                 return false;
             }
+
+            if (totalAvailable < 0 || totalOnHand < 0 || totalAllocated < 0 || totalOrdered < 0 || totalExpected < 0)
+            {
+                return false; // Abort if any value is invalid
+            }
+
+            // Apply changes if validation passed
+            inventory.total_available = totalAvailable;
+            inventory.total_on_hand = totalOnHand;
+            inventory.total_allocated = totalAllocated;
+            inventory.total_ordered = totalOrdered;
+            inventory.total_expected = totalExpected;
 
         }
         // Update the shipment So the shipment has the updated items

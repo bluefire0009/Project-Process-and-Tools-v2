@@ -77,7 +77,7 @@ public class OrderStorage : IOrderStorage
         if (await DB.SaveChangesAsync() < 1) return -1;
 
         // update the items with add setting so it adjusts the inventories propperly
-        await UpdateItemsInOrder(order.Id, orderItems, settings: "add");
+        await UpdateItemsInOrder(order.Id, orderItems, settings: "add", true);
 
         // var itms = GetItemsInOrder(order.Id);
         return order.Id;
@@ -191,7 +191,7 @@ public class OrderStorage : IOrderStorage
         return true;
     }
 
-    public async Task<bool> UpdateItemsInOrder(int orderId, List<OrderItems> list2, string settings = "")
+    public async Task<bool> UpdateItemsInOrder(int orderId, List<OrderItems> list2, string settings = "", bool fromPost = false)
     {
         // check if Order exists
 
@@ -258,31 +258,56 @@ public class OrderStorage : IOrderStorage
             Inventory? inventory = await DB.Inventories.FirstOrDefaultAsync(x => x.ItemId == item.ItemUid);
             if (inventory == null) return false;
 
+            int totalAvailable = inventory.total_available;
+            int totalOnHand = inventory.total_on_hand;
+            int totalAllocated = inventory.total_allocated;
+            int totalOrdered = inventory.total_ordered;
+
             // {'Shipped', 'Delivered', 'Pending', 'Packed'}
 
             if (OrderStatus == "Delivered" || OrderStatus == "Shipped")
             {
-                // if order is already delivered or shipped the total_available and total_on_hand changes
-                inventory.total_available -= item.Amount;
-                inventory.total_on_hand -= item.Amount;
+                if (fromPost)
+                {
+                    // if order is already delivered or shipped the total_available and total_on_hand changes
+                    totalAvailable -= item.Amount;
+                    totalOnHand -= item.Amount;
+                }
+                else
+                {
+                    // you cant change the order after it has been delivered
+                    return false;
+                }
             }
             else if (OrderStatus == "Pending")
             {
                 // if the order is still pending then the total_allocated and total_available changes
-                inventory.total_allocated += item.Amount;
-                inventory.total_available -= item.Amount;
+                totalAllocated += item.Amount;
+                totalAvailable -= item.Amount;
             }
             else if (OrderStatus == "Packed")
             {
                 // if the order is already packed then the total_allocated and total_available changes
-                inventory.total_ordered += item.Amount;
-                inventory.total_available -= item.Amount;
+                totalOrdered += item.Amount;
+                totalAvailable -= item.Amount;
             }
             else
             {
                 // if OrderStatus is anything else return false
                 return false;
             }
+
+            if (totalAvailable < 0 || totalOnHand < 0 || totalAllocated < 0 || totalOrdered < 0)
+            {
+                return false; // Abort if any value is invalid
+            }
+
+            // Apply changes if validation passed
+            inventory.total_available = totalAvailable;
+            inventory.total_on_hand = totalOnHand;
+            inventory.total_allocated = totalAllocated;
+            inventory.total_ordered = totalOrdered;
+
         }
         if (await DB.SaveChangesAsync() < 1) return false;
         return true;
