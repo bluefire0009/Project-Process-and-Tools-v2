@@ -66,6 +66,9 @@ public class OrderController : Controller
 
             return BadRequest(new { Message = "Invalid JSON", Errors = errors });
         }
+        var existingOrder = await Storage.GetOrder(Id);
+        if (existingOrder.OrderStatus == "Delivered" && order.OrderStatus == "Delivered")
+            return BadRequest("Can't Alter an order that has already been Delivered");
 
         if (await Storage.UpdateOrder(Id, order)) return Ok($"Order with Id{Id} was updated successfully");
         return BadRequest();

@@ -73,6 +73,10 @@ public class ShipmentController : Controller
 
             return BadRequest(new { Message = "Invalid JSON", Errors = errors });
         }
+        var existingShipment = await Storage.GetShipment(Id);
+        if (existingShipment.ShipmentStatus == "Delivered" && shipment.ShipmentStatus == "Delivered")
+            return BadRequest("Can't Alter an shipment that has already been Delivered");
+
         if (await Storage.UpdateShipment(Id, shipment)) return Ok($"Shipment with Id{Id} was updated successfully");
         return BadRequest();
     }

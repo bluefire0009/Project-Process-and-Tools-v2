@@ -1,17 +1,18 @@
+// maak een item om mee te werken
 POST http://localhost:3000/api/v2/items
 Content-Type:  application/json
 
 {
-  "Uid": "P000001"
+  "Uid": "Item1"
 }
 
 #####
-// Maak een inventory met 10x van item: P000001
+// Maak een inventory met 10x van item: Item1
 POST http://localhost:3000/api/v2/inventories
 Content-Type:  application/json
 
 {
-  "ItemId": "P000001",
+  "ItemId": "Item1",
   "total_on_hand": 10,
   "total_expected": 0,
   "total_ordered": 0,
@@ -21,7 +22,7 @@ Content-Type:  application/json
 
 
 #####
-// probeer een order te plaatsen voor 20x van item: P000001
+// probeer een order te plaatsen voor 20x van item: Item1
 POST http://localhost:3000/api/v2/orders
 Content-Type: application/json
 
@@ -29,7 +30,7 @@ Content-Type: application/json
   "OrderStatus" : "Pending",
   "Items": [
     {
-      "ItemUid": "P000001",
+      "ItemUid": "Item1",
       "Amount": 20,
       "OrderId": 1
     }
@@ -37,7 +38,7 @@ Content-Type: application/json
 }
 
 ####
-// stuur een shipment met items naar de inventory met item: "P000001"
+// stuur een shipment met items naar de inventory met item: "Item1"
 POST http://localhost:3000/api/v2/shipments
 Content-Type: application/json
 
@@ -47,7 +48,7 @@ Content-Type: application/json
   "Items": [
     {
       "Id": 1,
-      "ItemUid": "P000001",
+      "ItemUid": "Item1",
       "Amount": 20,
       "ShipmentId": 1
     }
@@ -65,7 +66,7 @@ Content-Type: application/json
   "Items": [
     {
       "Id": 1,
-      "ItemUid": "P000001",
+      "ItemUid": "Item1",
       "Amount": 20,
       "ShipmentId": 1
     }
@@ -83,7 +84,7 @@ Content-Type: application/json
   "Items": [
     {
       "Id": 1,
-      "ItemUid": "P000001",
+      "ItemUid": "Item1",
       "Amount": 20,
       "ShipmentId": 1
     }
@@ -92,7 +93,7 @@ Content-Type: application/json
 
 
 #####
-// probeer een order te plaatsen voor 20x van item: P000001
+// probeer een order te plaatsen voor 20x van item: Item1
 POST http://localhost:3000/api/v2/orders
 Content-Type: application/json
 
@@ -100,7 +101,7 @@ Content-Type: application/json
   "OrderStatus" : "Pending",
   "Items": [
     {
-      "ItemUid": "P000001",
+      "ItemUid": "Item1",
       "Amount": 20,
       "OrderId": 1
     }
@@ -116,7 +117,7 @@ Content-Type: application/json
   "OrderStatus" : "Pending",
   "Items": [
     {
-      "ItemUid": "P000001",
+      "ItemUid": "Item1",
       "Amount": 30,
       "OrderId": 1
     }
@@ -132,7 +133,7 @@ Content-Type: application/json
   "OrderStatus" : "Pending",
   "Items": [
     {
-      "ItemUid": "P000001",
+      "ItemUid": "Item1",
       "Amount": -10,
       "OrderId": 1
     }
@@ -148,7 +149,7 @@ Content-Type: application/json
   "OrderStatus" : "Packed",
   "Items": [
     {
-      "ItemUid": "P000001",
+      "ItemUid": "Item1",
       "Amount": 20,
       "OrderId": 1
     }
@@ -164,7 +165,7 @@ Content-Type: application/json
   "OrderStatus" : "Shipped",
   "Items": [
     {
-      "ItemUid": "P000001",
+      "ItemUid": "Item1",
       "Amount": 20,
       "OrderId": 1
     }
@@ -180,8 +181,24 @@ Content-Type: application/json
   "OrderStatus" : "Delivered",
   "Items": [
     {
-      "ItemUid": "P000001",
+      "ItemUid": "Item1",
       "Amount": 20,
+      "OrderId": 1
+    }
+  ]
+}
+
+#####
+// probeer de hoeveelheid items te veranderen na dat het delivered is
+Put http://localhost:3000/api/v2/orders/1
+Content-Type: application/json
+
+{
+  "OrderStatus" : "Delivered",
+  "Items": [
+    {
+      "ItemUid": "Item1",
+      "Amount": 30,
       "OrderId": 1
     }
   ]
