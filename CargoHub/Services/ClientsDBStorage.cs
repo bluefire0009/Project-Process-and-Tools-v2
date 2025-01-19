@@ -62,12 +62,18 @@ public class ClientDBStorage : IClientStorage
         Client? clientInDatabase = await db.Clients.Where(c => c.Id == idToUpdate).FirstOrDefaultAsync();
         if (clientInDatabase == null) return false;
 
-        db.Clients.Remove(clientInDatabase);
-        await db.SaveChangesAsync();
-
-        updatedClient.UpdatedAt = CETDateTime.Now();
-
-        db.Add(updatedClient);
+        clientInDatabase.Name = updatedClient.Name;
+        clientInDatabase.Address = updatedClient.Address;
+        clientInDatabase.Province = updatedClient.Province;
+        clientInDatabase.ContactPhone = updatedClient.ContactPhone;
+        clientInDatabase.ContactName = updatedClient.ContactName;
+        clientInDatabase.ContactEmail = updatedClient.ContactEmail;
+        clientInDatabase.Country = updatedClient.Country;
+        clientInDatabase.City = updatedClient.City;
+        clientInDatabase.ZipCode = updatedClient.ZipCode;
+        clientInDatabase.UpdatedAt = CETDateTime.Now();
+        db.Clients.Update(clientInDatabase);
+        
         await db.SaveChangesAsync();
 
         return true;
