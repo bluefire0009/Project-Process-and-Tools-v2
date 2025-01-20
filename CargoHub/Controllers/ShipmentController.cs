@@ -50,7 +50,11 @@ public class ShipmentController : Controller
 
         if (!ModelState.IsValid)
         {
-            return BadRequest("Invalid model");
+            var errors = ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage);
+
+            return BadRequest(new { Message = "Invalid JSON", Errors = errors });
         }
 
         int id = await Storage.AddShipment(shipment);
@@ -61,6 +65,18 @@ public class ShipmentController : Controller
     [HttpPut("{Id}")]
     public async Task<IActionResult> UpdateShipment([FromRoute] int Id, [FromBody] Shipment shipment)
     {
+        if (!ModelState.IsValid)
+        {
+            var errors = ModelState.Values
+            .SelectMany(v => v.Errors)
+            .Select(e => e.ErrorMessage);
+
+            return BadRequest(new { Message = "Invalid JSON", Errors = errors });
+        }
+        var existingShipment = await Storage.GetShipment(Id);
+        if (existingShipment.ShipmentStatus == "Delivered" && shipment.ShipmentStatus == "Delivered")
+            return BadRequest("Can't Alter an shipment that has already been Delivered");
+
         if (await Storage.UpdateShipment(Id, shipment)) return Ok($"Shipment with Id{Id} was updated successfully");
         return BadRequest();
     }

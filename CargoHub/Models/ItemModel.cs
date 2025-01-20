@@ -12,29 +12,29 @@ public class Item : IEquatable<Item>
     public string? Code { get; set; }
     public string? Description { get; set; }
     public string? ShortDescription { get; set; }
-    public int UpcCode { get; set; }
+    public int? UpcCode { get; set; }
     public string? ModelNumber { get; set; }
     public string? CommodityCode { get; set; }
 
     [ForeignKey("ItemLine")]
     public ItemLine? itemLineJson { get; set; }
-    public int ItemLine { get; set; }
+    public int? ItemLine { get; set; }
 
     [ForeignKey("ItemGroup")]
     public ItemGroup? itemGroupJson { get; set; }
-    public int ItemGroup { get; set; }
+    public int? ItemGroup { get; set; }
 
     [ForeignKey("ItemType")]
     public ItemType? itemTypeJson { get; set; }
-    public int ItemType { get; set; }
+    public int? ItemType { get; set; }
 
-    public int UnitPurchaseQuantity { get; set; }
-    public int UnitOrderQuantity { get; set; }
-    public int PackOrderQuantity { get; set; }
+    public int? UnitPurchaseQuantity { get; set; }
+    public int? UnitOrderQuantity { get; set; }
+    public int? PackOrderQuantity { get; set; }
 
     [ForeignKey("SupplierId")]
     public Supplier? SupplierById { get; set; }
-    public int SupplierId { get; set; }
+    public int? SupplierId { get; set; }
     public string? SupplierCode { get; set; }
     public string? SupplierPartNumber { get; set; }
 

@@ -64,6 +64,8 @@ public class OrderStorage : IOrderStorage
     {
         // add order to orders
         if (order == null) return -1;
+        // Begin a transaction
+        using var transaction = await DB.Database.BeginTransactionAsync();
 
         // extract items from order
         List<OrderItems> orderItems = order.Items.ToList();
@@ -76,10 +78,19 @@ public class OrderStorage : IOrderStorage
         // Save to make it available in the DB for the UpdateItemsInOrder
         if (await DB.SaveChangesAsync() < 1) return -1;
 
-        // update the items with add setting so it adjusts the inventories propperly
-        await UpdateItemsInOrder(order.Id, orderItems, settings: "add", true);
+        if (orderItems.Count != 0)
+        {
+            // update the items with add setting so it adjusts the inventories propperly
+            bool orderAddStatus = await UpdateItemsInOrder(order.Id, orderItems, settings: "add", true);
+            if (!orderAddStatus)
+            {
+                await transaction.RollbackAsync();
+                return -1;
+            }
+        }
 
         // var itms = GetItemsInOrder(order.Id);
+        await transaction.CommitAsync();
         return order.Id;
     }
 
@@ -92,6 +103,7 @@ public class OrderStorage : IOrderStorage
         // make sure the order exists
         Order? FoundOrder = await DB.Orders.FirstOrDefaultAsync(x => x.Id == orderId);
         if (FoundOrder == null) return false;
+        string? prevStatus = FoundOrder.OrderStatus;
 
         // first empty the items incase the OrderStatus changed
         await UpdateItemsInOrder(orderId, []);
@@ -101,7 +113,7 @@ public class OrderStorage : IOrderStorage
         await DB.SaveChangesAsync();
 
         // Update the items first
-        await UpdateItemsInOrder(order.Id, order.Items.ToList(), settings: "add");
+        await UpdateItemsInOrder(orderId, order.Items.ToList(), settings: "add", PrevStatus: prevStatus);
 
         // update updated at
         FoundOrder.UpdatedAt = CETDateTime.Now();
@@ -191,7 +203,7 @@ public class OrderStorage : IOrderStorage
         return true;
     }
 
-    public async Task<bool> UpdateItemsInOrder(int orderId, List<OrderItems> list2, string settings = "", bool fromPost = false)
+    public async Task<bool> UpdateItemsInOrder(int orderId, List<OrderItems> list2, string settings = "", bool fromPost = false, string PrevStatus = "")
     {
         // check if Order exists
 
@@ -267,7 +279,7 @@ public class OrderStorage : IOrderStorage
 
             if (OrderStatus == "Delivered" || OrderStatus == "Shipped")
             {
-                if (fromPost)
+                if (fromPost || OrderStatus == "Shipped" || PrevStatus != "Delivered")
                 {
                     // if order is already delivered or shipped the total_available and total_on_hand changes
                     totalAvailable -= item.Amount;
